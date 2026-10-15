@@ -10,47 +10,52 @@
   gap: var(--space-4);
   height: 100vh;
   height: 100svh;
-  padding: clamp(var(--space-3), 3vw, var(--space-5));
+  /* Vertical padding only: horizontal padding would add to the outer gaps
+     around the boxes and break the even spacing. The masthead pads itself. */
+  padding: clamp(var(--space-3), 3vw, var(--space-5)) 0;
 }
 
 .masthead {
+  font-family: var(--font-friendly);
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-  padding: 0 var(--space-1);
+  padding: 0 clamp(var(--space-3), 3vw, var(--space-5));
 }
 
 .masthead__name {
   margin: 0;
-  font-size: var(--step-3);
-  font-weight: 500;
+  font-size: var(--step-2);
+  font-weight: 700;
   letter-spacing: 0.01em;
 }
 
 .masthead__line {
   margin: 0;
-  font-size: var(--step-1);
-  font-style: italic;
+  font-size: var(--step-0);
   color: var(--text-muted);
 }
 
-/* The boxes sit in the middle of the remaining space with room around
-   them, rather than filling it edge to edge. */
+/* The boxes are spread evenly: the gaps at the left edge, between the
+   boxes and at the right edge are all equal (space-evenly). */
 .choices {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: clamp(var(--space-4), 4vw, var(--space-6));
+  justify-content: space-evenly;
   min-height: 0;
-  padding: clamp(var(--space-3), 5vw, var(--space-6));
+  padding: var(--space-5) 0;
 }
 
+/* Flat: one solid fill, one solid border, one solid text colour.
+   The colours still come from the theme tokens, so hovering still shifts
+   the whole page towards the destination's palette. */
 .choice {
-  flex: 0 1 30rem;
+  flex: 0 1 30%;
   min-width: 0;
-  height: min(100%, 34rem);
+  aspect-ratio: 6 / 7;               /* height follows width, so the shape holds */
+  max-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,45 +66,34 @@
      The percentage is of the box's width, so the lift scales with it. */
   padding: var(--space-5) var(--space-5) calc(var(--space-5) + 4%);
 
-  border-radius: var(--radius);
+  border: var(--rule-heavy) solid var(--edge-b);
+  border-radius: var(--radius-lg);
+  background: var(--surface-box);
   text-decoration: none;
-  color: var(--text);
-
-  /* Gradient border: the inner layer paints the padding box, the outer layer
-     shows through the transparent border. Equal stops give a plain line. */
-  border: var(--rule) solid transparent;
-  background:
-    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
-    linear-gradient(135deg, var(--edge-a), var(--edge-b) 55%, var(--edge-a)) border-box;
-
-  transition: transform var(--bubble-duration) var(--bubble);
 }
 
 .choice__label {
-  max-width: 11ch;
-  font-size: clamp(var(--step-5), 3.2vw + 1.5rem, 5.5rem);
-  font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: -0.01em;
-
-  /* Text painted with a gradient. Flat by default; chrome in the amazed theme. */
-  background: linear-gradient(100deg,
-    var(--highlight-a) 0%, var(--highlight-b) 50%, var(--highlight-c) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  max-width: 10ch;
+  font-family: var(--font-friendly);
+  font-size: clamp(var(--step-3), 1.2vw + 1rem, var(--step-4));
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--highlight-a);
 }
 
-/* Previews: the box being considered swells from its centre like a bubble.
-   transform does not move the neighbours, so only the hovered box changes. */
+/* Each box has its own motion on hover, and transform never moves the
+   neighbour, so only the hovered box changes size. */
+.choice--recruiter { transition: transform var(--grow-duration) var(--grow); }
+.choice--amazed    { transition: transform var(--bubble-duration) var(--bubble); }
+
 [data-preview="recruiter"] .choice--recruiter,
 [data-preview="amazed"] .choice--amazed {
   transform: scale(1.06);
 }
 
-/* Narrow screens: stack the two blocks. */
+/* Narrow screens: stack the two blocks, still evenly spaced. */
 @media (max-width: 640px) {
-  .choices { flex-direction: column; }
-  .choice { flex: 1 1 0; width: 100%; height: auto; }
+  .choices { flex-direction: column; padding: 0; }
+  .choice { flex: 0 1 38%; width: 82%; aspect-ratio: auto; }
   .choice__label { max-width: none; }
 }

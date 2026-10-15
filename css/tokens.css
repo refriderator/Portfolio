@@ -48,6 +48,10 @@
      are what make it read as "refined" rather than "default". */
   --font-serif: "EB Garamond", Garamond, "Times New Roman", serif;
 
+  /* Friendly sans for the landing: Nunito's rounded stroke ends echo the
+     rounded boxes and read as approachable rather than formal. */
+  --font-friendly: "Nunito", "Segoe UI", system-ui, sans-serif;
+
   /* Scale follows Bringhurst's classic sizes
      (14 16 18 21 24 36 48 72 px), plus 20 for serif body text, which
      needs to be set a little larger than a sans for the same x-height. */
@@ -70,8 +74,10 @@
   --space-6: 4rem;
 
   --radius: 2px;
+  --radius-lg: 1.25rem;
   --hairline: 1px;
   --rule: 2px;
+  --rule-heavy: 6px;
 
   /* Motion. --spring is a sampled underdamped oscillator,
      zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
@@ -91,6 +97,11 @@
     1.011, 1.0068, 1.0028, 0.9995, 0.9973, 0.9961, 0.9959, 0.9964, 0.9973,
     0.9983, 0.9993, 1.0002, 1.0007, 1.001, 1);
   --bubble-duration: 900ms;
+
+  /* --grow: a slow, smooth swell with no overshoot. Symmetric ease-in-out,
+     so it starts and finishes gently. */
+  --grow: cubic-bezier(0.45, 0, 0.25, 1);
+  --grow-duration: 1100ms;
 
   /* Hover previews are quick so they feel like a response to the pointer. */
   --theme-duration: 450ms;
