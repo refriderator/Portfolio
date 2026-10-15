@@ -22,13 +22,15 @@ function sync() {
 // Warm what the next step will need, once, when someone shows interest in
 // a sheet (hover, focus or touch), and not before: most visitors pick one.
 //   amazed     the paper-plane transition module
-//   recruiter  the recruiter page's serif, so it appears without a font swap
+//   recruiter  the float-away transition, and the recruiter page's serif, so it appears without a font swap
 //              (fonts are only downloaded when something uses them)
 const warmers = {
   amazed: () => import("./airplane.js"),
-  recruiter: () => Promise.all(
-    ['400 1em "EB Garamond"', '500 1em "EB Garamond"', 'italic 400 1em "EB Garamond"']
-      .map((font) => document.fonts.load(font))),
+  recruiter: () => Promise.all([
+    import("./scatter.js"),
+    ...['400 1em "EB Garamond"', '500 1em "EB Garamond"', 'italic 400 1em "EB Garamond"']
+      .map((font) => document.fonts.load(font)),
+  ]),
 };
 const warmed = new Set();
 

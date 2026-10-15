@@ -25,6 +25,7 @@ const themeOf = (view) => (view === fallback ? null : view.dataset.view);
 // the click it is normally ready.
 const special = {
   "landing>amazed": () => import("./airplane.js"),
+  "landing>recruiter": () => import("./scatter.js"),
 };
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 

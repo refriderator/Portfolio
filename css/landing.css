@@ -114,6 +114,19 @@
   image-rendering: pixelated;
 }
 
+/* Landing → recruiter (js/scatter.js): the landing stays up as an overlay
+   while its masthead fades out and the recruiter page fades in beneath. */
+.landing.is-dismissing {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  transition: none;
+}
+
+.landing .masthead { transition: opacity 700ms ease; }
+.landing.is-faded .masthead { opacity: 0; }
+
 /* Narrow screens: stack the two sheets, still evenly spaced. */
 @media (max-width: 640px) {
   .choices { flex-direction: column; padding: 0; }

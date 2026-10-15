@@ -49,6 +49,7 @@ class Scene {
     this.pal = readPalette();
     this.palKey = "";
     this.launching = false;
+    this.scattering = false;          // the sheets floating off for the recruiter page
     this.running = false;
     this.last = 0;
     this.now = 0;
@@ -71,7 +72,7 @@ class Scene {
         wave: new Spring(0, 40, 13),      // ripple amplitude, in q
         reveal: new Spring(0, 90, 19),    // photo, 0–16 dither levels
         ear: new Spring(0, 140, 17),      // dog-ear: 0 folded … 1 open
-        fall: null, blown: null, hidden: false, hovered: false, nextSpark: 0,
+        fall: null, blown: null, drift: null, hidden: false, hovered: false, nextSpark: 0, sparkAt: 0,
       };
     });
 
@@ -152,7 +153,7 @@ class Scene {
     this.last = t;
     this.now = t;
 
-    const visible = !this.landing.hidden || this.overlays.size > 0;
+    const visible = !this.landing.hidden || this.scattering || this.overlays.size > 0;
     this.canvas.hidden = !visible;
     if (!visible) { this.running = false; return; }
 
@@ -173,7 +174,7 @@ class Scene {
 
   busy() {
     return this.overlays.size > 0 || this.particles.busy ||
-      this.sheets.some((s) => s.fall || s.blown || s.hovered ||
+      this.scattering || this.sheets.some((s) => s.fall || s.blown || s.hovered ||
         [s.lift, s.hop, s.squash, s.wave, s.reveal, s.ear].some((sp) => !sp.resting));
   }
 
@@ -212,28 +213,25 @@ class Scene {
 
     for (const sh of this.sheets) {
       const was = sh.hovered;
-      sh.hovered = preview === sh.name && !sh.fall;
-      const entered = sh.hovered && !was;
+      if (!this.scattering) sh.hovered = preview === sh.name && !sh.fall;   // frozen while they float off
+      const entered = sh.hovered && !was && !this.scattering;
 
       sh.reveal.target = sh.hovered || (this.launching && sh.name === "amazed") ? 16 : 0;
       if (calm) sh.reveal.x = sh.reveal.target;
 
       if (sh.name === "recruiter") {
-        // A bubbly hop with sparkles, and the dog-ear unfolds. No ripple.
+        // A bubbly hop, and the dog-ear unfolds. No ripple.
         sh.ear.target = sh.hovered ? 1 : 0;
         if (calm) sh.ear.x = sh.ear.target;
-        if (entered && !calm) {
-          sh.hop.v = -150;
-          this.burst(sh, 10, "spark");
-        }
+        if (entered && !calm) sh.hop.v = -150;
         sh.wave.target = 0;
-        if (sh.hovered && !calm && t > sh.nextSpark) { this.twinkle(sh); sh.nextSpark = t + 110; }
       } else {
-        // Lift, float and ripple; the launch takes it higher still.
+        // Lift, float and ripple, with sparkles; the launch takes it higher still.
         sh.lift.target = this.launching ? 6 : sh.hovered ? 2 : 0;
         sh.wave.target = this.launching ? 2 : sh.hovered && !calm ? 1.2 : 0;
         if (calm) sh.lift.x = sh.lift.target;
-        if (entered && !calm) this.burst(sh, 14, "dust");
+        if (entered && !calm) { this.burst(sh, 14, "dust"); this.burst(sh, 10, "spark"); }
+        if (sh.hovered && !calm && !this.launching && t > sh.sparkAt) { this.twinkle(sh); sh.sparkAt = t + 110; }
         if ((sh.hovered || this.launching) && !sh.hidden && !calm && t > sh.nextSpark) {
           this.downdraft(sh, this.launching ? 4 : 1);
           sh.nextSpark = t + (this.launching ? 16 : 90);
@@ -260,6 +258,7 @@ class Scene {
       }
     }
     this.particles.update(dt);
+    if (this.scattering && this.sheets.every((x) => x.drift && t >= x.drift.start + x.drift.dur)) this.scattering = false;
   }
 
   // ---------- particles (sizes and speeds in q, a quarter big pixel) ----------
@@ -328,6 +327,19 @@ class Scene {
       if (u <= 0) y = -H * 3;                                 // not yet dropped
     }
 
+    if (sh.drift) {
+      // Lifted by a breeze and carried off to its own side, slowly at first,
+      // swaying, leaning outwards and fluttering.
+      const u = Math.min(1, Math.max(0, (this.now - sh.drift.start) / sh.drift.dur));
+      const e = u * u * (3 - 2 * u) * 0.5 + u * u * 0.5;
+      const d = sh.drift.dir;
+      x += d * e * (this.canvas.width * 0.75 + this.W);
+      y += -e * this.H * 0.55 + Math.sin(u * 7) * 2 * this.q * (1 - u);
+      tilt = d * 0.45 * e;
+      lift = 3 + 4 * u;
+      wave = 2.4;
+    }
+
     if (sh.blown) {
       x += sh.blown.x; y += sh.blown.y;
       sx = Math.cos(sh.blown.spin);
@@ -342,7 +354,7 @@ class Scene {
   draw(t) {
     const g = this.g;
     g.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    if (!this.landing.hidden || this.launching) {
+    if (!this.landing.hidden || this.launching || this.scattering) {
       const order = [...this.sheets].sort((a, b) => (a.lift.x + (a.hovered ? 1 : 0)) - (b.lift.x + (b.hovered ? 1 : 0)));
       for (const sh of order) if (!sh.hidden) this.drawShadow(g, sh);
       for (const sh of order) if (!sh.hidden) this.drawSheet(g, sh, t);
@@ -364,9 +376,10 @@ class Scene {
     const tex = this.shadowTexture(sh, dither);
     const grow = sh.fall ? 0.3 + 0.7 * u * u : 1;
     const w = Math.round(W * Math.abs(p.sx) * grow), h = Math.round(H * grow);
-    const gx = (sh.fall ? p.x : sh.home.x + (sh.blown?.x ?? 0)) + (W - w) / 2 + off;
+    const gx = (sh.fall || sh.drift ? p.x : sh.home.x + (sh.blown?.x ?? 0)) + (W - w) / 2 + off;
     const gy = sh.home.y + (H - h) / 2 + off;
     g.globalAlpha = sh.blown ? Math.max(0, 1 + sh.blown.x / (30 * K)) : 1;
+    if (sh.drift) g.globalAlpha = Math.max(0, 1 - (this.now - sh.drift.start) / (sh.drift.dur * 0.5));
     g.drawImage(tex, Math.round(gx), Math.round(gy), w, h);
     g.globalAlpha = 1;
   }
@@ -433,6 +446,17 @@ class Scene {
     this.wake();
   }
 
+  // Both sheets float off, the recruiter's to the left, the other's to the
+  // right (js/scatter.js drives the page change around it).
+  scatter() {
+    this.scattering = true;
+    for (const sh of this.sheets) {
+      sh.drift = { start: performance.now(), dur: 1400, dir: sh.name === "recruiter" ? -1 : 1 };
+      this.burst(sh, 8, "dust");
+    }
+    this.wake();
+  }
+
   // The sheet's current place and look, for the folding copy to start from.
   handOff(name) {
     const sh = this.sheet(name);
@@ -447,8 +471,9 @@ class Scene {
   // Back to the resting landing, for whenever it is shown again.
   reset() {
     this.launching = false;
+    this.scattering = false;
     for (const sh of this.sheets) {
-      sh.hidden = false; sh.blown = null;
+      sh.hidden = false; sh.blown = null; sh.drift = null;
       for (const sp of [sh.lift, sh.wave, sh.reveal, sh.ear, sh.hop]) { sp.x = sp.target = 0; sp.v = 0; }
     }
   }
