@@ -1,0 +1,157 @@
+/* =====================================================================
+   DESIGN TOKENS
+   Two layers:
+     1. Primitives  — raw values with no meaning ("what it is").
+     2. Semantic    — roles that components use ("what it's for").
+   Components only ever read semantic tokens. A theme is a reassignment
+   of semantic → primitive, so components never change when themes do.
+   ===================================================================== */
+
+
+/* ---------- 1. Primitives ---------- */
+:root {
+  /* Neutral greys (landing page) */
+  --grey-975: #161719;
+  --grey-950: #1c1d20;
+  --grey-900: #232528;
+  --grey-850: #2b2d31;
+  --grey-700: #3f4248;
+  --grey-500: #70747c;
+  --grey-300: #b2b5bb;
+  --grey-150: #dddfe3;
+  --grey-50:  #f3f4f6;
+  --white:    #ffffff;
+  --black:    #000000;
+
+  /* Recruiter ink: a blue so dark it reads as black. Lines and text only. */
+  --ink-950: #0b1220;
+  --ink-700: #2b3650;
+  --ink-500: #5a6378;
+
+  /* Amazed navy: backgrounds */
+  --navy-975: #050e24;
+  --navy-950: #08153a;
+  --navy-900: #0d1e4a;
+  --navy-800: #16295e;
+
+  /* Chrome: three stops, light → dark → light, like a polished cylinder */
+  --chrome-hi:  #f6f7f9;
+  --chrome-mid: #9ea6b2;
+  --chrome-lo:  #5f6774;
+
+  /* Type: one family. Scale follows Bringhurst's classic sizes
+     (12 14 16 18 21 24 36 48 72 px) expressed in rem. */
+  --font-sans: "Schibsted Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --step--1: 0.875rem;   /* 14 */
+  --step-0:  1rem;       /* 16 */
+  --step-1:  1.125rem;   /* 18 */
+  --step-2:  1.3125rem;  /* 21 */
+  --step-3:  1.5rem;     /* 24 */
+  --step-4:  2.25rem;    /* 36 */
+  --step-5:  3rem;       /* 48 */
+  --step-6:  4.5rem;     /* 72 */
+
+  /* Space: 4px base grid */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  --radius: 3px;
+  --hairline: 1px;
+
+  /* Motion. --spring is a sampled underdamped oscillator,
+     zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
+  --spring: linear(0, 0.0437, 0.1537, 0.3016, 0.464, 0.6233, 0.7673, 0.8884,
+    0.9834, 1.052, 1.0963, 1.1197, 1.1263, 1.1206, 1.1066, 1.0878, 1.0673,
+    1.0472, 1.0291, 1.0138, 1.0019, 0.9933, 0.9878, 0.9848, 0.984, 0.9848,
+    0.9866, 0.989, 0.9916, 0.9941, 0.9964, 0.9983, 0.9998, 1.0009, 1.0016,
+    1.0019, 1.002, 1.0019, 1.0017, 1.0014, 1);
+  --spring-duration: 700ms;
+  --theme-duration: 450ms;
+}
+
+
+/* ---------- 2. Semantic tokens ----------
+   Registered with @property so the browser knows they are colors.
+   An unregistered custom property is just a string, and strings can't be
+   interpolated, so a theme change would snap. Typed, it can be transitioned. */
+@property --surface-page { syntax: "<color>"; inherits: true; initial-value: #1c1d20; }
+@property --surface-box  { syntax: "<color>"; inherits: true; initial-value: #232528; }
+@property --text         { syntax: "<color>"; inherits: true; initial-value: #dddfe3; }
+@property --text-muted   { syntax: "<color>"; inherits: true; initial-value: #b2b5bb; }
+@property --line         { syntax: "<color>"; inherits: true; initial-value: #3f4248; }
+@property --highlight-a  { syntax: "<color>"; inherits: true; initial-value: #dddfe3; }
+@property --highlight-b  { syntax: "<color>"; inherits: true; initial-value: #dddfe3; }
+@property --highlight-c  { syntax: "<color>"; inherits: true; initial-value: #dddfe3; }
+@property --edge-a       { syntax: "<color>"; inherits: true; initial-value: #3f4248; }
+@property --edge-b       { syntax: "<color>"; inherits: true; initial-value: #3f4248; }
+
+
+/* ---------- 3. Themes ----------
+   highlight-a/b/c: three gradient stops for display text.
+   edge-a/b: two gradient stops for box borders.
+   When the stops are equal the gradient is flat, so one mechanism covers
+   both plain and chrome treatments, and the switch between them can animate. */
+
+/* Landing, at rest: dark grey. Highlights are flat (all three stops equal). */
+:root {
+  --surface-page: var(--grey-950);
+  --surface-box:  var(--grey-900);
+  --text:         var(--grey-150);
+  --text-muted:   var(--grey-300);
+  --line:         var(--grey-700);
+  --highlight-a:  var(--grey-150);
+  --highlight-b:  var(--grey-150);
+  --highlight-c:  var(--grey-150);
+  --edge-a:       var(--grey-700);
+  --edge-b:       var(--grey-700);
+}
+
+/* Landing, leaning recruiter: the same greys, nudged lighter and crisper. */
+[data-preview="recruiter"] {
+  --surface-page: var(--grey-900);
+  --surface-box:  var(--grey-850);
+  --text:         var(--white);
+  --text-muted:   var(--grey-150);
+  --line:         var(--grey-500);
+  --highlight-a:  var(--white);
+  --highlight-b:  var(--white);
+  --highlight-c:  var(--white);
+  --edge-a:       var(--grey-500);
+  --edge-b:       var(--grey-500);
+}
+
+/* Amazed: navy grounds, chrome highlights. */
+[data-preview="amazed"],
+[data-theme="amazed"] {
+  --surface-page: var(--navy-950);
+  --surface-box:  var(--navy-900);
+  --text:         var(--grey-150);
+  --text-muted:   var(--grey-300);
+  --line:         var(--chrome-lo);
+  --highlight-a:  var(--chrome-hi);
+  --highlight-b:  var(--chrome-mid);
+  --highlight-c:  var(--chrome-hi);
+  --edge-a:       var(--chrome-hi);
+  --edge-b:       var(--chrome-lo);
+}
+
+/* Recruiter design system: white and grey grounds, ink for text and lines,
+   black reserved for the single strongest action on a page. */
+[data-theme="recruiter"] {
+  --surface-page: var(--white);
+  --surface-box:  var(--grey-50);
+  --text:         var(--ink-950);
+  --text-muted:   var(--ink-500);
+  --line:         var(--ink-950);
+  --highlight-a:  var(--ink-950);
+  --highlight-b:  var(--ink-950);
+  --highlight-c:  var(--ink-950);
+  --edge-a:       var(--ink-950);
+  --edge-b:       var(--ink-950);
+  --action-bg:    var(--black);
+  --action-text:  var(--white);
+}

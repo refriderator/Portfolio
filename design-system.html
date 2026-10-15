@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-theme="recruiter">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recruiter design system</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/tokens.css">
+  <style>
+    /* Reference page only. Reads semantic tokens, like any component would. */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { background: var(--surface-page); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+    body { margin: 0; }
+    main { max-width: 52rem; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+
+    h1 { font-size: var(--step-5); font-weight: 500; letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 var(--space-3); }
+    h2 { font-size: var(--step-3); font-weight: 500; letter-spacing: -0.01em; margin: 0 0 var(--space-4); }
+    p  { font-size: var(--step-1); line-height: 1.55; max-width: 62ch; margin: 0 0 var(--space-3); }
+    .muted { color: var(--text-muted); }
+
+    section { border-top: var(--hairline) solid var(--line); padding: var(--space-5) 0; }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--space-3); }
+    .swatch { display: grid; gap: var(--space-2); font-size: var(--step--1); }
+    .swatch__chip { height: 4.5rem; border-radius: var(--radius); border: var(--hairline) solid var(--line); }
+    .swatch__name { font-weight: 500; }
+
+    .scale { display: grid; gap: var(--space-3); }
+    .scale__row { display: grid; grid-template-columns: 5rem 1fr; align-items: baseline; gap: var(--space-3); }
+    .scale__row span:first-child { font-size: var(--step--1); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .scale__row span:last-child { line-height: 1.1; overflow-wrap: anywhere; }
+
+    .lines { display: grid; gap: var(--space-4); }
+    .rule { border: 0; margin: 0; border-top: var(--hairline) solid var(--line); }
+    .rule--strong { border-top-width: 2px; }
+
+    .action {
+      display: inline-block; padding: var(--space-3) var(--space-4); border-radius: var(--radius);
+      background: var(--action-bg); color: var(--action-text);
+      font: 500 var(--step-0)/1 var(--font-sans); text-decoration: none;
+    }
+    .action:focus-visible { outline: 2px solid var(--line); outline-offset: 3px; }
+    .link { color: var(--text); text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
+
+    .entry { display: grid; grid-template-columns: 9rem 1fr; gap: var(--space-4); padding: var(--space-4); background: var(--surface-box); border-radius: var(--radius); }
+    .entry__when { font-size: var(--step--1); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .entry h3 { font-size: var(--step-2); font-weight: 500; margin: 0 0 var(--space-1); }
+    .entry p { font-size: var(--step-0); margin: 0; }
+    @media (max-width: 560px) { .entry { grid-template-columns: 1fr; gap: var(--space-2); } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Recruiter design system</h1>
+    <p class="muted">White and grey grounds. Ink, a blue close enough to black, for every line and letter. Black for the one action that matters most on a page.</p>
+  </header>
+
+  <section>
+    <h2>Colour</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch__chip" style="background:var(--white)"></div><span class="swatch__name">White</span><span class="muted">#ffffff</span><span class="muted">page</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--grey-50)"></div><span class="swatch__name">Grey 50</span><span class="muted">#f3f4f6</span><span class="muted">raised surfaces</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-500)"></div><span class="swatch__name">Ink 500</span><span class="muted">#5a6378</span><span class="muted">secondary text</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-950)"></div><span class="swatch__name">Ink 950</span><span class="muted">#0b1220</span><span class="muted">text and lines</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--black)"></div><span class="swatch__name">Black</span><span class="muted">#000000</span><span class="muted">primary action</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Type</h2>
+    <div class="scale">
+      <div class="scale__row"><span>72 / step 6</span><span style="font-size:var(--step-6);font-weight:500;letter-spacing:-0.03em">Engineer</span></div>
+      <div class="scale__row"><span>48 / step 5</span><span style="font-size:var(--step-5);font-weight:500;letter-spacing:-0.025em">Selected work</span></div>
+      <div class="scale__row"><span>36 / step 4</span><span style="font-size:var(--step-4);font-weight:500;letter-spacing:-0.02em">Experience</span></div>
+      <div class="scale__row"><span>24 / step 3</span><span style="font-size:var(--step-3);font-weight:500">Section heading</span></div>
+      <div class="scale__row"><span>21 / step 2</span><span style="font-size:var(--step-2);font-weight:500">Entry title</span></div>
+      <div class="scale__row"><span>18 / step 1</span><span style="font-size:var(--step-1)">Lead paragraph text for introductions.</span></div>
+      <div class="scale__row"><span>16 / step 0</span><span style="font-size:var(--step-0)">Body text for descriptions and details.</span></div>
+      <div class="scale__row"><span>14 / step −1</span><span style="font-size:var(--step--1)" class="muted">Dates, captions and metadata.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lines</h2>
+    <div class="lines">
+      <hr class="rule">
+      <hr class="rule rule--strong">
+    </div>
+    <p class="muted" style="margin-top:var(--space-3)">A hairline separates sections. The 2px rule marks the top of a page only.</p>
+  </section>
+
+  <section>
+    <h2>Actions</h2>
+    <p><a class="action" href="#">Download CV</a></p>
+    <p><a class="link" href="#">View project on GitHub</a></p>
+  </section>
+
+  <section>
+    <h2>Experience entry</h2>
+    <article class="entry">
+      <span class="entry__when">2025 to now</span>
+      <div>
+        <h3>Software engineering, self-directed</h3>
+        <p class="muted">Placeholder copy. Replace with a role, a result, and the tools used to get there.</p>
+      </div>
+    </article>
+  </section>
+</main>
+</body>
+</html>
