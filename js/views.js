@@ -10,6 +10,8 @@
 //      the colours start their slow change (--switch-duration)
 //   3. fade the new view in, starting partway through the colour change
 //                                           (--fade-in after --fade-in-delay)
+//
+// Some pairs of views have their own transition instead (see `special`).
 
 const root = document.documentElement;
 const views = [...document.querySelectorAll("[data-view]")];
@@ -17,6 +19,14 @@ const fallback = views.find((v) => v.dataset.view === "landing");
 
 // Each view's theme is its name, except the landing, which uses the base tokens.
 const themeOf = (view) => (view === fallback ? null : view.dataset.view);
+
+// Transitions of their own, by "from>to". Each is a module loaded on demand;
+// js/landing.js starts loading it as soon as someone shows interest, so by
+// the click it is normally ready.
+const special = {
+  "landing>amazed": () => import("./airplane.js"),
+};
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 let current = views.find((v) => !v.hidden) ?? fallback;
 let generation = 0; // bumps on every change, so a superseded change stops
@@ -40,6 +50,22 @@ function setTheme(view) {
   else delete root.dataset.theme;
 }
 
+// Show `next` and hide the rest at once, with no colour transition.
+function swapNow(next, el) {
+  delete root.dataset.preview;
+  for (const v of views) {
+    v.hidden = v !== next;
+    v.inert = v !== next;
+    v.classList.remove("is-leaving");
+  }
+  // Apply the new state with every transition off, then turn them back on
+  // two frames later, once the browser has painted the new colours.
+  root.dataset.instant = "";
+  setTheme(next);
+  settle(next, el);
+  requestAnimationFrame(() => requestAnimationFrame(() => delete root.dataset.instant));
+}
+
 function settle(next, el) {
   // Scroll to the linked element, or to the top when the link is the view itself.
   if (el && el !== next) el.scrollIntoView();
@@ -58,6 +84,15 @@ async function show(animate) {
   const gen = ++generation;
   const prev = current;
   current = next;
+  const isCurrent = () => gen === generation;
+
+  const own = special[`${prev.dataset.view}>${next.dataset.view}`];
+  if (animate && own && !reducedMotion.matches) {
+    const { default: play } = await own();
+    if (!isCurrent()) return;
+    await play({ from: prev, to: next, swap: () => swapNow(next, el), isCurrent });
+    return;
+  }
 
   if (animate) {
     prev.classList.add("is-leaving");
@@ -75,12 +110,7 @@ async function show(animate) {
   }
 
   if (!animate) {
-    // Apply the new state with every transition off, then turn them back on
-    // two frames later, once the browser has painted the new colours.
-    root.dataset.instant = "";
-    setTheme(next);
-    settle(next, el);
-    requestAnimationFrame(() => requestAnimationFrame(() => delete root.dataset.instant));
+    swapNow(next, el);
     return;
   }
 

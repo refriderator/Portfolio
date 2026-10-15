@@ -20,6 +20,14 @@
   <script type="module" src="js/landing.js"></script>
   <script type="module" src="js/recruiter.js"></script><!-- gives posts their ids… -->
   <script type="module" src="js/views.js"></script><!-- …which views.js then resolves -->
+
+  <!-- Prefetch a project or update page once the pointer rests on its card
+       ("moderate" = after about 200ms of hover, or on press), so it opens
+       instantly without fetching pages nobody is about to visit. Browsers
+       without speculation rules ignore this block. -->
+  <script type="speculationrules">
+  { "prefetch": [{ "where": { "selector_matches": "a.tile, a.feature" }, "eagerness": "moderate" }] }
+  </script>
 </head>
 <body>
 
@@ -33,10 +41,11 @@
     <!-- Each choice is a stack of layers, one job each, because two
          animations cannot share one transform:
            shadow  stays on the ground, slides as the paper rises
-           drop    intro: falls onto the page
-           lift    hover: rises towards you (grows)
+           drop    intro: flips and falls onto the page
+           lift    hover: grows, or rises towards you
            float   hover: bobs and jiggles
-           paper   the picture and its label
+           paper   the front: picture (on hover) and label
+           back    the blank back, seen while the sheet flips
            dust    pixel dust on landing and lift-off
          The <a> itself never moves, so the hover target stays put. -->
     <main class="choices">
@@ -46,9 +55,10 @@
           <span class="choice__lift">
             <span class="choice__float">
               <span class="choice__paper">
-                <img class="choice__img" src="assets/landing/recruiter.png" alt="" width="96" height="112">
+                <img class="choice__img" src="assets/landing/recruiter.png" alt="" width="96" height="112" decoding="async" fetchpriority="low">
                 <span class="choice__label"><span class="choice__text">I am a recruiter</span></span>
               </span>
+              <span class="choice__back"></span>
             </span>
           </span>
         </span>
@@ -60,9 +70,10 @@
           <span class="choice__lift">
             <span class="choice__float">
               <span class="choice__paper">
-                <img class="choice__img" src="assets/landing/amazed.png" alt="" width="96" height="112">
+                <img class="choice__img" src="assets/landing/amazed.png" alt="" width="80" height="113" decoding="async" fetchpriority="low">
                 <span class="choice__label"><span class="choice__text">I want to be amazed</span></span>
               </span>
+              <span class="choice__back"></span>
             </span>
           </span>
         </span>

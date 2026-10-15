@@ -13,11 +13,12 @@ The browser scales the result back up with `image-rendering: pixelated`
 (nearest neighbour), which keeps every pixel a crisp square.
 
 Usage: python3 tools/pixelate.py IN OUT --box L T H [--width 96] [--colours 24]
-                                 [--mirror] [--saturation 1.0]
+                                 [--aspect 6/7] [--mirror] [--saturation 1.0]
   --box gives the crop: left, top and height in source pixels; the width
-  follows from the 6:7 shape of the landing boxes.
+  follows from --aspect (width / height), e.g. 210/297 for A4 portrait.
 """
 import argparse
+from fractions import Fraction
 from PIL import Image, ImageEnhance, ImageOps
 
 p = argparse.ArgumentParser()
@@ -27,15 +28,16 @@ p.add_argument("--width", type=int, default=96)
 p.add_argument("--colours", type=int, default=24)
 p.add_argument("--mirror", action="store_true")
 p.add_argument("--saturation", type=float, default=1.0)
+p.add_argument("--aspect", type=Fraction, default=Fraction(6, 7))
 a = p.parse_args()
 
 left, top, height = a.box
-im = Image.open(a.src).convert("RGB").crop((left, top, left + round(height * 6 / 7), top + height))
+im = Image.open(a.src).convert("RGB").crop((left, top, left + round(height * a.aspect), top + height))
 if a.mirror:
     im = ImageOps.mirror(im)
 if a.saturation != 1.0:
     im = ImageEnhance.Color(im).enhance(a.saturation)
 
-small = im.resize((a.width, round(a.width * 7 / 6)), Image.Resampling.BOX)
+small = im.resize((a.width, round(a.width / a.aspect)), Image.Resampling.BOX)
 small.quantize(colors=a.colours, dither=Image.Dither.FLOYDSTEINBERG).save(a.dst, optimize=True)
 print(f"{a.dst}: {small.width}x{small.height}, {a.colours} colours")

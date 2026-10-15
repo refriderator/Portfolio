@@ -83,7 +83,7 @@
 
   /* One "pixel" of the 8-bit style: outlines, corner notches and shadow
      offsets are all whole multiples of it. */
-  --px: 4px;
+  --px: 6px;
 
   /* Motion. --spring is a sampled underdamped oscillator,
      zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
@@ -173,8 +173,10 @@
   --edge-b:       var(--charcoal-600);
 }
 
-/* Amazed: navy grounds, chrome highlights. */
+/* Amazed: navy grounds, chrome highlights. [data-launching] holds it during
+   the paper-plane transition, whatever the pointer does meanwhile. */
 [data-preview="amazed"],
+[data-launching],
 [data-theme="amazed"] {
   --surface-page: var(--navy-950);
   --surface-box:  var(--navy-900);
