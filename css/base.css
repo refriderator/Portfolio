@@ -28,7 +28,9 @@ html {
     --surface-page, --surface-box, --text, --text-muted, --line,
     --highlight-a, --highlight-b, --highlight-c, --edge-a, --edge-b;
   transition-duration: var(--theme-duration);
-  transition-timing-function: ease;
+  /* Hover previews fade in three hard steps, the way old consoles faded
+     by stepping through a few palette entries. */
+  transition-timing-function: steps(3);
 }
 
 /* Moving between views: the same properties, slower and symmetric. */

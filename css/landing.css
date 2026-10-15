@@ -1,37 +1,16 @@
 /* =====================================================================
    LANDING — 8-bit
-   A white page; two A4 sheets flip and fall onto it one after the other.
-   Everything sits on a grid of --px: outlines are one --px thick, corners
-   are notched by one --px, shadows sit whole --px away, and the motion
-   moves in steps rather than gliding.
+   A white page; two pixel-art sheets flip and fall onto it, one after the
+   other. Each sheet is the 28 × 40 sprite #sheet (in index.html), so one
+   sheet pixel, --pp, is the sheet's width / 28: about 16px on a laptop.
+   Every offset on the sheet is a whole number of sheet pixels, and motion
+   moves in a few held frames rather than gliding, like an old game.
 
    State lives on <html>:
      data-preview    which sheet is hovered or focused (js/landing.js)
      data-landed     the intro has played, so it never replays
      data-launching  the paper-plane transition is running (js/airplane.js)
    ===================================================================== */
-
-.landing,
-.fold-stage {
-  /* A pixel-cornered rectangle: the four corner squares of size --px are
-     cut away, the way 8-bit games round off a box. */
-  --notch: polygon(
-    var(--px) 0, calc(100% - var(--px)) 0,
-    calc(100% - var(--px)) var(--px), 100% var(--px),
-    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)),
-    calc(100% - var(--px)) 100%, var(--px) 100%,
-    var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)),
-    0 var(--px), var(--px) var(--px));
-
-  /* Dither patterns on a 2 × 2 cell of --px squares: one, two or three of
-     the four squares filled (25%, 50%, 75%). Dithering is how 8-bit
-     hardware drew transparency it did not have. */
-  --cell: calc(2 * var(--px)) calc(2 * var(--px));
-  --dither-25: repeating-conic-gradient(#000 0 25%, transparent 0 100%) 0 0 / var(--cell);
-  --dither-50: repeating-conic-gradient(#000 0 25%, transparent 0 50%) 0 0 / var(--cell);
-  --dither-75: repeating-conic-gradient(#000 0 75%, transparent 0 100%) 0 0 / var(--cell);
-  --dither: repeating-conic-gradient(var(--black) 0 25%, transparent 0 50%) 0 0 / var(--cell);
-}
 
 .landing {
   display: grid;
@@ -84,6 +63,22 @@
 /* A4 portrait, 210 × 297 (1 : √2, so halving it gives the same shape
    again). Sized by height, so the proportions hold on any screen: as tall
    as the space allows, but never so tall that two sheets overflow the width. */
+.choice,
+.fold-stage {
+  /* The sheet is a size container, so 100cqw is its width and one sheet
+     pixel is 1/28 of that. */
+  container-type: inline-size;
+  --pp: calc(100cqw / 28);
+
+  /* Dither masks on a 2 × 2 cell of sheet pixels: one, two or three of the
+     four filled (25%, 50%, 75%). Dithering is how 8-bit hardware drew
+     transparency it did not have. */
+  --cell: calc(2 * var(--pp)) calc(2 * var(--pp));
+  --dither-25: repeating-conic-gradient(#000 0 25%, transparent 0 100%) 0 0 / var(--cell);
+  --dither-50: repeating-conic-gradient(#000 0 25%, transparent 0 50%) 0 0 / var(--cell);
+  --dither-75: repeating-conic-gradient(#000 0 75%, transparent 0 100%) 0 0 / var(--cell);
+}
+
 .choice {
   position: relative;
   flex: none;
@@ -91,7 +86,7 @@
   aspect-ratio: 210 / 297;
   perspective: 1200px;
   text-decoration: none;
-  color: var(--text);
+  color: var(--sheet-ink);
 }
 
 .choice__shadow,
@@ -112,43 +107,49 @@
   transform-style: preserve-3d;
 }
 
-/* Hard drop shadow, on the ground. Light comes from the upper left, so the
-   shadow falls down-right. A sheet at height h casts its shadow h·tan θ
-   further away; at θ = 45° that is just h. So rising = shadow sliding away. */
-.choice__shadow {
-  background: var(--black);
-  clip-path: var(--notch);
-  translate: calc(2 * var(--px)) calc(2 * var(--px));
-  transition: translate 240ms steps(3);
+.choice__sprite {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .choice__paper,
 .choice__back {
   display: block;
-  overflow: hidden;
-  clip-path: var(--notch);
-  border: var(--px) solid transparent;
   backface-visibility: hidden;
-  /* Outline in hard bands: one flat colour normally, polished-chrome
-     stripes in the amazed palette (equal stops give a plain line). */
-  background:
-    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
-    linear-gradient(180deg,
-      var(--edge-a) 0 30%, var(--edge-b) 30% 70%, var(--edge-a) 70%) border-box;
 }
 
-/* The blank back of the sheet, turned to face the other way. */
+/* The back: the same sheet without its marks, turned to face the other way. */
 .choice__back {
+  --marks: hidden;
   transform: rotateY(180deg);
 }
 
-/* The picture: 8-bit sprite, scaled up nearest-neighbour so each pixel
-   stays a crisp square. Hidden until the sheet is hovered. */
+/* Hard drop shadow on the ground: the sheet's own silhouette in black.
+   Light comes from the upper left, so it falls down-right. A sheet at
+   height h casts its shadow h·tan θ further away; at θ = 45° that is just
+   h. So rising = shadow sliding away, and dithering as it softens. */
+.choice__shadow {
+  --sheet-fill: var(--black);
+  --sheet-shade: var(--black);
+  --sheet-flap: var(--black);
+  --sheet-ink: var(--black);
+  --marks: hidden;
+  translate: var(--pp) var(--pp);
+  transition: translate 240ms steps(2);
+}
+
+/* The picture develops in the sprite's dithered photo area: cells 3–24
+   across and 7–22 down of the 28 × 40 grid. The sprite is scaled up
+   nearest-neighbour so its pixels stay crisp squares. */
 .choice__img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: calc(3 / 28 * 100%);
+  top: calc(7 / 40 * 100%);
+  width: calc(22 / 28 * 100%);
+  height: calc(16 / 40 * 100%);
   object-fit: cover;
   image-rendering: pixelated;
   opacity: 0;
@@ -170,47 +171,33 @@
   75%, 100% { -webkit-mask: none; mask: none; }
 }
 
-/* Label plate, like a game's dialogue box. It sits a little above the
-   middle of the sheet, where text looks centred to the eye. */
+/* The heading, in the band between the picture and the two text lines
+   (rows 24–33), a little above the band's middle. */
 .choice__label {
   position: absolute;
-  left: calc(3 * var(--px));
-  right: calc(3 * var(--px));
-  top: 44%;
-  translate: 0 -50%;
-  padding: calc(3 * var(--px)) calc(2 * var(--px));
-  clip-path: var(--notch);
-  border: var(--px) solid transparent;
-  background:
-    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
-    linear-gradient(var(--edge-b), var(--edge-b)) border-box;
+  left: calc(2 / 28 * 100%);
+  right: calc(2 / 28 * 100%);
+  top: calc(24 / 40 * 100%);
+  height: calc(9 / 40 * 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: calc(1 / 40 * 100%);
   font-size: 16px;
   line-height: 1.6;
   text-align: center;
-}
-
-/* Text painted in hard bands, repeated once per line (1lh = one line
-   height), so each line of a two-line label gets its own chrome stripes.
-   Flat when the three highlight stops are equal. */
-.choice__text {
-  background: linear-gradient(180deg,
-    var(--highlight-a) 0 45%, var(--highlight-b) 45% 70%, var(--highlight-c) 70%);
-  background-size: 100% 1.6em;
-  background-size: 100% 1lh;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--sheet-ink);
 }
 
 @media (min-width: 1200px) {
   .choice__label { font-size: 24px; }
 }
 
-/* Pixel dust: eight 2 × 2-pixel motes along the bottom edge, each with its
-   own start position and drift. Invisible except while puffing. */
+/* Pixel dust: eight motes, one sheet pixel each, along the bottom edge,
+   each with its own start position and drift. Invisible except while puffing. */
 .choice__dust {
   position: absolute;
-  inset: auto 0 calc(-1 * var(--px)) 0;
+  inset: auto 0 0 0;
   pointer-events: none;
 }
 
@@ -218,48 +205,48 @@
   position: absolute;
   bottom: 0;
   left: var(--x);
-  width: calc(2 * var(--px));
-  height: calc(2 * var(--px));
-  background: var(--night-300);
+  width: var(--pp);
+  height: var(--pp);
+  background: var(--sheet-shade);
   opacity: 0;
 }
 
-.choice__dust i:nth-child(1) { --x: -2%;  --dx: -48px; --dy: -24px; }
-.choice__dust i:nth-child(2) { --x: 4%;   --dx: -30px; --dy: -42px; }
-.choice__dust i:nth-child(3) { --x: 12%;  --dx: -18px; --dy: -24px; }
-.choice__dust i:nth-child(4) { --x: 22%;  --dx: -12px; --dy: -12px; }
-.choice__dust i:nth-child(5) { --x: 72%;  --dx: 12px;  --dy: -12px; }
-.choice__dust i:nth-child(6) { --x: 82%;  --dx: 18px;  --dy: -24px; }
-.choice__dust i:nth-child(7) { --x: 92%;  --dx: 30px;  --dy: -42px; }
-.choice__dust i:nth-child(8) { --x: 98%;  --dx: 48px;  --dy: -24px; }
+.choice__dust i:nth-child(1) { --x: -4%;  --dx: -3; --dy: -2; }
+.choice__dust i:nth-child(2) { --x: 4%;   --dx: -2; --dy: -3; }
+.choice__dust i:nth-child(3) { --x: 12%;  --dx: -1; --dy: -2; }
+.choice__dust i:nth-child(4) { --x: 22%;  --dx: -1; --dy: -1; }
+.choice__dust i:nth-child(5) { --x: 72%;  --dx: 1;  --dy: -1; }
+.choice__dust i:nth-child(6) { --x: 82%;  --dx: 1;  --dy: -2; }
+.choice__dust i:nth-child(7) { --x: 92%;  --dx: 2;  --dy: -3; }
+.choice__dust i:nth-child(8) { --x: 100%; --dx: 3;  --dy: -2; }
 
-/* Keyboard focus: a dashed pixel outline around the whole sheet. */
+/* Keyboard focus: a dashed outline around the whole sheet. */
 .choice:focus-visible {
   outline: var(--px) dashed var(--text);
-  outline-offset: calc(2 * var(--px));
+  outline-offset: var(--px);
 }
 
 
 /* ---------- Intro: the sheets flip and fall, one after the other ----------
    A sheet of paper falls at terminal velocity almost at once, then tumbles
    and sways as air spills from alternate edges. Here it turns end over end
-   (rotateX) once while swaying (rotateZ), and lands face up. steps() makes
-   it move like a sprite: a few positions per segment, no in-between frames. */
+   (rotateX) once while swaying (rotateZ), and lands face up. Only three held
+   frames per stretch of the fall, like an old game's sprite. */
 
 .choice--recruiter { --drop-delay: 300ms; }
 .choice--amazed    { --drop-delay: 1100ms; }
 
 .choice__drop {
-  animation: drop 1300ms steps(4) var(--drop-delay) both;
+  animation: drop 1300ms steps(3) var(--drop-delay) both;
 }
 
 .choice__shadow {
-  animation: shadow-in 1300ms steps(4) var(--drop-delay) both;
+  animation: shadow-in 1300ms steps(3) var(--drop-delay) both;
 }
 
 /* Dust kicks up at the moment of landing (88% of the way through the drop). */
 .choice__dust i {
-  animation: puff 480ms steps(5) calc(var(--drop-delay) + 1144ms);
+  animation: puff 480ms steps(4) calc(var(--drop-delay) + 1144ms);
 }
 
 @keyframes drop {
@@ -272,19 +259,18 @@
 }
 
 /* The shadow marks where the sheet will land, as old games did: small,
-   faint and far off while the sheet is high, then growing, closing in and
-   turning solid as it reaches the ground. */
+   faint (dithered) and far off while the sheet is high, then growing,
+   closing in and turning solid as it reaches the ground. */
 @keyframes shadow-in {
-  0%   { translate: 96px 96px; scale: 0.6;  opacity: 0;   background: var(--dither); }
-  60%  { translate: 40px 40px; scale: 0.85; opacity: 0.5; background: var(--dither); }
-  87%  { translate: calc(2 * var(--px)) calc(2 * var(--px)); scale: 1; opacity: 1; background: var(--dither); }
-  88%  { background: var(--black); }
-  100% { translate: calc(2 * var(--px)) calc(2 * var(--px)); scale: 1; opacity: 1; background: var(--black); }
+  0%   { translate: calc(6 * var(--pp)) calc(6 * var(--pp)); scale: 0.6;  opacity: 0; -webkit-mask: var(--dither-25); mask: var(--dither-25); }
+  60%  { translate: calc(3 * var(--pp)) calc(3 * var(--pp)); scale: 0.85; opacity: 1; -webkit-mask: var(--dither-25); mask: var(--dither-25); }
+  87%  { translate: var(--pp) var(--pp); scale: 1; opacity: 1; -webkit-mask: var(--dither-50); mask: var(--dither-50); }
+  88%, 100% { translate: var(--pp) var(--pp); scale: 1; opacity: 1; -webkit-mask: none; mask: none; }
 }
 
 @keyframes puff {
   0%   { opacity: 1; translate: 0 0; }
-  100% { opacity: 0; translate: var(--dx) var(--dy); }
+  100% { opacity: 0; translate: calc(var(--dx) * var(--pp)) calc(var(--dy) * var(--pp)); }
 }
 
 /* Once the intro has played, switch it off, so coming back from another
@@ -298,10 +284,11 @@
 
 /* ---------- Recruiter hover: a bubbly swell ----------
    The page warms towards the recruiter palette (tokens.css) and the sheet
-   swells on the underdamped spring, so it overshoots once and settles. */
+   swells on the underdamped spring, held at 12 frames per second, so it
+   pops through a few poses, overshoots once and settles. */
 
 .choice--recruiter .choice__lift {
-  transition: scale var(--bubble-duration) var(--bubble);
+  transition: scale var(--bubble-duration) var(--bubble-held);
 }
 
 [data-preview="recruiter"] .choice--recruiter .choice__lift {
@@ -309,31 +296,32 @@
 }
 
 [data-preview="recruiter"] .choice--recruiter .choice__shadow {
-  translate: calc(3 * var(--px)) calc(3 * var(--px));
+  translate: calc(2 * var(--pp)) calc(2 * var(--pp));
 }
 
 
 /* ---------- Amazed hover: lift, float, jiggle ----------
    Lifting towards you makes the sheet look bigger (it is closer) and pushes
    its shadow further away; the shadow also thins to a dither, as a real
-   shadow softens with distance. The rise is quick and stepped. */
+   shadow softens with distance. The rise takes two held frames. */
 
 .choice--amazed .choice__lift {
-  transition: scale 240ms steps(3), translate 240ms steps(3);
+  transition: scale 240ms steps(2), translate 240ms steps(2);
 }
 
 [data-preview="amazed"] .choice--amazed .choice__lift {
   scale: 1.06;
-  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
+  translate: 0 calc(-1 * var(--pp));
 }
 
 [data-preview="amazed"] .choice--amazed .choice__shadow {
-  translate: calc(5 * var(--px)) calc(5 * var(--px));
-  background: var(--dither);
+  translate: calc(3 * var(--pp)) calc(3 * var(--pp));
+  -webkit-mask: var(--dither-50);
+  mask: var(--dither-50);
   animation: shadow-bob 1200ms steps(1) 240ms infinite;
 }
 
-/* Floating: a slow bob with a small jiggle, in whole-pixel steps. */
+/* Floating: a slow bob with a small jiggle, one sheet pixel at a time. */
 [data-preview="amazed"] .choice--amazed .choice__float,
 .choice--amazed.is-launching .choice__float {
   animation: float 1200ms steps(1) 240ms infinite;
@@ -341,63 +329,62 @@
 
 /* Dust kicked up at lift-off. */
 [data-preview="amazed"] .choice--amazed .choice__dust i {
-  animation: puff 480ms steps(5);
+  animation: puff 480ms steps(4);
 }
 
 @keyframes float {
-  0%   { translate: 0 0;                     rotate: 0deg; }
-  25%  { translate: 0 calc(-1 * var(--px)); rotate: -0.8deg; }
-  50%  { translate: 0 calc(-2 * var(--px)); rotate: 0deg; }
-  75%  { translate: 0 calc(-1 * var(--px)); rotate: 0.8deg; }
-  100% { translate: 0 0;                     rotate: 0deg; }
+  0%   { translate: 0 0;                         rotate: 0deg; }
+  25%  { translate: 0 calc(-0.5 * var(--pp));   rotate: -1deg; }
+  50%  { translate: 0 calc(-1 * var(--pp));     rotate: 0deg; }
+  75%  { translate: 0 calc(-0.5 * var(--pp));   rotate: 1deg; }
+  100% { translate: 0 0;                         rotate: 0deg; }
 }
 
 /* The shadow tracks the bob: the higher the sheet, the further away. */
 @keyframes shadow-bob {
-  0%, 100% { translate: calc(5 * var(--px)) calc(5 * var(--px)); }
-  25%, 75% { translate: calc(6 * var(--px)) calc(6 * var(--px)); }
-  50%      { translate: calc(7 * var(--px)) calc(7 * var(--px)); }
+  0%, 100% { translate: calc(3 * var(--pp)) calc(3 * var(--pp)); }
+  50%      { translate: calc(4 * var(--pp)) calc(4 * var(--pp)); }
 }
 
 
 /* ---------- Click on amazed: take-off (driven by js/airplane.js) ----------
-   The sheet climbs higher; its shadow falls far behind and fades; a blast
+   The sheet climbs higher; its shadow falls far behind and thins; a blast
    of dust goes out sideways; and the downdraft blows the other sheet off
    the left of the screen, tumbling. */
 
 .choice--amazed.is-launching .choice__lift {
   scale: 1.14;
-  translate: calc(-2 * var(--px)) calc(-6 * var(--px));
+  translate: calc(-1 * var(--pp)) calc(-3 * var(--pp));
 }
 
 .choice--amazed.is-launching .choice__shadow {
-  translate: calc(12 * var(--px)) calc(12 * var(--px));
-  background: var(--dither);
-  opacity: 0.6;
+  translate: calc(7 * var(--pp)) calc(7 * var(--pp));
+  -webkit-mask: var(--dither-25);
+  mask: var(--dither-25);
   animation: none;
 }
 
 .choice--amazed.is-launching .choice__dust i {
-  animation: thrust 420ms steps(5);
+  animation: thrust 420ms steps(4);
 }
 
 @keyframes thrust {
   0%   { opacity: 1; translate: 0 0; }
-  100% { opacity: 0; translate: calc(var(--dx) * 3) calc(var(--dy) * 0.5); }
+  100% { opacity: 0; translate: calc(var(--dx) * 3 * var(--pp)) calc(var(--dy) * 0.5 * var(--pp)); }
 }
 
 .choice--recruiter.is-blown .choice__drop {
-  animation: blow 640ms steps(6) both;
+  animation: blow 640ms steps(5) both;
 }
 
 .choice--recruiter.is-blown .choice__shadow {
-  animation: blow-shadow 240ms steps(3) both;
+  animation: blow-shadow 240ms steps(2) both;
 }
 
 @keyframes blow {
-  0%   { translate: 0 0;        transform: rotateY(0deg)   rotateZ(0deg); }
-  30%  { translate: -12vw -4vh; transform: rotateY(-40deg) rotateZ(-18deg); }
-  100% { translate: -150vw 6vh; transform: rotateY(-160deg) rotateZ(-70deg); }
+  0%   { translate: 0 0;         transform: rotateY(0deg)    rotateZ(0deg); }
+  30%  { translate: -12vw -4vh;  transform: rotateY(-40deg)  rotateZ(-18deg); }
+  100% { translate: -150vw 6vh;  transform: rotateY(-160deg) rotateZ(-70deg); }
 }
 
 @keyframes blow-shadow {
@@ -425,6 +412,7 @@
   pointer-events: none;
   perspective: 1400px;
   font-family: var(--font-pixel);    /* the pieces live outside .landing */
+  color: var(--sheet-ink);
 }
 
 /* A piece is a copy of the sheet's front, so it would vanish when turned
@@ -439,7 +427,12 @@
   animation: none;
 }
 
-.fold-face.is-back > * {
+.fold-face.is-back {
+  --marks: hidden;
+}
+
+.fold-face.is-back .choice__img,
+.fold-face.is-back .choice__label {
   visibility: hidden;
 }
 
@@ -448,12 +441,6 @@
 @media (max-width: 640px) {
   .choices { flex-direction: column; padding: 0; }
   .choice { height: min(42%, 80vw * 1.4142); }
-  /* Narrow sheets: slimmer margins so "recruiter" (9 × 16px) fits a line. */
-  .choice__label {
-    left: calc(2 * var(--px));
-    right: calc(2 * var(--px));
-    padding-inline: var(--px);
-  }
 }
 
 /* Reduced motion: no falling, floating or dust. The colour changes, the

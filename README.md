@@ -17,10 +17,14 @@ Static site, no build step. Open `index.html` through any local server
 | `js/landing.js` | Hover/focus preview on the landing sheets; warms what the next step needs. |
 | `js/airplane.js` | The landing → Workshop paper-plane transition (loaded on demand). |
 | `js/recruiter.js` | Builds the sidebar post list and the scroll marker. |
-| `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css`. |
+| `tools/spring.py` | Generates the `--spring`, `--bubble` and `--bubble-held` easing curves in `tokens.css` (`hold` for the 12 fps staircase). |
 | `tools/pixelate.py` | Turns a photo into an 8-bit sprite (crop, downsample, dither). |
 | `assets/landing/` | The two landing sprites (recruiter 96 × 112, amazed 80 × 113). |
 | `design-system.html` | Reference sheet for the recruiter theme. |
+
+The landing sheets are a 28 × 40 pixel-art sprite, the `#sheet` symbol at
+the top of `index.html`, coloured by the `--sheet-*` tokens. One sheet pixel
+(`--pp`) is the sheet's width / 28.
 
 ## Adding content
 

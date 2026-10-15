@@ -212,9 +212,10 @@ function folder(sheetEl, rect, px) {
   const w = rect.width, h = rect.height, c = w / 2, k = 0.34 * c;
   const tan22 = Math.SQRT2 - 1;                    // tan 22.5°, half of a corner's 45°
 
-  // The sheet's resting lift (matches .is-launching in landing.css).
-  const cx = w / 2, cy = h / 2;
-  const lift = { x: -2 * px, y: -6 * px, s: 1.14 };
+  // The sheet's take-off lift, in sheet pixels (1/28 of its width), to
+  // match .is-launching in landing.css.
+  const cx = w / 2, cy = h / 2, pp = w / 28;
+  const lift = { x: -pp, y: -3 * pp, s: 1.14 };
 
   // Folds, in sheet coordinates with the nose (top edge) at y = 0.
   const folds = {
