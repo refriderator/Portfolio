@@ -46,6 +46,7 @@
        Everything marked "Placeholder" is waiting for real content. -->
   <div class="view recruiter" id="recruiter" data-view="recruiter" hidden>
     <aside class="sidebar">
+      <a class="back" href="#start">&larr; Back to start</a>
       <header>
         <h1 class="sidebar__name" tabindex="-1">Coen Hao</h1>
         <p class="sidebar__bio">Portfolio and hobby page of a physics, mathematics, and statistics student at the University of Toronto.</p>
@@ -61,8 +62,6 @@
           <li><a class="toc__section toc__section--minor" href="#other-projects">Other projects</a></li>
         </ol>
       </nav>
-
-      <a class="sidebar__back" href="#start">&larr; Back to the start</a>
     </aside>
 
     <main class="reading">
@@ -163,7 +162,7 @@
        card links to its own page under projects/ or updates/. -->
   <div class="view amazed" id="amazed" data-view="amazed" hidden>
     <header class="amazed__head">
-      <a class="amazed__back" href="#start">&larr; Back to the start</a>
+      <a class="back" href="#start">&larr; Back to start</a>
       <h1 class="amazed__title" tabindex="-1">Workshop</h1>
       <p class="amazed__lede">Things I am building, and things I have built.</p>
     </header>
@@ -200,47 +199,50 @@
         </div>
       </section>
 
-      <section aria-labelledby="recent-updates">
-        <h2 class="shelf__title" id="recent-updates">Recent updates</h2>
-        <div class="tiles">
-          <a class="tile" href="updates/example.html">
-            <span class="tile__meta">Placeholder date</span>
-            <h3 class="tile__name">Placeholder update</h3>
-            <p class="tile__desc">Placeholder: one line on what changed.</p>
-          </a>
-          <a class="tile" href="updates/example.html">
-            <span class="tile__meta">Placeholder date</span>
-            <h3 class="tile__name">Placeholder update</h3>
-            <p class="tile__desc">Placeholder: one line on what changed.</p>
-          </a>
-          <a class="tile" href="updates/example.html">
-            <span class="tile__meta">Placeholder date</span>
-            <h3 class="tile__name">Placeholder update</h3>
-            <p class="tile__desc">Placeholder: one line on what changed.</p>
-          </a>
-        </div>
-      </section>
+      <!-- Two columns side by side: recent updates left, past projects right. -->
+      <div class="shelves">
+        <section aria-labelledby="recent-updates">
+          <h2 class="shelf__title" id="recent-updates">Recent updates</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="updates/example.html">
+              <span class="tile__meta">Placeholder date</span>
+              <h3 class="tile__name">Placeholder update</h3>
+              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            </a>
+            <a class="tile" href="updates/example.html">
+              <span class="tile__meta">Placeholder date</span>
+              <h3 class="tile__name">Placeholder update</h3>
+              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            </a>
+            <a class="tile" href="updates/example.html">
+              <span class="tile__meta">Placeholder date</span>
+              <h3 class="tile__name">Placeholder update</h3>
+              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            </a>
+          </div>
+        </section>
 
-      <section aria-labelledby="past-projects">
-        <h2 class="shelf__title" id="past-projects">Past projects</h2>
-        <div class="tiles">
-          <a class="tile" href="projects/example.html">
-            <span class="tile__meta">Placeholder year</span>
-            <h3 class="tile__name">Placeholder project</h3>
-            <p class="tile__desc">Placeholder: one line on what it was.</p>
-          </a>
-          <a class="tile" href="projects/example.html">
-            <span class="tile__meta">Placeholder year</span>
-            <h3 class="tile__name">Placeholder project</h3>
-            <p class="tile__desc">Placeholder: one line on what it was.</p>
-          </a>
-          <a class="tile" href="projects/example.html">
-            <span class="tile__meta">Placeholder year</span>
-            <h3 class="tile__name">Placeholder project</h3>
-            <p class="tile__desc">Placeholder: one line on what it was.</p>
-          </a>
-        </div>
-      </section>
+        <section aria-labelledby="past-projects">
+          <h2 class="shelf__title" id="past-projects">Past projects</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="projects/example.html">
+              <span class="tile__meta">Placeholder year</span>
+              <h3 class="tile__name">Placeholder project</h3>
+              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            </a>
+            <a class="tile" href="projects/example.html">
+              <span class="tile__meta">Placeholder year</span>
+              <h3 class="tile__name">Placeholder project</h3>
+              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            </a>
+            <a class="tile" href="projects/example.html">
+              <span class="tile__meta">Placeholder year</span>
+              <h3 class="tile__name">Placeholder project</h3>
+              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            </a>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 

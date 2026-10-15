@@ -12,15 +12,6 @@
   padding: var(--space-6) clamp(var(--space-3), 4vw, var(--space-6)) var(--space-6);
 }
 
-.amazed__back {
-  font-size: var(--step-1);
-  font-style: italic;
-  color: var(--text-muted);
-  text-decoration: none;
-}
-
-.amazed__back:hover { color: var(--text); }
-
 .amazed__title {
   margin: var(--space-4) 0 var(--space-2);
   font-size: clamp(var(--step-5), 5vw, 5.5rem);
@@ -44,7 +35,8 @@
   color: var(--text-muted);
 }
 
-.amazed__body > section { margin-top: var(--space-6); }
+.amazed__body > section,
+.shelves { margin-top: var(--space-6); }
 
 .shelf__title {
   margin: 0 0 var(--space-4);
@@ -221,6 +213,18 @@ a.tile:focus-visible { transform: translateY(-3px); }
 }
 
 
+/* Recent updates and past projects side by side. Each column is at least
+   24rem, so below about 50rem of width the second wraps under the first. */
+.shelves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-6) var(--space-5);
+}
+
+/* One card per row inside a column. */
+.tiles--stack { grid-template-columns: 1fr; }
+
+
 /* ---------- Project and update pages ---------- */
 
 .subpage__meta {
@@ -229,6 +233,13 @@ a.tile:focus-visible { transform: translateY(-3px); }
   font-style: italic;
   color: var(--text-muted);
 }
+
+.subpage__meta a {
+  color: inherit;
+  text-underline-offset: 0.18em;
+}
+
+.subpage__meta a:hover { color: var(--text); }
 
 .prose {
   max-width: 40rem;
