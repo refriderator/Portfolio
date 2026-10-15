@@ -22,6 +22,9 @@ Static site, no build step. Open `index.html` through any local server
 | `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css` (`hold` gives a frame-held staircase). |
 | `tools/pixelate.py` | Turns a photo into an 8-bit sprite (crop, downsample, dither). |
 | `assets/landing/` | The two landing pictures (recruiter 192 × 160, amazed 216 × 180), 6 : 5, 48 colours. |
+| `assets/resume/` | The two résumé PDFs linked from the Résumé section (vehicle dynamics, testing & validation). |
+| `assets/projects/` | Photos for the Portfolio posts, named after the post (`turbo-1.jpg`, `efi-3.jpg`, …), at most 1000 px. |
+| `assets/team/` | The Team Opposite Lock gallery. |
 | `design-system.html` | Reference sheet for the recruiter theme. |
 
 The landing is drawn on one canvas by `js/scene.js`, at a fine pixel of 2 CSS
@@ -36,7 +39,9 @@ plain boxes.
 - **Recruiter post:** add an `<article class="post">` in the right section of
   `index.html` (template in the comment above the Portfolio section). The
   sidebar link appears by itself.
-- **Résumé PDF:** save it as `assets/resume.pdf`.
+- **Résumé PDF:** export from Word over the file in `assets/resume/` (same name, so the links keep working).
+- **Post photos:** save to `assets/projects/` at most 1000 px wide and add an
+  `<a><img loading="lazy"></a>` to the post's `.gallery`.
 - **Project or update:** copy the template, fill it in, and point a card in
   the Amazed view at it.
 - **Picture on an in-progress card:** put an `<img>` inside `.feature__media`.

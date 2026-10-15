@@ -60,8 +60,10 @@
 
   <!-- =========================== RECRUITER ===========================
        Order of importance: résumé, main portfolio, then side projects.
-       Content copied from coenhao.wordpress.com (Master Portfolio and Team
-       Opposite Lock pages); "Read more" links point back to the full posts. -->
+       Content merged from coenhao.wordpress.com (Master Portfolio and Team
+       Opposite Lock pages), the portfolio PDF and both résumés. Each project:
+       title, a where/when line, an opening paragraph, what I did, photos,
+       skills, links back to the full write-ups. -->
   <div class="view recruiter" id="recruiter" data-view="recruiter" hidden>
     <aside class="sidebar">
       <a class="back" href="#start" aria-label="Back to start"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
@@ -83,7 +85,7 @@
           <li><a class="toc__section" href="#resume">Résumé</a></li>
           <li><a class="toc__section" href="#portfolio">Portfolio</a></li>
           <li><a class="toc__section toc__section--minor" href="#team-ol">Team OL</a></li>
-          <li><a class="toc__section toc__section--minor" href="#other-projects">Other projects</a></li>
+          <li><a class="toc__section toc__section--minor" href="#other-projects">Other Projects</a></li>
         </ol>
       </nav>
     </aside>
@@ -94,45 +96,61 @@
       <section class="collection" aria-labelledby="resume">
         <h2 class="collection__title" id="resume">Résumé</h2>
 
-        <p class="resume__lede">Physics, mathematics, and statistics student at the University of Toronto. Hands-on experience across vehicle dynamics, powertrain tuning, embedded systems, and test validation.</p>
+        <p class="resume__lede">Physics undergraduate with 5+ years of hands-on EFI tuning, suspension design, and vehicle-dynamics work across Formula Student and international motorsport competition.</p>
         <p class="resume__contact"><a href="mailto:coen.hao@mail.utoronto.ca">coen.hao@mail.utoronto.ca</a> · <a href="https://www.linkedin.com/in/coen-hao-04014b209">LinkedIn</a> · Toronto, ON</p>
 
-        <!-- Save a PDF as assets/resume.pdf and uncomment this button:
-        <p><a class="action" href="assets/resume.pdf" download>Download résumé (PDF)</a></p> -->
+        <!-- Two versions of the résumé; the .docx sources are kept outside the site. -->
+        <p class="resume__downloads">
+          <a class="action" href="assets/resume/Coen_Hao_Resume_Vehicle_Dynamics.pdf" download>Vehicle dynamics résumé (PDF)</a>
+          <a class="action action--quiet" href="assets/resume/Coen_Hao_Resume_Testing.pdf" download>Testing &amp; validation résumé (PDF)</a>
+        </p>
 
         <div class="resume">
           <h3 class="resume__heading">Education</h3>
           <div class="entry">
-            <span class="entry__when">University of Toronto</span>
+            <span class="entry__when">Expected 2028</span>
             <div>
-              <p class="entry__what">Physics, mathematics, and statistics</p>
+              <p class="entry__what">University of Toronto: Honours B.Sc.</p>
+              <p class="entry__detail">Physics Major; Mathematics Minor; Statistics Minor.</p>
+              <p class="entry__detail">Relevant coursework: Classical Mechanics, Practical Physics (Python), ODEs, Electricity &amp; Magnetism, Linear Algebra, Probability, Statistics &amp; Data Analysis.</p>
             </div>
           </div>
 
           <h3 class="resume__heading">Experience</h3>
           <div class="entry">
-            <span class="entry__when">Team Opposite Lock</span>
+            <span class="entry__when">2024, 2026 – present</span>
             <div>
-              <p class="entry__what">Competition driver, vehicle &amp; tire tech</p>
-              <p class="entry__detail">International team tandem drifting: setup from telemetry, fabrication, sponsorship and operations. <a href="#team-opposite-lock">More →</a></p>
+              <p class="entry__what">Suspension &amp; Vehicle Dynamics, UTFR Formula Student</p>
+              <p class="entry__detail">Setup correlation against MATLAB, Simulink, and Adams Car models; upright and jig fabrication; on-track testing and driver-feedback reports. <a href="#utfr">More →</a></p>
             </div>
           </div>
           <div class="entry">
-            <span class="entry__when">2024, 2026</span>
+            <span class="entry__when">2021 – present</span>
             <div>
-              <p class="entry__what">UTFR Formula Student: Suspension &amp; Vehicle Dynamics</p>
-              <p class="entry__detail">Competition suspension design and track engineering. <a href="#utfr">More →</a></p>
+              <p class="entry__what">Driver &amp; Competition Vehicle Build, Team Opposite Lock</p>
+              <p class="entry__detail">Turbo system design and build, Haltech tuning, steering geometry, and competition driving at Final Bout Special Stage Central 2025. <a href="#team-opposite-lock">More →</a></p>
+            </div>
+          </div>
+          <div class="entry">
+            <span class="entry__when">2021 – present</span>
+            <div>
+              <p class="entry__what">EFI Tuning &amp; Powertrain, independent and competition vehicles</p>
+              <p class="entry__detail">Tuned 5 competition vehicles, including 3 first-place vehicles at MotorTrend’s Roadkill Nights autocross; 3 full harness rebuilds; CFD intake and exhaust work. <a href="#efi-tuning">More →</a></p>
             </div>
           </div>
 
           <h3 class="resume__heading">Skills &amp; Tools</h3>
           <div class="entry">
-            <span class="entry__when">Design &amp; Simulation</span>
-            <div><p class="entry__detail">Fusion 360, Simulink, Adam’s Car, CFD, EFI/dyno tuning (Haltech, Apexi), PID tuning, data logging, drivetrain &amp; electrical diagnosis, Python, MATLAB, Embedded Systems (Arduino C).</p></div>
+            <span class="entry__when">Simulation &amp; analysis</span>
+            <div><p class="entry__detail">MATLAB, Simulink, Adams Car, CFD, Python (SciPy, Matplotlib), suspension geometry &amp; kinematics, statistical analysis, data logging.</p></div>
+          </div>
+          <div class="entry">
+            <span class="entry__when">Powertrain &amp; electrical</span>
+            <div><p class="entry__detail">Dyno/EFI tuning (Haltech, A’PEXi), PID tuning, oscilloscope and multimeter diagnosis, wiring harness fabrication, C/C++ (ESP32 and Arduino).</p></div>
           </div>
           <div class="entry">
             <span class="entry__when">Fabrication</span>
-            <div><p class="entry__detail">Upright fabrication / Jigging, alignment &amp; corner-weighting, fiberglass repair &amp; forming, general workshop &amp; tooling.</p></div>
+            <div><p class="entry__detail">Fusion 360, upright fabrication / jigging, alignment &amp; corner-weighting, fiberglass repair &amp; forming, general workshop &amp; tooling.</p></div>
           </div>
           <div class="entry">
             <span class="entry__when">Other</span>
@@ -149,81 +167,121 @@
 
         <article class="post" id="turbo-miata">
           <h3 class="post__title">Turbocharged Miata: Full Engine Build</h3>
-          <p class="post__date">End-to-end forced-induction build on OEM architecture</p>
+          <p class="post__date">Team Opposite Lock competition car</p>
           <div class="post__body">
-            <p>Combined Mazdaspeed Miata Turbo hot side with NB2 VVT high compression block. Street + dyno tuned.</p>
+            <p>End-to-end forced-induction build on OEM architecture. Mazdaspeed Miata oil pan, turbo hot side, and intake piping combined with an NB2 Miata 10:1 compression VVT block and top end. Street and dyno tuned.</p>
             <ul>
-              <li>Specced and installed fuel, intake, and exhaust system.</li>
-              <li>Designed and built turbo oil and coolant systems.</li>
-              <li>Performed all wiring and signal diagnosis, including identifying and RMA’ing an ECU board with a bad spark signal.</li>
-              <li>Tuned on a Haltech standalone ECU: closed and open-loop, idle and PID tuning, isolating idle faults across mechanical, electrical, and software causes.</li>
-              <li>Validated the build on a 1,500 mile road trip the day after completion.</li>
+              <li>Designed and budgeted the whole system, then specced and installed fuel, intake, and exhaust.</li>
+              <li>Designed and built the oil and coolant feed and return lines, plus a data logging system.</li>
+              <li>Tuned on a Haltech standalone ECU with a 3-port boost control solenoid and an aftermarket recirculation valve: closed-loop AFR and boost control, PID idle tuning, and idle diagnosis.</li>
+              <li>Adapted the downpipe to the standard Miata exhaust mounting location, welded the EGR system shut, and reused the Mazdaspeed oil catch can.</li>
+              <li>Performed all wiring and signal diagnosis, including isolating idle faults across mechanical, electrical, and software causes, and identifying and RMA’ing an ECU board with a bad spark signal.</li>
+              <li>Validated the build on a 1,500-mile road trip the day after completion, plus 8+ hours of competition driving.</li>
             </ul>
+            <div class="gallery">
+              <a href="assets/projects/turbo-1.jpg"><img src="assets/projects/turbo-1.jpg" alt="Team cars running on track at an event" width="695" height="460" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/turbo-2.jpg"><img src="assets/projects/turbo-2.jpg" alt="Working on the front hub and brake" width="483" height="461" loading="lazy" decoding="async"></a>
+            </div>
             <p class="post__skills"><strong>Skills:</strong> powertrain integration, standalone ECU tuning, electrical diagnosis, systems validation.</p>
             <p class="post__links"><a href="https://coenhao.wordpress.com/2026/08/12/full-build-miata/">Read the full build →</a></p>
+          </div>
+        </article>
+        <article class="post" id="steering-geometry">
+          <h3 class="post__title">Front Suspension Geometry: More Steering Lock</h3>
+          <p class="post__date">Applied vehicle dynamics on the competition car</p>
+          <div class="post__body">
+            <p>Moved the tie-rod mounting location on the knuckle to increase lock-to-lock steering angle, then corrected the geometry effects that came with it.</p>
+            <ul>
+              <li>Increased steering lock by 20° by relocating the tie-rod mount on the knuckle.</li>
+              <li>Corrected the resulting Ackermann and bump steer changes, made worse by the lowered ride height, by building 2 cm steering rack spacers specced from basic geometry simulations.</li>
+              <li>Made decisions from in-car measurement, Assetto Corsa simulator data, suspension-geometry tools, and OEM Mazda documentation.</li>
+            </ul>
+            <div class="gallery">
+              <a href="assets/projects/steering-1.jpg"><img src="assets/projects/steering-1.jpg" alt="Two front knuckles with the relocated tie-rod mounts" width="532" height="370" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/steering-2.jpg"><img src="assets/projects/steering-2.jpg" alt="Pair of 2 cm steering rack spacers" width="472" height="336" loading="lazy" decoding="async"></a>
+            </div>
+            <p class="post__skills"><strong>Skills:</strong> suspension kinematics, geometry analysis, sim-validated design.</p>
           </div>
         </article>
         <article class="post" id="double-wishbone-simulator">
           <h3 class="post__title">Double Wishbone Suspension Simulator: MX-5 NB Kinematics Study</h3>
           <p class="post__date">Four-corner, 7-degree-of-freedom model in JavaScript</p>
           <div class="post__body">
-            <p>Built a four-corner, 7-degree-of-freedom double wishbone model of the MX-5 NB in JavaScript, with geometry taken from measured arms, knuckles and subframe pickup points. Used it to compare spring, roll bar and ride height changes before touching the car.</p>
+            <p>Built a four-corner, 7-degree-of-freedom double wishbone model of the MX-5 NB in JavaScript, with geometry taken from measured arms, knuckles, and subframe pickup points. Used it to compare spring, roll bar, and ride height changes before touching the car.</p>
             <ul>
-              <li>Modelled the front and rear linkages from traced control arms and pickup drawings, then validated the stock car against Mazda’s published track, roll center heights, kingpin angle, caster trail and full steering lock.</li>
+              <li>Modeled the front and rear linkages from traced control arms and pickup drawings, then validated the stock car against Mazda’s published track, roll center heights, kingpin angle, caster trail, and full steering lock.</li>
               <li>Compared stock springs against two coilover setups: 8 / 6 kgf/mm cuts roll from 5.7 to 3.1 °/g and shifts roll stiffness rearward.</li>
-              <li>Analysed ride height and roll center movement: lowering 26 mm front / 38 mm rear drops the front roll center from 41 to 3 mm but only lengthens the roll lever by about 5 mm.</li>
+              <li>Analyzed ride height and roll center movement: lowering 26 mm front / 38 mm rear drops the front roll center from 41 to 3 mm but only lengthens the roll lever by about 5 mm.</li>
               <li>Quantified camber from a shortened front upper arm (about 0.25° per mm) and its side effects on kingpin angle and bump steer.</li>
               <li>Found and fixed a geometry fit that matched the published numbers for the wrong reasons, by replacing photo-scaled guesses with measured dimensions.</li>
-              <li>Made decisions from in-car measurement, Assetto Corsa simulator data, suspension-geometry tools, and OEM Mazda documentation.</li>
             </ul>
             <p class="post__skills"><strong>Skills:</strong> vehicle dynamics, suspension kinematics, model validation, JavaScript, three.js, data analysis.</p>
             <p class="post__links"><a href="https://refriderator.github.io/Double-Wishbone-Simulator">Try the simulator →</a> · <a href="https://github.com/refriderator/Double-Wishbone-Simulator">Code on GitHub →</a> · <a href="https://coenhao.wordpress.com/2026/10/03/double-wishbone-simulator/">Read the simulator introduction →</a> · <a href="https://coenhao.wordpress.com/2026/10/03/fixing-problems-you-created/">Read the kinematics study →</a></p>
           </div>
         </article>
         <article class="post" id="efi-tuning">
-          <h3 class="post__title">EFI Tuning (5 years)</h3>
-          <p class="post__date">Powertrain tuning across platforms</p>
+          <h3 class="post__title">EFI Tuning &amp; Powertrain</h3>
+          <p class="post__date">Independent and competition vehicles · 2021 – present</p>
           <div class="post__body">
-            <p>Tuned five competition vehicles, including rotary, forced-induction, and individual throttle body (ITB) setups.</p>
+            <p>Powertrain tuning across platforms. Tuned five competition vehicles, including rotary, forced-induction, and individual throttle body (ITB) setups, on street and dyno, winning across multiple disciplines of racing, including 3 first-place vehicles in MotorTrend’s Roadkill Nights autocross.</p>
             <ul>
-              <li>Modeled and optimized intake and exhaust airflow with CFD; PID tuning via data logging; dyno tuning and drivetrain diagnostics.</li>
-              <li>Includes a legacy hardware project: street legal FC RX-7 tuned on an Apexi FC Commander, working through old-format fuel maps and full electronic/mechanical signal verification.</li>
+              <li>Rebuilt 3 full engine and body harnesses: hand soldered and repinned OEM and aftermarket ECUs, chassis, and engines, working from OEM documents and oscilloscope testing.</li>
+              <li>Plotted Haltech data logs in Python to analyze boost, AFR, and intake temperature across competition sessions. Identified a lean AFR under certain ambient conditions and adjusted the correction tables.</li>
+              <li>Modeled and optimized intake and exhaust airflow with CFD and 3D-printed prototyping; PID tuning from data logs; dyno tuning and drivetrain diagnostics.</li>
+              <li>Includes a legacy hardware project: a street-legal FC RX-7 tuned on an A’PEXi FC Commander, working through old-format fuel maps and full electronic and mechanical signal verification.</li>
             </ul>
-            <p class="post__skills"><strong>Skills:</strong> EFI/ECU tuning, CFD, data logging, cross-platform diagnosis.</p>
+            <div class="gallery">
+              <a href="assets/projects/efi-1.jpg"><img src="assets/projects/efi-1.jpg" alt="Engine on a hoist during the build" width="441" height="383" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/efi-2.jpg"><img src="assets/projects/efi-2.jpg" alt="Engine bay with the intake removed, captioned "More air"" width="385" height="402" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/efi-3.jpg"><img src="assets/projects/efi-3.jpg" alt="Hand-soldered ECU circuit board" width="509" height="400" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/efi-4.jpg"><img src="assets/projects/efi-4.jpg" alt="Hand-written fuel map notes on paper" width="413" height="547" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/efi-5.jpg"><img src="assets/projects/efi-5.jpg" alt="Exhaust manifold and turbo flange" width="408" height="444" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/efi-6.jpg"><img src="assets/projects/efi-6.jpg" alt="Haltech boost control solenoid" width="344" height="443" loading="lazy" decoding="async"></a>
+            </div>
+            <p class="post__skills"><strong>Skills:</strong> EFI/ECU tuning, CFD, data logging, Python, cross-platform diagnosis.</p>
             <p class="post__links"><a href="https://coenhao.wordpress.com/2026/08/09/old-project-log/">Read the rotary tuning log →</a></p>
           </div>
         </article>
         <article class="post" id="utfr">
           <h3 class="post__title">UTFR Formula Student: Suspension &amp; Vehicle Dynamics</h3>
-          <p class="post__date">2024, 2026 · Competition suspension design and track engineering</p>
+          <p class="post__date">University of Toronto Formula Racing · 2024, 2026 – present</p>
           <div class="post__body">
-
+            <p>Competition suspension design and track engineering.</p>
             <ul>
-              <li>Fabricated uprights and performed alignment and ride height adjustments for competition readiness.</li>
-              <li>Produced driver feedback reports and improved vehicle and tire stability through iterative on track testing.</li>
-              <li>Used MATLAB, Simulink, and Adam’s car to model lap time characteristics and compare setups.</li>
+              <li>Correlated on-track logged data against MATLAB, Simulink, and Adams Car models to compare setups and lap-time effects.</li>
+              <li>Fabricated uprights, chassis jigs, and control arms, and performed alignment and ride height adjustments before and during competition.</li>
+              <li>Wrote driver-feedback reports and improved vehicle and tire stability through iterative on-track testing.</li>
             </ul>
-            <p class="post__skills"><strong>Skills:</strong> MATLAB, Simulink, Adam’s car, fabrication, track engineering.</p>
+            <p class="post__skills"><strong>Skills:</strong> MATLAB, Simulink, Adams Car, CAD, fabrication, track engineering.</p>
           </div>
         </article>
         <article class="post" id="esp32-aircraft">
-          <h3 class="post__title">ESP32 Fixed Wing Aircraft</h3>
-          <p class="post__date">Embedded flight control firmware and airframe</p>
+          <h3 class="post__title">ESP32 Fixed-Wing Aircraft</h3>
+          <p class="post__date">Personal project · 2026</p>
           <div class="post__body">
-            <p>Built a fixed wing RC aircraft around a 4S power system, and 60A ESC, driven by an ESP32 running an ELRS receiver over UART with six control surfaces (2 flap, 2 aileron, rudder, elevator).</p>
+            <p>Embedded flight control firmware and airframe. Built a fixed-wing RC aircraft around a 4S power system and a 60A ESC, driven by an ESP32 running an ELRS receiver over UART with six control surfaces (2 flap, 2 aileron, rudder, elevator).</p>
             <ul>
-              <li>Wrote control firmware implementing failsafes (default to a safe state on signal loss rather than holding last known input), a state machine (idle / armed / running / fault), and non blocking millis() scheduling so multiple tasks run without stalling the control loop.</li>
-              <li>Handled UART receiver parsing and multi servo PWM output on the ESP32.</li>
+              <li>Wrote control firmware with failsafes (default to a safe state on signal loss rather than holding the last known input), a fault-state machine (idle / armed / running / fault), and non-blocking millis() scheduling so multiple tasks run without stalling the control loop.</li>
+              <li>Handled UART receiver parsing and multi-servo PWM output on the ESP32.</li>
+              <li>Designed the wing in xflr5 and 3D-printed the airframe.</li>
             </ul>
-            <p class="post__skills"><strong>Skills:</strong> embedded C/C++, real-time control, serial protocols, systems integration.</p>
+            <div class="gallery">
+              <a href="assets/projects/esp32-1.png"><img src="assets/projects/esp32-1.png" alt="xflr5 wing analysis plots" width="1000" height="729" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/esp32-2.png"><img src="assets/projects/esp32-2.png" alt="xflr5 polar curves for several wing setups" width="1000" height="730" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/esp32-6.jpg"><img src="assets/projects/esp32-6.jpg" alt="xflr5 3D model of the plane" width="411" height="395" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/esp32-3.jpg"><img src="assets/projects/esp32-3.jpg" alt="3D-printed airframe parts laid out" width="425" height="319" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/esp32-4.jpg"><img src="assets/projects/esp32-4.jpg" alt="ESP32 board wired to the receiver and servos" width="358" height="268" loading="lazy" decoding="async"></a>
+              <a href="assets/projects/esp32-5.jpg"><img src="assets/projects/esp32-5.jpg" alt="Flight control firmware on a laptop" width="371" height="438" loading="lazy" decoding="async"></a>
+            </div>
+            <p class="post__skills"><strong>Skills:</strong> xflr5, embedded C/C++, real-time control, serial protocols, systems integration.</p>
             <p class="post__links"><a href="https://coenhao.wordpress.com/2026/08/11/esp32-plane-update/">Read the full build →</a></p>
           </div>
         </article>
         <article class="post" id="sim-to-real">
           <h3 class="post__title">“Sim-to-Real”</h3>
-          <p class="post__date">Data driven setup validation</p>
+          <p class="post__date">Data-driven setup validation</p>
           <div class="post__body">
-            <p>Built and modified vehicle, tire physics models, and 3D assets from real world scans; used logged telemetry alongside simulation to validate real world setup and driving changes.</p>
+            <p>Built and modified vehicle and tire physics models, and 3D assets from real-world scans; used logged telemetry alongside simulation to validate real-world setup and driving changes.</p>
             <p class="post__links"><a href="https://coenhao.wordpress.com/2026/08/09/simulator/">See the sim →</a></p>
           </div>
         </article>
@@ -235,18 +293,18 @@
 
         <article class="post" id="team-opposite-lock">
           <h3 class="post__title">Team Opposite Lock</h3>
-          <p class="post__date">Competition team-tandem drifting</p>
+          <p class="post__date">Competition team-tandem drifting · 2021 – present</p>
           <div class="post__body">
-            <p>Team Opposite Lock was formed in 2021 by a small group of high school seniors from Detroit. Today, we are the youngest team competing at the highest level of International Team Tandem Drift Competition.</p>
+            <p>Team Opposite Lock was formed in 2021 by a small group of high school seniors from Detroit. Today, we are the youngest team competing at the highest level of international team-tandem drift competition.</p>
             <h4 class="post__subhead">The Team</h4>
             <p>Team Opposite Lock competes at the top tier of international tandem drifting against teams from Japan, Australia, Europe, and South America, many with far larger budgets and decades more experience.</p>
-            <h4 class="post__subhead">My Role</h4>
+            <h4 class="post__subhead">My Rôle</h4>
             <ul class="roles">
-              <li><strong>Driver.</strong> Competition driver, translating simulator and real world telemetry into car setup and driving adjustments, closing following distance, and maximizing performance against drastically different car architectures and setups.</li>
+              <li><strong>Driver.</strong> Competition driver at Final Bout Special Stage Central 2025, translating simulator and real-world telemetry into car setup and driving adjustments, closing following distance, and maximizing performance against drastically different car architectures and setups.</li>
               <li><strong>Vehicle &amp; tire tech.</strong> Fitment, competition scrutineering, and run plan strategy built from tire wear, performance, and temperature data for the specific track and conditions on any given event day. Damper, spring rate, and ride height tuning; maintaining roll center and center of gravity after modifications; contact patch management through bushing and suspension changes and live adjustment.</li>
-              <li><strong>Fabrication &amp; maintenance.</strong> Fiberglass patching and forming, weatherproofing, and NVH work; visual scrutineering. Maintaining vehicular integrity and executing emergency repairs under time and materials constraints.</li>
-              <li><strong>Operations &amp; business.</strong> Sponsorship relations and professional communications, yearly budget, shop financials, and merchandising. Planning and logistics for events including international competition.</li>
-              <li><strong>Community.</strong> Social media, videography, and content creation. Building a global community with a strong presence across the West Coast, Midwest US, and Southeast Asia. Built and sold Assetto Corsa car/track 3D assets and tire-physics models to independent artists and drivers, scanned and modeled from the real world.</li>
+              <li><strong>Fabrication &amp; maintenance.</strong> Fiberglass patching and forming, weatherproofing, and NVH work; visual scrutineering. Track day quick repairs and setup changes; maintaining vehicle integrity and executing emergency repairs under time and materials constraints.</li>
+              <li><strong>Operations &amp; business.</strong> Managed the team budget, sponsorship relations and professional communications, shop financials, and merchandising. Planning and logistics for events, including international competition, and trackside operations.</li>
+              <li><strong>Community.</strong> Social media, videography, and content creation. Building a global community with a strong presence across the West Coast, the Midwest US, and Southeast Asia. Built and sold Assetto Corsa car/track 3D assets and tire-physics models to independent artists and drivers, scanned and modeled from the real world.</li>
             </ul>
             <h4 class="post__subhead">Gallery</h4>
             <div class="gallery">
@@ -264,7 +322,7 @@
               <a href="assets/team/team-12.jpg"><img src="assets/team/team-12.jpg" alt="Two cars in tandem through a corner" width="1000" height="562" loading="lazy" decoding="async"></a>
               <a href="assets/team/team-13.jpg"><img src="assets/team/team-13.jpg" alt="ECU tuning laptop and handheld in the car" width="1000" height="1777" loading="lazy" decoding="async"></a>
               <a href="assets/team/team-14.jpg"><img src="assets/team/team-14.jpg" alt="The team in costumes in the paddock" width="1000" height="675" loading="lazy" decoding="async"></a>
-              <a href="assets/team/team-15.jpg"><img src="assets/team/team-15.jpg" alt="Purple Miata drifting with tyre smoke" width="1000" height="566" loading="lazy" decoding="async"></a>
+              <a href="assets/team/team-15.jpg"><img src="assets/team/team-15.jpg" alt="Purple Miata drifting with tire smoke" width="1000" height="566" loading="lazy" decoding="async"></a>
               <a href="assets/team/team-16.jpg"><img src="assets/team/team-16.jpg" alt="Purple Miata leading a tandem run" width="1000" height="579" loading="lazy" decoding="async"></a>
               <a href="assets/team/team-17.jpg"><img src="assets/team/team-17.jpg" alt="Spotter watching cars drift past the wall" width="831" height="537" loading="lazy" decoding="async"></a>
             </div>
@@ -273,20 +331,20 @@
       </section>
 
       <section class="collection collection--minor" aria-labelledby="other-projects">
-        <h2 class="collection__title" id="other-projects">Other projects</h2>
+        <h2 class="collection__title" id="other-projects">Other Projects</h2>
 
         <article class="post" id="3d-camera">
-          <h3 class="post__title">3D camera exploration</h3>
+          <h3 class="post__title">3D Camera Exploration</h3>
           <p class="post__date">Room navigation and SLAM</p>
           <div class="post__body">
-            <p>The end goal is to have a platform to play around with room navigation on home robots and SLAM. So far I have been toying with Xbox Kinect cameras and data processing on MATLAB.</p>
+            <p>The end goal is a platform to play around with room navigation on home robots and SLAM. So far I have been toying with Xbox Kinect cameras and data processing in MATLAB.</p>
           </div>
         </article>
         <article class="post" id="alternator-ebike">
-          <h3 class="post__title">Car alternator electric bike</h3>
-          <p class="post__date">IB personal project, sophomore year of high school</p>
+          <h3 class="post__title">Car Alternator Electric Bike</h3>
+          <p class="post__date">IB personal project · sophomore year of high school</p>
           <div class="post__body">
-            <p>For my IB personal project in sophomore year of high school I used a junkyard alternator, car battery, 12v ESC, and speed controller mounted on an old hospital bed frame piping and a bike. It was my first introduction to flux, electric motors, circuits, and building.</p>
+            <p>For my IB personal project in sophomore year of high school I used a junkyard alternator, a car battery, a 12V ESC, and a speed controller mounted on old hospital bed frame piping and a bike. It was my first introduction to flux, electric motors, circuits, and building.</p>
           </div>
         </article>
       </section>
