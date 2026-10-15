@@ -62,14 +62,44 @@ body {
    It goes one level up the site (project → workshop → start), not back in
    history, so it still makes sense when someone arrives from a shared link. */
 .back {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;            /* stay button-sized inside a flex column */
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius);
   font-size: var(--step-1);
-  font-style: italic;
+  line-height: 1.6;
   color: var(--text-muted);
   text-decoration: none;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease,
+    transform 120ms ease;
 }
 
-.back:hover { color: var(--text); }
+/* The arrow leads the way out: it slides left on the same damped spring as
+   the landing boxes, so it overshoots a little and settles. */
+.back__arrow {
+  display: inline-block;
+  position: relative;
+  top: -0.1em;                       /* EB Garamond's arrow sits low; centre it on the word */
+  transition: transform var(--spring-duration) var(--spring);
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--text);
+  border-color: var(--text-muted);
+  background-color: var(--surface-box);
+}
+
+.back:hover .back__arrow,
+.back:focus-visible .back__arrow { transform: translateX(-4px); }
+
+.back:active { transform: scale(0.96); }
 
 /* Headings are focused by js/views.js only to move the reading position
    for keyboard and screen-reader users; they are not controls, so no ring. */
