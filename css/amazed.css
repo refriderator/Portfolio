@@ -152,7 +152,7 @@
      there is always clear space between the dither band and the title,
      however long the description is (on a phone it is always showing). */
   --photo-h: 13rem;
-  padding-top: calc(var(--photo-h) + var(--space-4));
+  padding-top: var(--photo-h);
 
   /* Leaving: the rule that applies after the change sets the transition,
      so these are the leave transitions and the :hover rule below has the
