@@ -17,6 +17,7 @@ Static site, no build step. Open `index.html` through any local server
 | `js/landing.js` | Hover/focus preview on the landing sheets; warms what the next step needs. |
 | `js/scene.js` | Draws the landing on a pixel canvas: sheets, shadows, particles, flag wave. |
 | `js/pixel.js` | Pixel-art helpers: the sheet sprite, a 3 × 5 bitmap font, dithering, particles. |
+| `js/wipe.js` | The amazed preview's darkening: a dither front rising from the bottom, sinking back on leave. |
 | `js/airplane.js` | The landing → Workshop paper-plane transition (loaded on demand). |
 | `js/recruiter.js` | Builds the sidebar post list and the scroll marker. |
 | `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css` (`hold` gives a frame-held staircase). |

@@ -168,6 +168,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 62%;
+}
+
+/* The text and its scrim cover the card's lower half, so the photo fills
+   only the top 58%: its subject sits in the clear part, and the dithered
+   edge of the scrim fades its bottom into the navy. */
+.feature__media img {
+  height: 58%;
   image-rendering: pixelated;
 }
 
@@ -400,6 +408,42 @@ a.tile:focus-visible::before {
   aspect-ratio: 16 / 9;
   border: var(--px, 2px) solid var(--line);
   background: #000;
+}
+
+/* In-progress project page: goals on the left, its updates and posts
+   down the right, photos in a row along the bottom. One column on a phone. */
+.project {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-areas: "goals log" "photos photos";
+  gap: var(--space-6) clamp(var(--space-5), 5vw, var(--space-7, 6rem));
+  margin-top: var(--space-5);
+}
+
+.project__goals { grid-area: goals; margin-top: 0; }
+.project__goals h2:first-child { margin-top: 0; }
+.project__log { grid-area: log; display: grid; gap: var(--space-5); align-content: start; }
+.project__log .shelf__title { margin-top: 0; }
+
+.project__photos {
+  grid-area: photos;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-4);
+}
+
+.project__photos figure { margin: 0; }
+
+.project__photos img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: var(--px, 2px) solid var(--line);
+}
+
+@media (max-width: 800px) {
+  .project { grid-template-columns: 1fr; grid-template-areas: "goals" "log" "photos"; }
 }
 
 /* Pinned items get more room than the rest. */

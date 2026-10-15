@@ -136,6 +136,26 @@
 .landing .masthead { transition: opacity 700ms ease; }
 .landing.is-faded .masthead { opacity: 0; }
 
+/* The amazed preview's darkening is a dither rising from below (js/wipe.js),
+   drawn behind the page's text. The theme colours wait for it: going dark,
+   they change only once the wipe has reached the top; going back, they flip
+   at once underneath it and the sinking wipe reveals them. */
+.dither-wipe {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+html[data-preview="amazed"]:not([data-theme]):not([data-switching]) {
+  transition-duration: 0s;
+  transition-delay: 470ms;
+}
+
+html[data-wipe="out"] { transition: none; }
+
 /* Narrow screens: stack the two sheets, still evenly spaced. */
 @media (max-width: 640px) {
   .choices { flex-direction: column; padding: 0; }

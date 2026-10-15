@@ -24,8 +24,10 @@
       <p class="subpage__meta">In progress</p>
     </header>
 
-    <main class="amazed__body">
-      <div class="prose">
+    <!-- Goals on the left, the project's updates and posts down the right,
+         photos along the bottom. -->
+    <main class="project">
+      <div class="prose project__goals">
         <h2>Goals</h2>
         <ul>
           <li>Plane weight, lift and balance, and the computer analysis behind them</li>
@@ -33,31 +35,36 @@
           <li>Basic control theory</li>
           <li>ArduPilot, basic autopilot programs and data logging</li>
         </ul>
-        <figure><img src="../assets/workshop/model-plane/1.jpg" alt="" loading="lazy" decoding="async"></figure>
-        <figure><img src="../assets/workshop/model-plane/2.jpg" alt="" loading="lazy" decoding="async"></figure>
       </div>
 
-      <section aria-labelledby="updates">
-        <h2 class="shelf__title" id="updates">Updates</h2>
-        <div class="tiles">
-          <a class="tile" href="../updates/trainer-plane.html">
+      <div class="project__log">
+        <section aria-labelledby="updates">
+          <h2 class="shelf__title" id="updates">Updates</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="../updates/trainer-plane.html">
             <span class="tile__meta">Sep 20, 2026</span>
             <h3 class="tile__name">Trainer Plane</h3>
             <p class="tile__desc">A sub-500 g trainer for learning remote-control flight.</p>
           </a>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <section aria-labelledby="posts">
-        <h2 class="shelf__title" id="posts">Posts</h2>
-        <div class="tiles">
-          <a class="tile" href="../projects/esp32-plane-update.html">
+        <section aria-labelledby="posts">
+          <h2 class="shelf__title" id="posts">Posts</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="../projects/esp32-plane-update.html">
             <span class="tile__meta">Aug 11, 2026</span>
             <h3 class="tile__name">Intro to hobby planes</h3>
             <p class="tile__desc">First steps into hobby planes, flown by an ESP32.</p>
           </a>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="project__photos">
+        <figure><img src="../assets/workshop/model-plane/1.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure><img src="../assets/workshop/model-plane/2.jpg" alt="" loading="lazy" decoding="async"></figure>
+      </div>
     </main>
   </div>
 </body>

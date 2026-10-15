@@ -24,22 +24,23 @@
       <p class="subpage__meta">In progress</p>
     </header>
 
-    <main class="amazed__body">
-      <div class="prose">
+    <!-- Goals on the left, the project's updates and posts down the right,
+         photos along the bottom. -->
+    <main class="project">
+      <div class="prose project__goals">
         <h2>Goals</h2>
         <ul>
           <li>Data logger</li>
           <li>Suspension engineering</li>
           <li>Intake performance engineering</li>
         </ul>
-        <figure><img src="../assets/workshop/nb-miata/1.jpg" alt="" loading="lazy" decoding="async"></figure>
-        <figure><img src="../assets/workshop/nb-miata/2.jpg" alt="" loading="lazy" decoding="async"></figure>
       </div>
 
-      <section aria-labelledby="updates">
-        <h2 class="shelf__title" id="updates">Updates</h2>
-        <div class="tiles">
-          <a class="tile" href="../updates/more-realism.html">
+      <div class="project__log">
+        <section aria-labelledby="updates">
+          <h2 class="shelf__title" id="updates">Updates</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="../updates/more-realism.html">
             <span class="tile__meta">Oct 5, 2026</span>
             <h3 class="tile__name">More Realism</h3>
             <p class="tile__desc">Reworked how a car's geometry goes into the suspension simulator.</p>
@@ -54,19 +55,25 @@
             <h3 class="tile__name">Double Wishbone Simulator</h3>
             <p class="tile__desc">A browser tool for checking suspension setup decisions.</p>
           </a>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <section aria-labelledby="posts">
-        <h2 class="shelf__title" id="posts">Posts</h2>
-        <div class="tiles">
-          <a class="tile" href="../projects/full-build-miata.html">
+        <section aria-labelledby="posts">
+          <h2 class="shelf__title" id="posts">Posts</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="../projects/full-build-miata.html">
             <span class="tile__meta">Aug 12, 2026</span>
             <h3 class="tile__name">Full Build: Miata</h3>
             <p class="tile__desc">The turbo NB Miata: EFI, VVT and the full build.</p>
           </a>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
+
+      <div class="project__photos">
+        <figure><img src="../assets/workshop/nb-miata/1.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure><img src="../assets/workshop/nb-miata/2.jpg" alt="" loading="lazy" decoding="async"></figure>
+      </div>
     </main>
   </div>
 </body>

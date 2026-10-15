@@ -8,6 +8,7 @@
 // the link while the pointer is still over it.
 
 import "./scene.js";
+import "./wipe.js";       // the amazed preview's rising dither
 
 const root = document.documentElement;
 let hovered = null;
