@@ -73,7 +73,6 @@ const EAR = 6;                                       // dog-ear size, in big pix
 
 // Layout of the marks on the front, in big pixels.
 export const PHOTO = { x: 2, y: 2, w: 18, h: 15 };
-const LABEL = { y: 18 };
 const BARS = [{ x: 3, y: 25, w: 16 }, { x: 3, y: 27, w: 11 }];
 
 const interior = (c) => c === PAPER || c === LIGHT || c === SHADE;
@@ -202,7 +201,13 @@ export function sheetTexture({ pal, ear = null, side = "front", photo = null, re
     g.drawImage(pc, PHOTO.x * K, PHOTO.y * K);
   }
 
-  text(g, label, (SHEET.w * K) / 2, LABEL.y * K, Math.max(1, Math.round(K / 2)), pal.ink);
+  // Lettering: as large as fits the paper with a one-cell margin each side,
+  // in a whole number of fine pixels per text pixel; centred in the band
+  // between the picture (ends at row 17) and the text bars (start at row
+  // 25), a quarter cell above its middle, where text looks centred.
+  const size = labelSize(label);
+  const top = 17 * K + Math.round((8 * K - 12 * size) / 2) - Math.round(K / 4);
+  text(g, label, (SHEET.w * K) / 2, top, size, pal.ink);
   g.fillStyle = pal.ink;
   for (const b of BARS) g.fillRect(b.x * K, b.y * K, b.w * K, K);
   return c;
@@ -263,6 +268,14 @@ const GLYPHS = {
 };
 
 const lineWidth = (s) => [...s].reduce((n, ch) => n + (GLYPHS[ch] ?? GLYPHS[" "])[0].length + 1, -1);
+
+// Largest text-pixel size (fine pixels) at which the widest line fits the
+// paper, leaving one big-pixel cell of margin on each side. (Rounding K / 2
+// instead overflowed at odd K: 36 text pixels × 6 = 216 > the 198 available.)
+function labelSize(lines) {
+  const widest = Math.max(...lines.map(lineWidth));
+  return Math.max(1, Math.floor(((SHEET.w - 4) * K - 2 * K) / widest));
+}
 
 // Lines of text centred on cx, top at `top`, each text pixel `size` canvas
 // pixels square, one pixel between letters and two between lines.

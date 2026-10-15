@@ -21,7 +21,7 @@ Static site, no build step. Open `index.html` through any local server
 | `js/recruiter.js` | Builds the sidebar post list and the scroll marker. |
 | `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css` (`hold` gives a frame-held staircase). |
 | `tools/pixelate.py` | Turns a photo into an 8-bit sprite (crop, downsample, dither). |
-| `assets/landing/` | The two landing sprites (recruiter 96 × 112, amazed 80 × 113). |
+| `assets/landing/` | The two landing pictures (recruiter 192 × 160, amazed 216 × 180), 6 : 5, 48 colours. |
 | `design-system.html` | Reference sheet for the recruiter theme. |
 
 The landing is drawn on one canvas by `js/scene.js`, at a fine pixel of 2 CSS
