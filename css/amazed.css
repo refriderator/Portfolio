@@ -135,7 +135,7 @@
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .feature {
@@ -260,7 +260,7 @@
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .tile {
@@ -422,7 +422,7 @@ a.tile:focus-visible::before {
 
 .project__goals { grid-area: goals; margin-top: 0; }
 .project__goals h2:first-child { margin-top: 0; }
-.project__log { grid-area: log; display: grid; gap: var(--space-5); align-content: start; }
+.project__log { grid-area: log; display: grid; gap: var(--space-6); align-content: start; }
 .project__log .shelf__title { margin-top: 0; }
 
 .project__photos {

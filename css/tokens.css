@@ -18,7 +18,9 @@
   --night-700: #262d3b;
   --night-500: #4b5466;
   --night-300: #9aa1ae;
+  --night-200: #b9bfc9;
   --night-150: #d6d9df;
+  --night-050: #f0f2f5;
   --white:     #ffffff;
   --black:     #000000;
 
@@ -193,13 +195,13 @@
 [data-theme="amazed"] {
   --surface-page: var(--navy-950);
   --surface-box:  var(--navy-900);
-  --text:         var(--night-150);
-  --text-muted:   var(--night-300);
+  --text:         var(--night-050);
+  --text-muted:   var(--night-200);
   --line:         var(--chrome-lo);
   --highlight-a:  var(--chrome-hi);
   --highlight-b:  var(--chrome-mid);
   --highlight-c:  var(--chrome-hi);
-  --edge-a:       var(--chrome-hi);
+  --edge-a:       var(--chrome-mid);   /* window frames: lit, but quieter than the text */
   --edge-b:       var(--chrome-lo);
   --sheet-fill:  #dfe3ea;
   --sheet-shade: #9ea6b2;
