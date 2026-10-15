@@ -1,0 +1,246 @@
+/* =====================================================================
+   AMAZED
+   Navy grounds and chrome edges (the "amazed" theme in tokens.css).
+   Shared by the Amazed view in index.html and by the pages under
+   projects/ and updates/.
+   ===================================================================== */
+
+.amazed,
+.subpage {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: var(--space-6) clamp(var(--space-3), 4vw, var(--space-6)) var(--space-6);
+}
+
+.amazed__back {
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.amazed__back:hover { color: var(--text); }
+
+.amazed__title {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: clamp(var(--step-5), 5vw, 5.5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+
+  background: linear-gradient(100deg,
+    var(--highlight-a) 0%, var(--highlight-b) 50%, var(--highlight-c) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.amazed__lede {
+  margin: 0;
+  max-width: 40ch;
+  font-size: var(--step-3);
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.amazed__body > section { margin-top: var(--space-6); }
+
+.shelf__title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--step-1);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+
+/* ---------- Chrome-edged surface, shared by both card sizes ----------
+   Same gradient-border trick as the landing: the inner layer paints the
+   padding box, the outer layer shows through the transparent border. */
+.feature,
+.tile {
+  border: var(--hairline) solid transparent;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
+    linear-gradient(135deg, var(--edge-a), var(--edge-b) 55%, var(--edge-a)) border-box;
+  color: var(--text);
+  text-decoration: none;
+}
+
+
+/* ---------- In progress: large feature cards ---------- */
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  gap: var(--space-4);
+}
+
+.feature {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: 24rem;
+  overflow: hidden;
+
+  /* The growth uses the same damped spring as the landing boxes. At a
+     2.5% scale the 12.6% overshoot is about 0.3% of the card: felt, not seen. */
+  transition: transform var(--spring-duration) var(--spring);
+}
+
+/* Picture layer: hidden at rest, fades in on hover. Until there is an
+   <img>, a chrome sheen stands in for it. */
+.feature__media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background:
+    radial-gradient(120% 90% at 85% 10%, var(--chrome-lo), transparent 60%),
+    var(--navy-800);
+  transition: opacity 500ms ease;
+}
+
+.feature__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Scrim: darkens the bottom of the picture so the text stays readable. */
+.feature__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--navy-975) 10%, transparent 75%);
+}
+
+.feature__text {
+  padding: clamp(var(--space-4), 3vw, var(--space-5));
+}
+
+.feature__status {
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.feature__name {
+  margin: var(--space-1) 0 0;
+  font-size: clamp(var(--step-4), 2.5vw + 1rem, var(--step-5));
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+/* Description: collapsed to zero height at rest. Animating grid rows from
+   0fr to 1fr animates to the content's real height, which "height: auto"
+   cannot do. */
+.feature__more {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 450ms ease, opacity 450ms ease;
+}
+
+.feature__desc {
+  overflow: hidden;
+  margin: 0;
+  max-width: 38ch;
+  font-size: var(--step-2);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.feature:hover,
+.feature:focus-visible {
+  transform: scale(1.025);
+  z-index: 1;
+}
+
+.feature:hover .feature__media,
+.feature:focus-visible .feature__media { opacity: 1; }
+
+.feature:hover .feature__more,
+.feature:focus-visible .feature__more {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.feature:hover .feature__desc,
+.feature:focus-visible .feature__desc { padding-top: var(--space-2); }
+
+/* Touch screens have no hover: show everything from the start. */
+@media (hover: none) {
+  .feature__media { opacity: 1; }
+  .feature__more { grid-template-rows: 1fr; opacity: 1; }
+  .feature__desc { padding-top: var(--space-2); }
+}
+
+
+/* ---------- Recent updates / past projects: small tiles ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  transition: transform 300ms ease;
+}
+
+a.tile:hover,
+a.tile:focus-visible { transform: translateY(-3px); }
+
+.tile__meta {
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.tile__name {
+  margin: 0;
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.tile__desc {
+  margin: 0;
+  font-size: var(--step-1);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+
+/* ---------- Project and update pages ---------- */
+
+.subpage__meta {
+  margin: var(--space-4) 0 0;
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.prose {
+  max-width: 40rem;
+  margin-top: var(--space-5);
+  font-size: var(--step-body);
+  line-height: 1.6;
+}
+
+.prose p { margin: 0 0 var(--space-3); }
+.prose a { color: inherit; text-underline-offset: 0.18em; }
+
+/* Pinned items get more room than the rest. */
+.tiles--pinned {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+}

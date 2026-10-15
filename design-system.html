@@ -6,12 +6,12 @@
   <title>Recruiter design system</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
   <link rel="stylesheet" href="css/tokens.css">
   <style>
     /* Reference page only. Reads semantic tokens, like any component would. */
     *, *::before, *::after { box-sizing: border-box; }
-    html { background: var(--surface-page); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+    html { background: var(--surface-page); color: var(--text); font-family: var(--font-serif); -webkit-font-smoothing: antialiased; }
     body { margin: 0; }
     main { max-width: 52rem; margin: 0 auto; padding: var(--space-6) var(--space-4); }
 
@@ -34,12 +34,13 @@
 
     .lines { display: grid; gap: var(--space-4); }
     .rule { border: 0; margin: 0; border-top: var(--hairline) solid var(--line); }
+    .rule--strong { border-top-color: var(--text); }
     .rule--strong { border-top-width: 2px; }
 
     .action {
       display: inline-block; padding: var(--space-3) var(--space-4); border-radius: var(--radius);
       background: var(--action-bg); color: var(--action-text);
-      font: 500 var(--step-0)/1 var(--font-sans); text-decoration: none;
+      font: 500 var(--step-0)/1 var(--font-serif); text-decoration: none;
     }
     .action:focus-visible { outline: 2px solid var(--line); outline-offset: 3px; }
     .link { color: var(--text); text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
@@ -55,16 +56,17 @@
 <main>
   <header>
     <h1>Recruiter design system</h1>
-    <p class="muted">White and grey grounds. Ink, a blue close enough to black, for every line and letter. Black for the one action that matters most on a page.</p>
+    <p class="muted">Paper grounds. Charcoal for every line and letter, set in an old-style serif. Black for the one action that matters most on a page.</p>
   </header>
 
   <section>
     <h2>Colour</h2>
     <div class="swatches">
-      <div class="swatch"><div class="swatch__chip" style="background:var(--white)"></div><span class="swatch__name">White</span><span class="muted">#ffffff</span><span class="muted">page</span></div>
-      <div class="swatch"><div class="swatch__chip" style="background:var(--grey-50)"></div><span class="swatch__name">Grey 50</span><span class="muted">#f3f4f6</span><span class="muted">raised surfaces</span></div>
-      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-500)"></div><span class="swatch__name">Ink 500</span><span class="muted">#5a6378</span><span class="muted">secondary text</span></div>
-      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-950)"></div><span class="swatch__name">Ink 950</span><span class="muted">#0b1220</span><span class="muted">text and lines</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper-50)"></div><span class="swatch__name">Paper 50</span><span class="muted">#f8f7f3</span><span class="muted">page</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper-100)"></div><span class="swatch__name">Paper 100</span><span class="muted">#f0eee8</span><span class="muted">raised surfaces</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper-200)"></div><span class="swatch__name">Paper 200</span><span class="muted">#e3e0d8</span><span class="muted">hairlines</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--charcoal-600)"></div><span class="swatch__name">Charcoal 600</span><span class="muted">#5b5f68</span><span class="muted">secondary text</span></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--charcoal-900)"></div><span class="swatch__name">Charcoal 900</span><span class="muted">#23262c</span><span class="muted">text</span></div>
       <div class="swatch"><div class="swatch__chip" style="background:var(--black)"></div><span class="swatch__name">Black</span><span class="muted">#000000</span><span class="muted">primary action</span></div>
     </div>
   </section>
@@ -72,9 +74,9 @@
   <section>
     <h2>Type</h2>
     <div class="scale">
-      <div class="scale__row"><span>72 / step 6</span><span style="font-size:var(--step-6);font-weight:500;letter-spacing:-0.03em">Engineer</span></div>
-      <div class="scale__row"><span>48 / step 5</span><span style="font-size:var(--step-5);font-weight:500;letter-spacing:-0.025em">Selected work</span></div>
-      <div class="scale__row"><span>36 / step 4</span><span style="font-size:var(--step-4);font-weight:500;letter-spacing:-0.02em">Experience</span></div>
+      <div class="scale__row"><span>72 / step 6</span><span style="font-size:var(--step-6);font-weight:500">Engineer</span></div>
+      <div class="scale__row"><span>48 / step 5</span><span style="font-size:var(--step-5);font-weight:500">Selected work</span></div>
+      <div class="scale__row"><span>36 / step 4</span><span style="font-size:var(--step-4);font-weight:500">Experience</span></div>
       <div class="scale__row"><span>24 / step 3</span><span style="font-size:var(--step-3);font-weight:500">Section heading</span></div>
       <div class="scale__row"><span>21 / step 2</span><span style="font-size:var(--step-2);font-weight:500">Entry title</span></div>
       <div class="scale__row"><span>18 / step 1</span><span style="font-size:var(--step-1)">Lead paragraph text for introductions.</span></div>

@@ -1,0 +1,257 @@
+/* =====================================================================
+   RECRUITER
+   Two columns: a sticky sidebar (who, and where to go) and a reading
+   column. The reading column is capped at about 65 characters a line,
+   the range where the eye finds the start of the next line easily.
+   ===================================================================== */
+
+.recruiter {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  border-right: var(--hairline) solid var(--line);
+}
+
+.sidebar__name {
+  margin: 0;
+  font-size: clamp(var(--step-5), 4vw, var(--step-6));
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+
+.sidebar__bio {
+  margin: var(--space-3) 0 0;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.toc {
+  font-size: var(--step-1);
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc > ol > li + li {
+  margin-top: var(--space-4);
+}
+
+.toc a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: 0.2em;
+}
+
+.toc__section {
+  display: block;
+  font-size: var(--step-3);
+  font-weight: 500;
+}
+
+/* Post links under each section, built by js/recruiter.js. */
+.toc .toc__posts {
+  margin-top: var(--space-2);
+  border-left: var(--hairline) solid var(--line);
+}
+
+.toc__posts a {
+  display: block;
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  margin-left: calc(-1 * var(--hairline));
+  border-left: var(--hairline) solid transparent;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Scroll position marker: the post on screen gets a darker rule. */
+.toc a[aria-current="true"] {
+  color: var(--text);
+  border-left-color: var(--text);
+}
+
+.sidebar__back {
+  margin-top: auto;
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.sidebar__back:hover { color: var(--text); }
+
+
+/* ---------- Reading column ---------- */
+
+.reading {
+  max-width: 44rem;
+  padding: var(--space-6) clamp(var(--space-4), 5vw, var(--space-6)) 30vh;
+  font-size: var(--step-body);
+  line-height: 1.6;
+}
+
+.collection + .collection {
+  margin-top: var(--space-6);
+}
+
+.collection__title {
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--hairline) solid var(--text);
+  font-size: var(--step-5);
+  font-weight: 500;
+  line-height: 1.05;
+  scroll-margin-top: var(--space-5);
+}
+
+/* Side projects: same structure, quieter headings. */
+.collection--minor .collection__title {
+  font-size: var(--step-4);
+  border-bottom-color: var(--line);
+}
+
+.collection--minor .post__title {
+  font-size: var(--step-3);
+}
+
+.toc__section--minor {
+  font-size: var(--step-2);
+  color: var(--text-muted);
+}
+
+
+/* ---------- Résumé ---------- */
+
+.action {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--action-bg);
+  color: var(--action-text);
+  font-size: var(--step-1);
+  text-decoration: none;
+}
+
+.action:hover { opacity: 0.85; }
+
+.resume__heading {
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: var(--step-1);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: var(--hairline) solid var(--line);
+}
+
+.entry__when {
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.entry p { margin: 0; }
+.entry__what { font-weight: 500; }
+.entry__detail { color: var(--text-muted); }
+
+@media (max-width: 560px) {
+  .entry { grid-template-columns: 1fr; gap: var(--space-1); }
+}
+
+.post {
+  scroll-margin-top: var(--space-5);
+}
+
+.post + .post {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--hairline) solid var(--line);
+}
+
+.post__title {
+  margin: 0;
+  font-size: var(--step-4);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.post__date {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.post__body > * { margin: var(--space-3) 0 0; }
+.post__body > :first-child { margin-top: var(--space-4); }
+
+.post__body a {
+  color: inherit;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: 0.18em;
+  overflow-wrap: anywhere;
+}
+
+.post__body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+
+/* ---------- Narrow screens ----------
+   The sidebar becomes a header that scrolls away; the section links
+   stay, the per-post list goes (the headings themselves do that job). */
+@media (max-width: 860px) {
+  .recruiter { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    border-right: 0;
+    border-bottom: var(--hairline) solid var(--line);
+  }
+
+  .toc > ol { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-4); }
+  .toc > ol > li + li { margin-top: 0; }
+  .toc__posts { display: none; }
+  .sidebar__back { margin-top: 0; }
+
+  .reading { padding: var(--space-5) var(--space-4) 20vh; }
+  .collection__title { font-size: var(--step-4); }
+  .post__title { font-size: var(--step-3); }
+}

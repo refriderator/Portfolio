@@ -1,52 +1,56 @@
 /* =====================================================================
    LANDING
-   Reads semantic tokens only. The page's state lives in one attribute,
-   html[data-preview], set by js/landing.js. Both the colour shift and the
-   widening key off that same attribute, so they can never disagree.
+   Reads semantic tokens only. Both the colour shift and the widening key
+   off html[data-preview], set by js/landing.js, so they can never disagree.
    ===================================================================== */
 
-*, *::before, *::after { box-sizing: border-box; }
-
-html {
-  height: 100%;
-  background: var(--surface-page);
-  color: var(--text);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-
-  /* Typed tokens transition here and every descendant inherits the
-     in-between values frame by frame. One declaration animates the theme. */
-  transition:
-    --surface-page var(--theme-duration) ease,
-    --surface-box  var(--theme-duration) ease,
-    --text         var(--theme-duration) ease,
-    --text-muted   var(--theme-duration) ease,
-    --highlight-a  var(--theme-duration) ease,
-    --highlight-b  var(--theme-duration) ease,
-    --highlight-c  var(--theme-duration) ease,
-    --edge-a       var(--theme-duration) ease,
-    --edge-b       var(--theme-duration) ease;
+.landing {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-4);
+  height: 100vh;
+  height: 100svh;
+  padding: clamp(var(--space-3), 3vw, var(--space-5));
 }
 
-body {
-  height: 100%;
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: 0 var(--space-1);
+}
+
+.masthead__name {
   margin: 0;
+  font-size: var(--step-3);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.masthead__line {
+  margin: 0;
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .choices {
   display: flex;
   gap: var(--space-3);
-  height: 100%;
-  padding: clamp(var(--space-3), 3vw, var(--space-5));
+  min-height: 0;
 }
 
 .choice {
   /* flex-basis 0 means grow factors alone set the widths: at 1 : 1 the
-     boxes are equal, at 1.25 : 1 the left takes 1.25/2.25 ≈ 56%. */
+     boxes are equal, at 1.25 : 1 the hovered one takes 1.25/2.25 ≈ 56%. */
   flex: 1 1 0;
   min-width: 0;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-2);
   padding: clamp(var(--space-4), 3vw, var(--space-5));
   border-radius: var(--radius);
   text-decoration: none;
@@ -63,12 +67,11 @@ body {
 }
 
 .choice__label {
-  margin: 0;
-  max-width: 12ch;
-  font-size: clamp(var(--step-4), 2.4vw + 1.25rem, var(--step-6));
-  font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  max-width: 11ch;
+  font-size: clamp(var(--step-5), 3.2vw + 1.5rem, 5.5rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
 
   /* Text painted with a gradient. Flat by default; chrome in the amazed theme. */
   background: linear-gradient(100deg,
@@ -78,28 +81,14 @@ body {
   color: transparent;
 }
 
-/* Keyboard focus gets a visible ring in addition to the preview state. */
-.choice:focus-visible {
-  outline: 2px solid var(--highlight-a);
-  outline-offset: 4px;
-}
-
-/* Recruiter preview: the left box widens. */
-[data-preview="recruiter"] .choice--recruiter {
+/* Previews: the box being considered widens. */
+[data-preview="recruiter"] .choice--recruiter,
+[data-preview="amazed"] .choice--amazed {
   flex-grow: 1.25;
 }
 
-/* Narrow screens: stack the two blocks. Tap behaviour comes later. */
+/* Narrow screens: stack the two blocks. */
 @media (max-width: 640px) {
   .choices { flex-direction: column; }
   .choice__label { max-width: none; }
-}
-
-/* Respect reduced motion: keep the colour change, drop the bounce. */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --spring: ease-out;
-    --spring-duration: 150ms;
-    --theme-duration: 150ms;
-  }
 }

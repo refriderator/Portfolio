@@ -3,24 +3,246 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Choose a way in</title>
+  <title>Coen Hao</title>
+  <meta name="description" content="Portfolio of a physics, mathematics and statistics student at the University of Toronto.">
+  <meta name="color-scheme" content="dark light">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
 
   <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/landing.css">
-  <script src="js/landing.js" defer></script>
+  <link rel="stylesheet" href="css/recruiter.css">
+  <link rel="stylesheet" href="css/amazed.css">
+  <!-- Modules: each file gets its own scope, and they run after parsing, in order. -->
+  <script type="module" src="js/landing.js"></script>
+  <script type="module" src="js/recruiter.js"></script><!-- gives posts their ids… -->
+  <script type="module" src="js/views.js"></script><!-- …which views.js then resolves -->
 </head>
 <body>
-  <main class="choices">
-    <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter">
-      <span class="choice__label">I am a recruiter</span>
-    </a>
-    <a class="choice choice--amazed" data-choice="amazed" href="#amazed">
-      <span class="choice__label">I want to be amazed</span>
-    </a>
-  </main>
+
+  <!-- ============================ LANDING ============================ -->
+  <div class="view landing" id="start" data-view="landing">
+    <header class="masthead">
+      <p class="masthead__name">Coen Hao</p>
+      <p class="masthead__line">Physics, mathematics &amp; statistics, University of Toronto</p>
+    </header>
+
+    <main class="choices">
+      <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter">
+        <span class="choice__label">I am a recruiter</span>
+      </a>
+      <a class="choice choice--amazed" data-choice="amazed" href="#amazed">
+        <span class="choice__label">I want to be amazed</span>
+      </a>
+    </main>
+  </div>
+
+
+  <!-- =========================== RECRUITER ===========================
+       Order of importance: résumé, main portfolio, then side projects.
+       Everything marked "Placeholder" is waiting for real content. -->
+  <div class="view recruiter" id="recruiter" data-view="recruiter" hidden>
+    <aside class="sidebar">
+      <header>
+        <h1 class="sidebar__name" tabindex="-1">Coen Hao</h1>
+        <p class="sidebar__bio">Portfolio and hobby page of a physics, mathematics, and statistics student at the University of Toronto.</p>
+      </header>
+
+      <!-- Section links are written here; the post links under each
+           section are generated from the posts by js/recruiter.js. -->
+      <nav class="toc" aria-label="Portfolio">
+        <ol>
+          <li><a class="toc__section" href="#resume">Résumé</a></li>
+          <li><a class="toc__section" href="#portfolio">Portfolio</a></li>
+          <li><a class="toc__section toc__section--minor" href="#team-ol">Team OL</a></li>
+          <li><a class="toc__section toc__section--minor" href="#other-projects">Other projects</a></li>
+        </ol>
+      </nav>
+
+      <a class="sidebar__back" href="#start">&larr; Back to the start</a>
+    </aside>
+
+    <main class="reading">
+
+      <!-- ---------- Résumé ---------- -->
+      <section class="collection" aria-labelledby="resume">
+        <h2 class="collection__title" id="resume">Résumé</h2>
+
+        <!-- Put the PDF at assets/resume.pdf and this button works. -->
+        <p><a class="action" href="assets/resume.pdf" download>Download résumé (PDF)</a></p>
+
+        <div class="resume">
+          <h3 class="resume__heading">Education</h3>
+          <div class="entry">
+            <span class="entry__when">Placeholder dates</span>
+            <div>
+              <p class="entry__what">University of Toronto</p>
+              <p class="entry__detail">Placeholder: programme, year, relevant courses.</p>
+            </div>
+          </div>
+
+          <h3 class="resume__heading">Experience</h3>
+          <div class="entry">
+            <span class="entry__when">Placeholder dates</span>
+            <div>
+              <p class="entry__what">Placeholder role, organisation</p>
+              <p class="entry__detail">Placeholder: one result, and the tools used to get there.</p>
+            </div>
+          </div>
+
+          <h3 class="resume__heading">Skills</h3>
+          <div class="entry">
+            <span class="entry__when">Placeholder</span>
+            <div>
+              <p class="entry__detail">Placeholder: languages, tools, methods.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Portfolio ----------
+        Each post is one <article class="post">, newest first:
+
+        <article class="post" id="more-realism">
+          <h3 class="post__title">More Realism</h3>
+          <time class="post__date" datetime="2026-10-05">October 5, 2026</time>
+          <div class="post__body">
+            <p>…</p>
+          </div>
+        </article>
+
+        The id becomes the post's link (…/#more-realism). Leave it out and
+        js/recruiter.js makes one from the title.
+      -->
+      <section class="collection" aria-labelledby="portfolio">
+        <h2 class="collection__title" id="portfolio">Portfolio</h2>
+
+        <article class="post">
+          <h3 class="post__title">Placeholder portfolio post</h3>
+          <time class="post__date">Placeholder date</time>
+          <div class="post__body">
+            <p>Placeholder: copy a Master Portfolio post from the WordPress site here.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ---------- Side projects: smaller headings, same post format ---------- -->
+      <section class="collection collection--minor" aria-labelledby="team-ol">
+        <h2 class="collection__title" id="team-ol">Team OL</h2>
+
+        <article class="post">
+          <h3 class="post__title">Placeholder Team OL post</h3>
+          <time class="post__date">Placeholder date</time>
+          <div class="post__body">
+            <p>Placeholder: copy a Team OL post from the WordPress site here.</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="collection collection--minor" aria-labelledby="other-projects">
+        <h2 class="collection__title" id="other-projects">Other projects</h2>
+
+        <article class="post">
+          <h3 class="post__title">Placeholder project</h3>
+          <time class="post__date">Placeholder date</time>
+          <div class="post__body">
+            <p>Placeholder: one paragraph and a link.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+
+  <!-- ============================ AMAZED ============================
+       In progress: large cards that grow and reveal a picture on hover.
+       Below: small cards for recent updates and past projects. Every
+       card links to its own page under projects/ or updates/. -->
+  <div class="view amazed" id="amazed" data-view="amazed" hidden>
+    <header class="amazed__head">
+      <a class="amazed__back" href="#start">&larr; Back to the start</a>
+      <h1 class="amazed__title" tabindex="-1">Workshop</h1>
+      <p class="amazed__lede">Things I am building, and things I have built.</p>
+    </header>
+
+    <main class="amazed__body">
+      <section aria-labelledby="in-progress">
+        <h2 class="shelf__title" id="in-progress">In progress</h2>
+        <div class="features">
+
+          <!-- To add a picture, put an <img> inside .feature__media:
+               <div class="feature__media"><img src="assets/….jpg" alt=""></div> -->
+          <a class="feature" href="projects/example.html">
+            <div class="feature__media" aria-hidden="true"></div>
+            <div class="feature__text">
+              <span class="feature__status">In progress</span>
+              <h3 class="feature__name">Placeholder project</h3>
+              <div class="feature__more">
+                <p class="feature__desc">Placeholder: two lines on what it is and why it is interesting.</p>
+              </div>
+            </div>
+          </a>
+
+          <a class="feature" href="projects/example.html">
+            <div class="feature__media" aria-hidden="true"></div>
+            <div class="feature__text">
+              <span class="feature__status">In progress</span>
+              <h3 class="feature__name">Placeholder project</h3>
+              <div class="feature__more">
+                <p class="feature__desc">Placeholder: two lines on what it is and why it is interesting.</p>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+      <section aria-labelledby="recent-updates">
+        <h2 class="shelf__title" id="recent-updates">Recent updates</h2>
+        <div class="tiles">
+          <a class="tile" href="updates/example.html">
+            <span class="tile__meta">Placeholder date</span>
+            <h3 class="tile__name">Placeholder update</h3>
+            <p class="tile__desc">Placeholder: one line on what changed.</p>
+          </a>
+          <a class="tile" href="updates/example.html">
+            <span class="tile__meta">Placeholder date</span>
+            <h3 class="tile__name">Placeholder update</h3>
+            <p class="tile__desc">Placeholder: one line on what changed.</p>
+          </a>
+          <a class="tile" href="updates/example.html">
+            <span class="tile__meta">Placeholder date</span>
+            <h3 class="tile__name">Placeholder update</h3>
+            <p class="tile__desc">Placeholder: one line on what changed.</p>
+          </a>
+        </div>
+      </section>
+
+      <section aria-labelledby="past-projects">
+        <h2 class="shelf__title" id="past-projects">Past projects</h2>
+        <div class="tiles">
+          <a class="tile" href="projects/example.html">
+            <span class="tile__meta">Placeholder year</span>
+            <h3 class="tile__name">Placeholder project</h3>
+            <p class="tile__desc">Placeholder: one line on what it was.</p>
+          </a>
+          <a class="tile" href="projects/example.html">
+            <span class="tile__meta">Placeholder year</span>
+            <h3 class="tile__name">Placeholder project</h3>
+            <p class="tile__desc">Placeholder: one line on what it was.</p>
+          </a>
+          <a class="tile" href="projects/example.html">
+            <span class="tile__meta">Placeholder year</span>
+            <h3 class="tile__name">Placeholder project</h3>
+            <p class="tile__desc">Placeholder: one line on what it was.</p>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
 </body>
 </html>

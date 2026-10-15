@@ -1,0 +1,111 @@
+/* =====================================================================
+   BASE
+   Shared by every view. The page's state lives in attributes on <html>:
+     data-preview   which landing choice is hovered or focused
+     data-theme     the theme of the current view (absent on the landing)
+     data-switching present while moving between views
+     data-instant   present for one frame when the state is set without
+                    animation (opening a deep link such as #recruiter)
+   Everything visual keys off those; js/views.js only flips them.
+   ===================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  min-height: 100%;
+  background: var(--surface-page);
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+
+  /* Typed tokens transition here and every descendant inherits the
+     in-between values frame by frame. One declaration animates the theme. */
+  transition-property:
+    --surface-page, --surface-box, --text, --text-muted, --line,
+    --highlight-a, --highlight-b, --highlight-c, --edge-a, --edge-b;
+  transition-duration: var(--theme-duration);
+  transition-timing-function: ease;
+}
+
+/* Moving between views: the same properties, slower and symmetric. */
+html[data-switching] {
+  transition-duration: var(--switch-duration);
+  transition-timing-function: var(--switch-ease);
+}
+
+html[data-instant],
+html[data-instant] * {
+  transition: none !important;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+}
+
+::selection {
+  background: var(--text);
+  color: var(--surface-page);
+}
+
+:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 4px;
+}
+
+/* Headings are focused by js/views.js only to move the reading position
+   for keyboard and screen-reader users; they are not controls, so no ring. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+
+/* ---------- Views ----------
+   Exactly one view is shown; the others carry [hidden].
+   js/views.js runs the sequence: fade the old view out, swap, change the
+   theme, then fade the new view in partway through the colour change. */
+/* .landing and .recruiter set display, which would beat the browser's own
+   [hidden] rule; this puts [hidden] back on top. */
+[hidden] { display: none !important; }
+
+.view {
+  transition: opacity var(--fade-in) ease var(--fade-in-delay);
+}
+
+.view.is-leaving {
+  opacity: 0;
+  transition: opacity var(--fade-out) ease;
+}
+
+.view.is-entering {
+  opacity: 0;
+  transition: none;
+}
+
+
+/* Respect reduced motion: keep a short crossfade, drop the bounce. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --spring: ease-out;
+    --spring-duration: 150ms;
+    --theme-duration: 150ms;
+    --switch-duration: 300ms;
+    --fade-out: 120ms;
+    --fade-in: 200ms;
+    --fade-in-delay: 100ms;
+  }
+}
