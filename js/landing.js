@@ -30,3 +30,21 @@ for (const choice of document.querySelectorAll("[data-choice]")) {
     if (focused === name) { focused = null; sync(); }
   });
 }
+
+// Intro: the papers fall once per page load. When the last one lands, mark
+// it so the intro does not replay on returning from another view. If the
+// landing is hidden mid-fall (someone clicks through fast), the animation is
+// cancelled rather than ended; that counts too. Under reduced motion the
+// intro never runs, so mark it straight away.
+const lastDrop = document.querySelector(".choice--amazed .choice__drop");
+const landed = () => (root.dataset.landed = "");
+
+if (!lastDrop || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  landed();
+} else {
+  for (const type of ["animationend", "animationcancel"]) {
+    lastDrop.addEventListener(type, (e) => {
+      if (e.target === lastDrop && e.animationName === "drop") landed();
+    });
+  }
+}

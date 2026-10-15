@@ -22,6 +22,9 @@
   --white:     #ffffff;
   --black:     #000000;
 
+  /* Ink: the near-black of pixel outlines and hard shadows on the landing. */
+  --ink:       #15171c;
+
   /* Amazed navy: backgrounds. Deep enough that it reads as blue only
      next to the night greys, never as a bright royal blue. */
   --navy-975: #02050d;
@@ -48,9 +51,10 @@
      are what make it read as "refined" rather than "default". */
   --font-serif: "EB Garamond", Garamond, "Times New Roman", serif;
 
-  /* Friendly sans for the landing: Nunito's rounded stroke ends echo the
-     rounded boxes and read as approachable rather than formal. */
-  --font-friendly: "Nunito", "Segoe UI", system-ui, sans-serif;
+  /* 8-bit faces. Press Start 2P is drawn on an 8px grid, so it stays crisp
+     at multiples of 8px; VT323 (a DEC terminal face) carries longer text. */
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-terminal: "VT323", ui-monospace, monospace;
 
   /* Scale follows Bringhurst's classic sizes
      (14 16 18 21 24 36 48 72 px), plus 20 for serif body text, which
@@ -74,10 +78,12 @@
   --space-6: 4rem;
 
   --radius: 2px;
-  --radius-lg: 1.25rem;
   --hairline: 1px;
   --rule: 2px;
-  --rule-heavy: 6px;
+
+  /* One "pixel" of the 8-bit style: outlines, corner notches and shadow
+     offsets are all whole multiples of it. */
+  --px: 4px;
 
   /* Motion. --spring is a sampled underdamped oscillator,
      zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
@@ -98,10 +104,6 @@
     0.9983, 0.9993, 1.0002, 1.0007, 1.001, 1);
   --bubble-duration: 900ms;
 
-  /* --grow: a slow, smooth swell with no overshoot. Symmetric ease-in-out,
-     so it starts and finishes gently. */
-  --grow: cubic-bezier(0.45, 0, 0.25, 1);
-  --grow-duration: 1100ms;
 
   /* Hover previews are quick so they feel like a response to the pointer. */
   --theme-duration: 450ms;
@@ -123,16 +125,16 @@
    Registered with @property so the browser knows they are colors.
    An unregistered custom property is just a string, and strings can't be
    interpolated, so a theme change would snap. Typed, it can be transitioned. */
-@property --surface-page { syntax: "<color>"; inherits: true; initial-value: #0a0d14; }
-@property --surface-box  { syntax: "<color>"; inherits: true; initial-value: #0f131c; }
-@property --text         { syntax: "<color>"; inherits: true; initial-value: #d6d9df; }
-@property --text-muted   { syntax: "<color>"; inherits: true; initial-value: #9aa1ae; }
-@property --line         { syntax: "<color>"; inherits: true; initial-value: #262d3b; }
-@property --highlight-a  { syntax: "<color>"; inherits: true; initial-value: #d6d9df; }
-@property --highlight-b  { syntax: "<color>"; inherits: true; initial-value: #d6d9df; }
-@property --highlight-c  { syntax: "<color>"; inherits: true; initial-value: #d6d9df; }
-@property --edge-a       { syntax: "<color>"; inherits: true; initial-value: #262d3b; }
-@property --edge-b       { syntax: "<color>"; inherits: true; initial-value: #262d3b; }
+@property --surface-page { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --surface-box  { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --text         { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --text-muted   { syntax: "<color>"; inherits: true; initial-value: #4b5466; }
+@property --line         { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --highlight-a  { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --highlight-b  { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --highlight-c  { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --edge-a       { syntax: "<color>"; inherits: true; initial-value: #15171c; }
+@property --edge-b       { syntax: "<color>"; inherits: true; initial-value: #15171c; }
 
 
 /* ---------- 3. Themes ----------
@@ -141,32 +143,34 @@
    When the stops are equal the gradient is flat, so one mechanism covers
    both plain and chrome treatments, and the switch between them can animate. */
 
-/* Landing, at rest: night. Highlights are flat (all three stops equal). */
+/* Landing, at rest: a white page, white paper, ink outlines.
+   Highlights are flat (all three stops equal). */
 :root {
-  --surface-page: var(--night-950);
-  --surface-box:  var(--night-900);
-  --text:         var(--night-150);
-  --text-muted:   var(--night-300);
-  --line:         var(--night-700);
-  --highlight-a:  var(--night-150);
-  --highlight-b:  var(--night-150);
-  --highlight-c:  var(--night-150);
-  --edge-a:       var(--night-700);
-  --edge-b:       var(--night-700);
+  --surface-page: var(--white);
+  --surface-box:  var(--white);
+  --text:         var(--ink);
+  --text-muted:   var(--night-500);
+  --line:         var(--ink);
+  --highlight-a:  var(--ink);
+  --highlight-b:  var(--ink);
+  --highlight-c:  var(--ink);
+  --edge-a:       var(--ink);
+  --edge-b:       var(--ink);
 }
 
-/* Landing, leaning recruiter: a step towards the light page it leads to. */
+/* Landing, leaning recruiter: the page warms towards the recruiter page's
+   paper and the outlines soften, so everything reads lighter. */
 [data-preview="recruiter"] {
-  --surface-page: var(--night-900);
-  --surface-box:  var(--night-850);
-  --text:         var(--white);
-  --text-muted:   var(--night-150);
-  --line:         var(--night-500);
-  --highlight-a:  var(--paper-50);
-  --highlight-b:  var(--paper-50);
-  --highlight-c:  var(--paper-50);
-  --edge-a:       var(--night-500);
-  --edge-b:       var(--night-500);
+  --surface-page: var(--paper-50);
+  --surface-box:  var(--white);
+  --text:         var(--charcoal-900);
+  --text-muted:   var(--charcoal-600);
+  --line:         var(--charcoal-600);
+  --highlight-a:  var(--charcoal-900);
+  --highlight-b:  var(--charcoal-900);
+  --highlight-c:  var(--charcoal-900);
+  --edge-a:       var(--charcoal-600);
+  --edge-b:       var(--charcoal-600);
 }
 
 /* Amazed: navy grounds, chrome highlights. */

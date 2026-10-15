@@ -1,22 +1,44 @@
 /* =====================================================================
-   LANDING
-   Reads semantic tokens only. Both the colour shift and the swelling key
-   off html[data-preview], set by js/landing.js, so they can never disagree.
+   LANDING — 8-bit
+   A white page; two papers drift down and land one after the other.
+   Everything sits on a grid of --px: outlines are one --px thick, corners
+   are notched by one --px, shadows sit whole --px away, and the motion
+   moves in steps rather than gliding.
+
+   State lives on <html>:
+     data-preview  which paper is hovered or focused (js/landing.js)
+     data-landed   set once the intro has played, so it never replays
    ===================================================================== */
 
 .landing {
+  /* A pixel-cornered rectangle: the four corner squares of size --px are
+     cut away, the way 8-bit games round off a box. */
+  --notch: polygon(
+    var(--px) 0, calc(100% - var(--px)) 0,
+    calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)),
+    calc(100% - var(--px)) 100%, var(--px) 100%,
+    var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)),
+    0 var(--px), var(--px) var(--px));
+
+  /* Black dithered to 50%: a checkerboard of --px squares. Dithering is how
+     8-bit hardware drew transparency it did not have. */
+  --dither: repeating-conic-gradient(var(--black) 0 25%, transparent 0 50%)
+            0 0 / calc(2 * var(--px)) calc(2 * var(--px));
+
   display: grid;
   grid-template-rows: auto 1fr;
   gap: var(--space-4);
   height: 100vh;
   height: 100svh;
   /* Vertical padding only: horizontal padding would add to the outer gaps
-     around the boxes and break the even spacing. The masthead pads itself. */
+     around the papers and break the even spacing. The masthead pads itself. */
   padding: clamp(var(--space-3), 3vw, var(--space-5)) 0;
+  overflow: clip;                    /* the papers start above the top edge */
+  font-family: var(--font-pixel);
 }
 
 .masthead {
-  font-family: var(--font-friendly);
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -27,19 +49,19 @@
 
 .masthead__name {
   margin: 0;
-  font-size: var(--step-2);
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-size: 16px;                   /* Press Start 2P is crisp at multiples of 8px */
+  line-height: 1.5;
 }
 
 .masthead__line {
   margin: 0;
-  font-size: var(--step-0);
+  font-family: var(--font-terminal);
+  font-size: 22px;
   color: var(--text-muted);
 }
 
-/* The boxes are spread evenly: the gaps at the left edge, between the
-   boxes and at the right edge are all equal (space-evenly). */
+/* Evenly spread: the gaps at the left edge, between the papers and at the
+   right edge are all equal. */
 .choices {
   display: flex;
   align-items: center;
@@ -48,52 +70,281 @@
   padding: var(--space-5) 0;
 }
 
-/* Flat: one solid fill, one solid border, one solid text colour.
-   The colours still come from the theme tokens, so hovering still shifts
-   the whole page towards the destination's palette. */
+
+/* ---------- A paper and its layers ---------- */
+
 .choice {
+  position: relative;
   flex: 0 1 30%;
   min-width: 0;
   aspect-ratio: 6 / 7;               /* height follows width, so the shape holds */
   max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  /* Optical centre: extra padding at the bottom lifts the label a little
-     above the geometric middle, where text looks centred to the eye.
-     The percentage is of the box's width, so the lift scales with it. */
-  padding: var(--space-5) var(--space-5) calc(var(--space-5) + 4%);
-
-  border: var(--rule-heavy) solid var(--edge-b);
-  border-radius: var(--radius-lg);
-  background: var(--surface-box);
   text-decoration: none;
+  color: var(--text);
 }
 
+.choice__shadow,
+.choice__drop,
+.choice__lift,
+.choice__float,
+.choice__paper {
+  position: absolute;
+  inset: 0;
+}
+
+/* Hard drop shadow, on the ground. Light comes from the upper left, so the
+   shadow falls down-right. A paper at height h casts its shadow h·tan θ
+   further away; at θ = 45° that is just h. So rising = shadow sliding away. */
+.choice__shadow {
+  background: var(--black);
+  clip-path: var(--notch);
+  translate: calc(2 * var(--px)) calc(2 * var(--px));
+  transition: translate 240ms steps(3);
+}
+
+.choice__paper {
+  display: block;
+  overflow: hidden;
+  clip-path: var(--notch);
+  border: var(--px) solid transparent;
+  /* Outline in hard bands: one flat colour normally, polished-chrome
+     stripes in the amazed palette (equal stops give a plain line). */
+  background:
+    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
+    linear-gradient(180deg,
+      var(--edge-a) 0 30%, var(--edge-b) 30% 70%, var(--edge-a) 70%) border-box;
+}
+
+/* The sprite is 96 × 112 real pixels; nearest-neighbour scaling keeps each
+   one a crisp square instead of blurring neighbours together. */
+.choice__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  transition: filter 240ms steps(3);
+}
+
+/* Label plate, like a game's dialogue box. */
 .choice__label {
-  max-width: 10ch;
-  font-family: var(--font-friendly);
-  font-size: clamp(var(--step-3), 1.2vw + 1rem, var(--step-4));
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--highlight-a);
+  position: absolute;
+  left: calc(3 * var(--px));
+  right: calc(3 * var(--px));
+  bottom: calc(3 * var(--px));
+  padding: calc(4 * var(--px)) calc(3 * var(--px));
+  clip-path: var(--notch);
+  border: var(--px) solid transparent;
+  background:
+    linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
+    linear-gradient(var(--edge-b), var(--edge-b)) border-box;
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: center;
 }
 
-/* Each box has its own motion on hover, and transform never moves the
-   neighbour, so only the hovered box changes size. */
-.choice--recruiter { transition: transform var(--grow-duration) var(--grow); }
-.choice--amazed    { transition: transform var(--bubble-duration) var(--bubble); }
-
-[data-preview="recruiter"] .choice--recruiter,
-[data-preview="amazed"] .choice--amazed {
-  transform: scale(1.06);
+/* Text painted in hard bands, repeated once per line (1lh = one line
+   height), so each line of a two-line label gets its own chrome stripes.
+   Flat when the three highlight stops are equal. */
+.choice__text {
+  background: linear-gradient(180deg,
+    var(--highlight-a) 0 45%, var(--highlight-b) 45% 70%, var(--highlight-c) 70%);
+  background-size: 100% 1.6em;
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-/* Narrow screens: stack the two blocks, still evenly spaced. */
+@media (min-width: 1200px) {
+  .choice__label { font-size: 24px; }
+}
+
+/* Pixel dust: eight 2×2-pixel motes along the bottom edge, each with its
+   own start position and drift. Invisible except while puffing. */
+.choice__dust {
+  position: absolute;
+  inset: auto 0 calc(-1 * var(--px)) 0;
+  pointer-events: none;
+}
+
+.choice__dust i {
+  position: absolute;
+  bottom: 0;
+  left: var(--x);
+  width: calc(2 * var(--px));
+  height: calc(2 * var(--px));
+  background: var(--night-300);
+  opacity: 0;
+}
+
+.choice__dust i:nth-child(1) { --x: -2%;  --dx: -36px; --dy: -20px; }
+.choice__dust i:nth-child(2) { --x: 4%;   --dx: -24px; --dy: -36px; }
+.choice__dust i:nth-child(3) { --x: 12%;  --dx: -12px; --dy: -24px; }
+.choice__dust i:nth-child(4) { --x: 22%;  --dx: -8px;  --dy: -12px; }
+.choice__dust i:nth-child(5) { --x: 76%;  --dx: 8px;   --dy: -12px; }
+.choice__dust i:nth-child(6) { --x: 86%;  --dx: 12px;  --dy: -24px; }
+.choice__dust i:nth-child(7) { --x: 94%;  --dx: 24px;  --dy: -36px; }
+.choice__dust i:nth-child(8) { --x: 100%; --dx: 36px;  --dy: -20px; }
+
+/* Keyboard focus: a dashed pixel outline around the whole paper. */
+.choice:focus-visible {
+  outline: var(--px) dashed var(--text);
+  outline-offset: calc(3 * var(--px));
+}
+
+
+/* ---------- Intro: the papers drift down one after the other ----------
+   A falling sheet of paper reaches terminal velocity almost at once, then
+   sways side to side as air spills from alternate edges. So the keyframes
+   swing left and right with a tilt while descending. steps() makes it move
+   like a sprite: a few positions per segment, no in-between frames. */
+
+.choice--recruiter { --drop-delay: 300ms; }
+.choice--amazed    { --drop-delay: 1100ms; }
+
+.choice__drop {
+  animation: drop 1300ms steps(4) var(--drop-delay) both;
+}
+
+.choice__shadow {
+  animation: shadow-in 1300ms steps(4) var(--drop-delay) both;
+}
+
+/* Dust kicks up at the moment of landing (88% of the way through the drop). */
+.choice__dust i {
+  animation: puff 480ms steps(5) calc(var(--drop-delay) + 1144ms);
+}
+
+.masthead {
+  animation: appear 400ms steps(4) 2600ms both;
+}
+
+@keyframes drop {
+  0%   { translate: -24px -110vh; rotate: -10deg; }
+  22%  { translate: 28px -78vh;   rotate: 9deg; }
+  44%  { translate: -20px -48vh;  rotate: -7deg; }
+  66%  { translate: 14px -20vh;   rotate: 5deg; }
+  88%  { translate: 0 0;          rotate: 0deg; scale: 1.03 0.96; }
+  100% { translate: 0 0;          rotate: 0deg; scale: 1; }
+}
+
+/* The shadow marks where the paper will land, as old games did: small,
+   faint and far off while the paper is high, then growing, closing in and
+   turning solid as it reaches the ground. */
+@keyframes shadow-in {
+  0%   { translate: 96px 96px; scale: 0.6;  opacity: 0;    background: var(--dither); }
+  60%  { translate: 40px 40px; scale: 0.85; opacity: 0.5;  background: var(--dither); }
+  87%  { translate: calc(2 * var(--px)) calc(2 * var(--px)); scale: 1; opacity: 1; background: var(--dither); }
+  88%  { background: var(--black); }
+  100% { translate: calc(2 * var(--px)) calc(2 * var(--px)); scale: 1; opacity: 1; background: var(--black); }
+}
+
+@keyframes puff {
+  0%   { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: var(--dx) var(--dy); }
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Once the intro has played, switch it off, so coming back from another
+   view does not replay it. */
+[data-landed] .choice__drop,
+[data-landed] .choice__shadow,
+[data-landed] .choice__dust i,
+[data-landed] .masthead {
+  animation: none;
+}
+
+
+/* ---------- Recruiter hover: lift, float, jiggle ----------
+   Lifting towards you makes the paper look bigger (it is closer) and
+   pushes its shadow further away; the shadow also thins to a dither, as a
+   real shadow softens with distance. The rise is quick and stepped. */
+
+.choice__lift {
+  transition: scale 240ms steps(3), translate 240ms steps(3);
+}
+
+[data-preview="recruiter"] .choice--recruiter .choice__lift {
+  scale: 1.06;
+  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
+}
+
+[data-preview="recruiter"] .choice--recruiter .choice__shadow {
+  translate: calc(6 * var(--px)) calc(6 * var(--px));
+  background: var(--dither);
+  animation: shadow-bob 1200ms steps(1) 240ms infinite;
+}
+
+/* Floating: a slow bob with a small jiggle, in whole-pixel steps. */
+[data-preview="recruiter"] .choice--recruiter .choice__float {
+  animation: float 1200ms steps(1) 240ms infinite;
+}
+
+/* "Lighter": the picture brightens as the paper comes up into the light. */
+[data-preview="recruiter"] .choice--recruiter .choice__img {
+  filter: brightness(1.2) saturate(0.9);
+}
+
+/* Dust kicked up at lift-off. */
+[data-preview="recruiter"] .choice--recruiter .choice__dust i {
+  animation: puff 480ms steps(5);
+}
+
+@keyframes float {
+  0%   { translate: 0 0;                     rotate: 0deg; }
+  25%  { translate: 0 calc(-1 * var(--px)); rotate: -0.8deg; }
+  50%  { translate: 0 calc(-2 * var(--px)); rotate: 0deg; }
+  75%  { translate: 0 calc(-1 * var(--px)); rotate: 0.8deg; }
+  100% { translate: 0 0;                     rotate: 0deg; }
+}
+
+/* The shadow tracks the bob: the higher the paper, the further away. */
+@keyframes shadow-bob {
+  0%, 100% { translate: calc(6 * var(--px)) calc(6 * var(--px)); }
+  25%, 75% { translate: calc(7 * var(--px)) calc(7 * var(--px)); }
+  50%      { translate: calc(8 * var(--px)) calc(8 * var(--px)); }
+}
+
+
+/* ---------- Amazed hover: the palette inverts, the paper bounces ----------
+   The colours come from tokens.css ([data-preview="amazed"] is the navy
+   and chrome theme); here the paper only swells on the underdamped spring. */
+
+.choice--amazed .choice__lift {
+  transition: scale var(--bubble-duration) var(--bubble);
+}
+
+[data-preview="amazed"] .choice--amazed .choice__lift {
+  scale: 1.06;
+}
+
+[data-preview="amazed"] .choice--amazed .choice__shadow {
+  translate: calc(4 * var(--px)) calc(4 * var(--px));
+}
+
+
+/* Narrow screens: stack the two papers, still evenly spaced. */
 @media (max-width: 640px) {
   .choices { flex-direction: column; padding: 0; }
-  .choice { flex: 0 1 38%; width: 82%; aspect-ratio: auto; }
-  .choice__label { max-width: none; }
+  .choice { flex: 0 1 38%; width: 80%; aspect-ratio: auto; }
+}
+
+/* Reduced motion: no falling, floating or dust. The colour changes and the
+   static lift remain, so hovering still says something. */
+@media (prefers-reduced-motion: reduce) {
+  .choice__drop,
+  .choice__shadow,
+  .choice__dust i,
+  .masthead,
+  [data-preview] .choice .choice__float,
+  [data-preview] .choice .choice__shadow,
+  [data-preview] .choice .choice__dust i {
+    animation: none !important;
+  }
 }

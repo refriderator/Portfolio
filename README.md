@@ -16,7 +16,9 @@ Static site, no build step. Open `index.html` through any local server
 | `js/views.js` | Picks the view from the URL hash and runs the transition. |
 | `js/landing.js` | Hover/focus preview on the landing boxes. |
 | `js/recruiter.js` | Builds the sidebar post list and the scroll marker. |
-| `tools/spring.py` | Generates the `--spring` easing curve in `tokens.css`. |
+| `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css`. |
+| `tools/pixelate.py` | Turns a photo into an 8-bit sprite (crop, downsample, dither). |
+| `assets/landing/` | The two landing sprites, 96 × 112 px each. |
 | `design-system.html` | Reference sheet for the recruiter theme. |
 
 ## Adding content
@@ -28,3 +30,4 @@ Static site, no build step. Open `index.html` through any local server
 - **Project or update:** copy the template, fill it in, and point a card in
   the Amazed view at it.
 - **Picture on an in-progress card:** put an `<img>` inside `.feature__media`.
+- **New landing picture:** `python3 tools/pixelate.py photo.jpg assets/landing/recruiter.png --box LEFT TOP HEIGHT [--mirror]`.

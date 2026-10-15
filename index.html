@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coen Hao</title>
   <meta name="description" content="Portfolio of a physics, mathematics and statistics student at the University of Toronto.">
-  <meta name="color-scheme" content="dark light">
+  <meta name="color-scheme" content="light dark">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Press+Start+2P&family=VT323&display=swap">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
@@ -30,12 +30,43 @@
       <p class="masthead__line">Physics, mathematics &amp; statistics, University of Toronto</p>
     </header>
 
+    <!-- Each choice is a stack of layers, one job each, because two
+         animations cannot share one transform:
+           shadow  stays on the ground, slides as the paper rises
+           drop    intro: falls onto the page
+           lift    hover: rises towards you (grows)
+           float   hover: bobs and jiggles
+           paper   the picture and its label
+           dust    pixel dust on landing and lift-off
+         The <a> itself never moves, so the hover target stays put. -->
     <main class="choices">
       <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter">
-        <span class="choice__label">I am a recruiter</span>
+        <span class="choice__shadow" aria-hidden="true"></span>
+        <span class="choice__drop">
+          <span class="choice__lift">
+            <span class="choice__float">
+              <span class="choice__paper">
+                <img class="choice__img" src="assets/landing/recruiter.png" alt="" width="96" height="112">
+                <span class="choice__label"><span class="choice__text">I am a recruiter</span></span>
+              </span>
+            </span>
+          </span>
+        </span>
+        <span class="choice__dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       </a>
       <a class="choice choice--amazed" data-choice="amazed" href="#amazed">
-        <span class="choice__label">I want to be amazed</span>
+        <span class="choice__shadow" aria-hidden="true"></span>
+        <span class="choice__drop">
+          <span class="choice__lift">
+            <span class="choice__float">
+              <span class="choice__paper">
+                <img class="choice__img" src="assets/landing/amazed.png" alt="" width="96" height="112">
+                <span class="choice__label"><span class="choice__text">I want to be amazed</span></span>
+              </span>
+            </span>
+          </span>
+        </span>
+        <span class="choice__dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       </a>
     </main>
   </div>
