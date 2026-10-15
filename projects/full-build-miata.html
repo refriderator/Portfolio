@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- Copied from the WordPress post of the same name. -->
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Full Build: Miata · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/amazed.css">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">Full Build: Miata</h1>
+      <p class="subpage__meta">
+        <time datetime="2026-08-12">August 12, 2026</time> &middot;
+        <a href="../projects/nb-miata.html">NB Miata</a>
+      </p>
+    </header>
+
+    <main class="prose">
+      <p>Competition Drift Car, turbo (provisions), EFI, suspension engineering, and data logging</p>
+      <h2>Turbo Miata: OEM+ VVT Turbo</h2>
+      <p>The rusty Miata was a 2003 Mazdaspeed Miata. Parts that were used:</p>
+      <ul>
+      <li>Turbo hot side</li>
+      <li>Oil pan</li>
+      <li>Intake and charge piping</li>
+      </ul>
+      <p>Sourced Parts (Necessary):</p>
+      <ul>
+      <li>Larger Fuel Pump (DeatschWerks 300; 340lph)</li>
+      <li>Larger Fuel Injectors (700cc; justified below)</li>
+      <li>Oil and Coolant feed and return lines + fittings (Off oil pressure sensor and water pump)</li>
+      <li>Boost control solenoid</li>
+      <li>Wideband 02 Sensor (Gauge if not connected to ECU)</li>
+      <li>ECU and Harness</li>
+      </ul>
+      <p>Sourced (Unecessary):</p>
+      <ul>
+      <li>Downpipe to NB2 exhaust adapter (only for aftermarket non Mazdaspeed Exhausts)</li>
+      <li>Larger Intercooler (Flyin&#8217; Miata)</li>
+      </ul>
+      <p>The Mazdaspeed engine is based on the NB1 which had a 9.5:1 compression ratio and lacked VVT. The oil pan (with provisions for oil return) bolted to the NB2&#8217;s 10:1 VVT block. Oil feed was T&#8217;d off the oil pressure sensor with AN &#8211; NTP fittings and a threaded line. Coolant from the water pump in the front of the engine.</p>
+      <p>Tuning was done on a Haltech. The software is ridiculously intuitive and has both closed and open loop AFR tuning. The process of tuning is not very hard. It took the most time just to wire everything right and make sure all the pins were reading. Then idle tuning and PID, determining if bad idle was mechanical, electrical, or software. Part of this diagnosis involved finding out one ECU had to be sent back for a bad spark signal. Eventually, both cars made it on a 1500 mile road trip the day after completion.</p>
+      <p>Misc Parts: The fuel system is overkill. The main reasoning is for overhead, temperature, and higher flow injectors let you push more fuel with a shorter duty cycle which ensures fuel is more efficiently timed and sparked.</p>
+      <p>The turbo Miata died when the plug and play harness burned itself after 15,000 miles. The engine was returned to OEM and the turbo will wait for another summer.</p>
+      <figure><img alt="" src="../assets/workshop/full-build-miata/1.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/2.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/3.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/4.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/5.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/6.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/7.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/full-build-miata/8.jpg" loading="lazy" decoding="async"></figure>
+      <h2>2-way Locking Differential:</h2>
+      <p>The biggest modification related to driving dynamics is by far the Tomei 2-way LSD. A 2- way differential resists wheel speed difference across the diff on acceleration and deceleration using clutches. The tuning is extremely tedious as it required fabricating a special tool to torque the pre-load &#8216;nuts&#8217;.</p>
+      <p>Engine response and rotation on braking were greatly improved which is important on a &lt;150 hp car. The vehicle resisted &#8220;snapping&#8221; back to straight as 4 corner double wishbone cars like to do. Overall, my ability to move the rear of the car around and trust that it would remain predictable greatly improved confidence in chasing. </p>
+      <h2>Front Suspension Geometry:</h2>
+      <p>Team tandems drifting is judged on many factors: Vehicle proximity, speed, angle, visual, transition timing, etc. Performance can reasonably be traded of for driver control and visual points which is unique to the sport and creates a series of constraints that must be worked around.</p>
+      <ul>
+      <li>Lower than OEM ride height:
+      <ul>
+      <li>In double wishbone, lowering with only coil overs can lead to extension of the roll moment arm from roll center dropping further than COG. This was compensated for with reshaped lower control arm mounts and an adjustable upper control arm.</li>
+      <li>The steering rack becomes misaligned with its mounts on the knuckle. Custom 2 cm spacers were made to lift the steering rack.</li>
+      </ul>
+      </li>
+      </ul>
+      <p>These decisions were made using in car measurements, Assetto Corsa simulator data, suspension geometry simulation tools, and OEM Mazda documents.</p>
+      <figure><img src="../assets/workshop/full-build-miata/9.jpg" alt="" loading="lazy" decoding="async"></figure>
+      <h2>Data Logger:</h2>
+      <p>Rasberry pi5, MPU6050, GPS, Camera, Mic&#8230;</p>
+    </main>
+  </div>
+</body>
+</html>

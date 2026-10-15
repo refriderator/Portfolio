@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- Copied from the WordPress post of the same name. -->
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Intro to hobby planes · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/amazed.css">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">Intro to hobby planes</h1>
+      <p class="subpage__meta">
+        <time datetime="2026-08-11">August 11, 2026</time> &middot;
+        <a href="../projects/model-plane.html">Model Plane</a>
+      </p>
+    </header>
+
+    <main class="prose">
+      <p>&#8220;Stage 8&#8221;, as my Arduino file name suggests, is the 8th rebuild of a plane that has not flew yet. Delays mostly include 3d printing tolerance testing, weight : strength, and dimensional testing for physical parts like batteries, screws, and servos. Tx and Rx of the receiver are wire to GPIO 16 and 17 of the ESP respectively. Servos are on 4, 18, 19, and 21. The nice thing about using your own code over a pre-built flight controller is knowing where all the inner function are. Diagnosis becomes a lot easier for servo function and fail safes.</p>
+      <p>The plane itself has:</p>
+      <ul>
+      <li>SunnySky V3 x2820 860KV</li>
+      <li>12&#215;6 inch prop</li>
+      <li>4s 14.8v lipo</li>
+      <li>50A 5vSBEC ESC</li>
+      <li>ELRS reciever and some servos</li>
+      </ul>
+      <p>Some cool things I initially learned about:</p>
+      <ul>
+      <li><strong>Failsafes:</strong> returning to a safe state rather than crashing or holding a last known value</li>
+      <li><strong>States:</strong> Moving from idle, armed, running, and fault</li>
+      <li>Using arrays and lists to hold data over randomly dispersed variables </li>
+      <li><strong>millis()</strong> scheduling: Just counts time from on to determine delay rather than using delay() which pauses the whole program (must used unsigned long as type)</li>
+      <li>What is actually happening to the serial and peripherals I definitely need more time toying with. I understand how the buffering and parsing works but all the syntax is still being understood.</li>
+      <li>Plane aerodynamic balance and behaviors: This plane uses NACA4412 as the main airfoils with 2 degrees of dihedral and NACA0110&#8217;s for the elevator and rudder. The COG is 3 cm in front of the simulated COL, but will probably need to be adjusted after test. There are a lot more ratios to list, but they weren&#8217;t chosen very intentionally so these values will be left for another plane&#8217;s analysis.</li>
+      </ul>
+      <figure><img src="../assets/workshop/esp32-plane-update/1.png" alt="" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/2.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/3.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/4.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/5.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/6.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/7.jpg" loading="lazy" decoding="async"></figure>
+    </main>
+  </div>
+</body>
+</html>

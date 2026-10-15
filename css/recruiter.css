@@ -26,6 +26,12 @@
   border-right: var(--hairline) solid var(--line);
 }
 
+/* The sidebar scrolls on its own when its lists are open, but a scroll bar
+   here sits in the middle of the page (Macs set to always show them draw a
+   wide dark one). Hidden: the wheel, trackpad and keyboard still scroll it. */
+.sidebar { scrollbar-width: none; }
+.sidebar::-webkit-scrollbar { display: none; }
+
 .sidebar__name {
   margin: 0;
   font-size: clamp(var(--step-5), 4vw, var(--step-6));

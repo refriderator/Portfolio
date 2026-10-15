@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Copied from the WordPress post of the same name. -->
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>More Realism · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/amazed.css">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">More Realism</h1>
+      <p class="subpage__meta">
+        <time datetime="2026-10-05">October 5, 2026</time> &middot;
+        <a href="../projects/nb-miata.html">NB Miata</a>
+      </p>
+    </header>
+
+    <main class="prose">
+      <p><a href="https://refriderator.github.io/Double-Wishbone-Simulator">https://refriderator.github.io/Double-Wishbone-Simulator</a></p>
+      <p>I reworked the way users may input the geometric parameters to their car. It is more visually focused and I think allows the sim to apply to more vehicles. It also allows new degrees of freedom for each control arms inner pivot which allows for more realistic anti- squat and anti- dive.</p>
+      <p>The program does its own solving when variables are changed and will let the user know if limits are met or parameters where adjusted.</p>
+      <p>The DRIVE function now provides tire trails for better visualization and readouts, though is only really realistic and useful for steady state turning or step steering reaction rather than full driving dynamics as the simulator falls apart at high slip angles.</p>
+      <p>I hope to eventually be able to work out better tire data over placeholders.</p>
+      <figure>
+      <figure><img src="../assets/workshop/more-realism/1.png" alt="" loading="lazy" decoding="async"></figure>
+      </figure>
+      <figure><img src="../assets/workshop/more-realism/2.png" alt="" loading="lazy" decoding="async"></figure>
+      <figure><img src="../assets/workshop/more-realism/3.png" alt="" loading="lazy" decoding="async"></figure>
+      <figure><img src="../assets/workshop/more-realism/4.png" alt="" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/more-realism/5.png" loading="lazy" decoding="async"></figure>
+    </main>
+  </div>
+</body>
+</html>

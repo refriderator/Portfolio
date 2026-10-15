@@ -349,6 +349,59 @@ a.tile:focus-visible::before {
 .prose p { margin: 0 0 var(--space-3); }
 .prose a { color: inherit; text-underline-offset: 0.18em; }
 
+/* Posts copied from WordPress (js-free HTML: headings, lists, tables,
+   figures, a YouTube player). Pictures sit flush with the text column. */
+.prose h2, .prose h3, .prose h4 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.prose ul, .prose ol { margin: 0 0 var(--space-3); padding-left: 1.2em; }
+.prose li + li { margin-top: var(--space-1); }
+
+.prose figure { margin: var(--space-4) 0; }
+.prose figcaption { margin-top: var(--space-1); font-size: 20px; color: var(--text-muted); }
+
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: var(--px, 2px) solid var(--line);
+}
+
+.prose table {
+  width: 100%;
+  margin: var(--space-4) 0;
+  border-collapse: collapse;
+  font-size: 20px;
+}
+
+.prose th, .prose td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Wide tables scroll sideways on a phone instead of widening the page. */
+@media (max-width: 640px) {
+  .prose table { display: block; overflow-x: auto; }
+}
+
+.prose .video { margin: var(--space-4) 0; }
+
+.prose .video iframe,
+.prose video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: var(--px, 2px) solid var(--line);
+  background: #000;
+}
+
 /* Pinned items get more room than the rest. */
 .tiles--pinned {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));

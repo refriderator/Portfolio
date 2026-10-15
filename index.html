@@ -375,53 +375,59 @@
       <section aria-labelledby="in-progress">
         <h2 class="shelf__title" id="in-progress">In progress</h2>
         <div class="features">
-
-          <!-- To add a picture, put an <img> inside .feature__media:
-               <div class="feature__media"><img src="assets/….jpg" alt=""></div> -->
-          <a class="feature" href="projects/example.html">
-            <div class="feature__media" aria-hidden="true"></div>
+          <a class="feature" href="projects/nb-miata.html">
+            <div class="feature__media" aria-hidden="true"><img src="assets/workshop/nb-miata/1.jpg" alt="" loading="lazy" decoding="async"></div>
             <div class="feature__text">
               <span class="feature__status">In progress</span>
-              <h3 class="feature__name">Placeholder project</h3>
+              <h3 class="feature__name">NB Miata</h3>
               <div class="feature__more">
-                <p class="feature__desc">Placeholder: two lines on what it is and why it is interesting.</p>
+                <p class="feature__desc">Data logging, suspension geometry worked out in my own simulator, and intake performance.</p>
               </div>
             </div>
           </a>
-
-          <a class="feature" href="projects/example.html">
-            <div class="feature__media" aria-hidden="true"></div>
+<a class="feature" href="projects/model-plane.html">
+            <div class="feature__media" aria-hidden="true"><img src="assets/workshop/model-plane/1.jpg" alt="" loading="lazy" decoding="async"></div>
             <div class="feature__text">
               <span class="feature__status">In progress</span>
-              <h3 class="feature__name">Placeholder project</h3>
+              <h3 class="feature__name">Model Plane</h3>
               <div class="feature__more">
-                <p class="feature__desc">Placeholder: two lines on what it is and why it is interesting.</p>
+                <p class="feature__desc">Weight, lift and balance from computer analysis; ESP32 firmware, control theory and autopilot.</p>
               </div>
             </div>
           </a>
-
         </div>
       </section>
 
-      <!-- Two columns side by side: recent updates left, past projects right. -->
+      <!-- Two columns side by side: recent updates left, past projects right.
+           Each card opens a page copied from the WordPress post. -->
       <div class="shelves">
         <section aria-labelledby="recent-updates">
           <h2 class="shelf__title" id="recent-updates">Recent updates</h2>
           <div class="tiles tiles--stack">
-            <a class="tile" href="updates/example.html">
-              <span class="tile__meta">Placeholder date</span>
-              <h3 class="tile__name">Placeholder update</h3>
-              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            <a class="tile" href="updates/more-realism.html">
+              <span class="tile__meta">Oct 5, 2026</span>
+              <h3 class="tile__name">More Realism</h3>
+              <p class="tile__desc">Reworked how a car's geometry goes into the suspension simulator.</p>
             </a>
-            <a class="tile" href="updates/example.html">
-              <span class="tile__meta">Placeholder date</span>
-              <h3 class="tile__name">Placeholder update</h3>
-              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            <a class="tile" href="updates/fixing-problems-you-created.html">
+              <span class="tile__meta">Oct 3, 2026</span>
+              <h3 class="tile__name">Fixing the problems you create (a study on mx-5 suspension)</h3>
+              <p class="tile__desc">Using my simulator to study NB Miata suspension choices.</p>
             </a>
-            <a class="tile" href="updates/example.html">
-              <span class="tile__meta">Placeholder date</span>
-              <h3 class="tile__name">Placeholder update</h3>
-              <p class="tile__desc">Placeholder: one line on what changed.</p>
+            <a class="tile" href="updates/just-fitment-for-now.html">
+              <span class="tile__meta">Oct 3, 2026</span>
+              <h3 class="tile__name">Just fitment, for now</h3>
+              <p class="tile__desc">Car Fitment Tool: see how a wheel and tire sit before you buy.</p>
+            </a>
+            <a class="tile" href="updates/double-wishbone-simulator.html">
+              <span class="tile__meta">Oct 3, 2026</span>
+              <h3 class="tile__name">Double Wishbone Simulator</h3>
+              <p class="tile__desc">A browser tool for checking suspension setup decisions.</p>
+            </a>
+            <a class="tile" href="updates/trainer-plane.html">
+              <span class="tile__meta">Sep 20, 2026</span>
+              <h3 class="tile__name">Trainer Plane</h3>
+              <p class="tile__desc">A sub-500 g trainer for learning remote-control flight.</p>
             </a>
           </div>
         </section>
@@ -429,20 +435,35 @@
         <section aria-labelledby="past-projects">
           <h2 class="shelf__title" id="past-projects">Past projects</h2>
           <div class="tiles tiles--stack">
-            <a class="tile" href="projects/example.html">
-              <span class="tile__meta">Placeholder year</span>
-              <h3 class="tile__name">Placeholder project</h3>
-              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            <a class="tile" href="projects/full-build-miata.html">
+              <span class="tile__meta">Aug 12, 2026</span>
+              <h3 class="tile__name">Full Build: Miata</h3>
+              <p class="tile__desc">The turbo NB Miata: EFI, VVT and the full build.</p>
             </a>
-            <a class="tile" href="projects/example.html">
-              <span class="tile__meta">Placeholder year</span>
-              <h3 class="tile__name">Placeholder project</h3>
-              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            <a class="tile" href="projects/esp32-plane-update.html">
+              <span class="tile__meta">Aug 11, 2026</span>
+              <h3 class="tile__name">Intro to hobby planes</h3>
+              <p class="tile__desc">First steps into hobby planes, flown by an ESP32.</p>
             </a>
-            <a class="tile" href="projects/example.html">
-              <span class="tile__meta">Placeholder year</span>
-              <h3 class="tile__name">Placeholder project</h3>
-              <p class="tile__desc">Placeholder: one line on what it was.</p>
+            <a class="tile" href="projects/wheel-tracing.html">
+              <span class="tile__meta">Aug 10, 2026</span>
+              <h3 class="tile__name">Wheel Tracing</h3>
+              <p class="tile__desc">Tracing a drift through slide, initiation and self-steer.</p>
+            </a>
+            <a class="tile" href="projects/car-camping-highlights.html">
+              <span class="tile__meta">Aug 9, 2026</span>
+              <h3 class="tile__name">Car Camping Highlights</h3>
+              <p class="tile__desc">Tuning, road trips and camping with the team.</p>
+            </a>
+            <a class="tile" href="projects/simulator.html">
+              <span class="tile__meta">Aug 9, 2026</span>
+              <h3 class="tile__name">Simulator</h3>
+              <p class="tile__desc">My sim rig, and where sim tire physics falls short.</p>
+            </a>
+            <a class="tile" href="projects/old-project-log.html">
+              <span class="tile__meta">Aug 9, 2026</span>
+              <h3 class="tile__name">EFI: Tuning an FC RX-7</h3>
+              <p class="tile__desc">Street tuning a 10AE FC RX-7 on an Apexi FC Commander.</p>
             </a>
           </div>
         </section>
