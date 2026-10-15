@@ -30,7 +30,11 @@ for (const sectionLink of nav.querySelectorAll(".toc__section")) {
     item.append(a);
     list.append(item);
   }
-  sectionLink.after(list);
+  // Wrapped so CSS can fold it open on hover (see .toc__fold).
+  const fold = document.createElement("div");
+  fold.className = "toc__fold";
+  fold.append(list);
+  sectionLink.after(fold);
 }
 
 // Scroll marker. A post counts as "on screen" while it crosses a band from

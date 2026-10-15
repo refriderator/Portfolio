@@ -156,3 +156,16 @@ body {
     --fade-in-delay: 100ms;
   }
 }
+
+
+/* Touch screens have no hover, so links answer the finger instead: a quick
+   press-in while held. */
+@media (hover: none) {
+  .back, .action, .icon-link, .feature, a.tile {
+    transition: transform 150ms ease;
+  }
+
+  .back:active, .action:active, .icon-link:active, .feature:active, a.tile:active {
+    transform: scale(0.96);
+  }
+}

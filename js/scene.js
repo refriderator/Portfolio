@@ -19,6 +19,9 @@ import { K, setK, SHEET, makeCanvas, readPalette, sheetTexture, silhouette, ripp
 
 const root = document.documentElement;
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Touch screens have no hover, so the photos are on the paper from the start there.
+const touch = () => matchMedia("(hover: none)").matches;
+const HOLD = 450;                 // ms: a press this long, released, is a long press
 
 class Spring {
   constructor(x = 0, k = 170, c = 26) { this.x = x; this.v = 0; this.target = x; this.k = k; this.c = c; }
@@ -70,13 +73,16 @@ class Scene {
         hop: new Spring(0, 260, 9),       // in q; ζ ≈ 0.28, a bouncy hop
         squash: new Spring(1, 420, 16),   // vertical scale after landing
         wave: new Spring(0, 40, 13),      // ripple amplitude, in q
-        reveal: new Spring(0, 90, 19),    // photo, 0–16 dither levels
+        reveal: new Spring(touch() ? 16 : 0, 90, 19),   // photo, 0–16 dither levels
         ear: new Spring(0, 140, 17),      // dog-ear: 0 folded … 1 open
-        fall: null, blown: null, drift: null, hidden: false, hovered: false, nextSpark: 0, sparkAt: 0,
+        jx: new Spring(0, 300, 7),        // shake: sideways jiggle in q; ζ ≈ 0.2, wobbles a few times
+        jt: new Spring(0, 260, 6),        // shake: lean, radians
+        fall: null, blown: null, drift: null, hidden: false, hovered: false, pressed: false, nextSpark: 0, sparkAt: 0,
       };
     });
 
     root.dataset.scene = "";
+    this.listenForPresses();
     addEventListener("resize", () => { this.layout(); this.wake(); });
     new MutationObserver(() => this.wake())
       .observe(root, { attributes: true, attributeFilter: ["data-preview", "data-theme", "data-launching"] });
@@ -88,6 +94,96 @@ class Scene {
   }
 
   sheet(name) { return this.sheets.find((s) => s.name === name); }
+
+  // ---------- touch: press, long press, shake ----------
+  // A finger on a sheet plays its hover animation while it is held. Held
+  // past HOLD and released, it is a long press: the page stays, and the
+  // phone's motion starts moving the sheets, as if the table they lie on
+  // were shaken or walked past. The release is the tap iOS needs before it
+  // allows motion events.
+
+  listenForPresses() {
+    for (const sh of this.sheets) {
+      let downAt = 0, longPress = false;
+      sh.el.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "touch") return;
+        downAt = performance.now();
+        longPress = false;
+        sh.pressed = true;
+        this.wake();
+      });
+      // Decided on release, not on click: Safari may send no click after a long hold.
+      sh.el.addEventListener("pointerup", (e) => {
+        sh.pressed = false;
+        if (e.pointerType !== "touch" || !downAt) return;
+        longPress = performance.now() - downAt >= HOLD;
+        downAt = 0;
+        if (longPress) this.startShaking();
+      });
+      for (const type of ["pointercancel", "pointerleave"]) {   // a scroll took the finger: neither tap nor long press
+        sh.el.addEventListener(type, () => { sh.pressed = false; downAt = 0; });
+      }
+      sh.el.addEventListener("contextmenu", (e) => e.preventDefault());   // no link menu on a long press
+      sh.el.addEventListener("click", (e) => {
+        if (!longPress) return;
+        e.preventDefault();                         // a long press doesn't open the page…
+        longPress = false;
+        this.startShaking();                        // …and if iOS refused to ask on pointerup, it asks now
+      });
+    }
+  }
+
+  async startShaking() {
+    if (this.shaking || this.asking || reduced() || typeof DeviceMotionEvent === "undefined") return;
+    if (typeof DeviceMotionEvent.requestPermission === "function") {   // iOS asks the user
+      this.asking = true;
+      try {
+        if (await DeviceMotionEvent.requestPermission() !== "granted") return;
+      } catch {
+        return;                                     // not counted as a tap; the click tries again
+      } finally {
+        this.asking = false;
+      }
+    }
+    if (this.shaking) return;
+    this.shaking = true;
+    this.jiggle(6);                                 // a first shake, so it is clear something changed
+    let last = null, nextKick = 0;
+    addEventListener("devicemotion", (e) => {
+      // Acceleration without gravity where the phone gives it; otherwise the
+      // change since the last reading, which removes the steady pull of gravity.
+      const a = e.acceleration, g = e.accelerationIncludingGravity;
+      let m = 0;
+      if (a && a.x !== null) m = Math.hypot(a.x, a.y, a.z);
+      else if (g && g.x !== null) {
+        if (last) m = Math.hypot(g.x - last.x, g.y - last.y, g.z - last.z);
+        last = { x: g.x, y: g.y, z: g.z };
+      }
+      const now = performance.now();
+      if (m > 1.2 && now > nextKick && !this.landing.hidden) {   // m/s²: a footstep is about 2, a shake 10+
+        this.jiggle(Math.min(m, 14));
+        nextKick = now + 140;
+      }
+    });
+  }
+
+  // Each sheet gets a kick that grows with the shake: a sideways wobble, a
+  // lean, a hop and a ripple, and some dust and sparkles off the paper.
+  jiggle(m) {
+    const k = m / 10;
+    for (const sh of this.sheets) {
+      if (sh.fall || sh.hidden) continue;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      sh.jx.v += side * rand(120, 190) * k;
+      sh.jt.v += -side * rand(1.6, 2.8) * k;
+      sh.hop.v -= rand(60, 110) * k;
+      sh.lift.v += rand(8, 14) * k;                 // floats up off the table, then settles
+      sh.wave.x = Math.max(sh.wave.x, 1.6 * k);
+      this.burst(sh, Math.round(2 + 6 * k), "dust");
+      this.burst(sh, Math.round(1 + 4 * k), "spark");
+    }
+    this.wake();
+  }
 
   // Where the sheets go, from the links' boxes. A big pixel is the largest
   // even number of CSS px for which a 22-pixel-wide sheet fits the
@@ -175,7 +271,7 @@ class Scene {
   busy() {
     return this.overlays.size > 0 || this.particles.busy ||
       this.scattering || this.sheets.some((s) => s.fall || s.blown || s.hovered ||
-        [s.lift, s.hop, s.squash, s.wave, s.reveal, s.ear].some((sp) => !sp.resting));
+        [s.lift, s.hop, s.squash, s.wave, s.reveal, s.ear, s.jx, s.jt].some((sp) => !sp.resting));
   }
 
   // ---------- intro: the sheets drift down, one after the other ----------
@@ -183,7 +279,7 @@ class Scene {
   startIntro(t) {
     this.introStart = t;
     if (root.dataset.landed !== undefined || reduced()) { root.dataset.landed = ""; return; }
-    this.sheets.forEach((s, i) => { s.fall = { start: t + 250 + i * 950, dur: 2300 }; });
+    this.sheets.forEach((s, i) => { s.fall = { start: t + 150 + i * 550, dur: 1500 }; });
   }
 
   // A falling sheet of paper: it rocks from side to side like a pendulum,
@@ -213,10 +309,10 @@ class Scene {
 
     for (const sh of this.sheets) {
       const was = sh.hovered;
-      if (!this.scattering) sh.hovered = preview === sh.name && !sh.fall;   // frozen while they float off
+      if (!this.scattering) sh.hovered = (preview === sh.name || sh.pressed) && !sh.fall;   // frozen while they float off
       const entered = sh.hovered && !was && !this.scattering;
 
-      sh.reveal.target = sh.hovered || (this.launching && sh.name === "amazed") ? 16 : 0;
+      sh.reveal.target = sh.hovered || touch() || (this.launching && sh.name === "amazed") ? 16 : 0;
       if (calm) sh.reveal.x = sh.reveal.target;
 
       if (sh.name === "recruiter") {
@@ -238,7 +334,7 @@ class Scene {
         }
       }
 
-      for (const sp of [sh.lift, sh.hop, sh.squash, sh.wave, sh.reveal, sh.ear]) sp.step(s);
+      for (const sp of [sh.lift, sh.hop, sh.squash, sh.wave, sh.reveal, sh.ear, sh.jx, sh.jt]) sp.step(s);
 
       if (sh.fall && t >= sh.fall.start + sh.fall.dur) {
         sh.fall = null;
@@ -312,6 +408,8 @@ class Scene {
     const H = this.H;
     let x = sh.home.x, y = sh.home.y, sx = 1, sy = sh.squash.x, lift = sh.lift.x, wave = sh.wave.x, tilt = 0;
     y += sh.hop.x * this.q - sh.lift.x * K;
+    x += sh.jx.x * this.q;
+    tilt += sh.jt.x;
 
     if (sh.hovered && sh.name === "amazed") y += Math.sin(this.now / 260) * 1.5 * this.q;   // bob
 
@@ -474,7 +572,8 @@ class Scene {
     this.scattering = false;
     for (const sh of this.sheets) {
       sh.hidden = false; sh.blown = null; sh.drift = null;
-      for (const sp of [sh.lift, sh.wave, sh.reveal, sh.ear, sh.hop]) { sp.x = sp.target = 0; sp.v = 0; }
+      for (const sp of [sh.lift, sh.wave, sh.reveal, sh.ear, sh.hop, sh.jx, sh.jt]) { sp.x = sp.target = 0; sp.v = 0; }
+      if (touch()) sh.reveal.x = sh.reveal.target = 16;
     }
   }
 }

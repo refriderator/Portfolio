@@ -96,6 +96,15 @@
   white-space: nowrap;
 }
 
+/* A long press on a sheet starts shake mode (js/scene.js): no text
+   selection, iOS link preview or double-tap zoom on the way. */
+.choice {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
 .choice:focus-visible {
   outline: var(--px) dashed var(--text);
   outline-offset: var(--px);
