@@ -1,6 +1,6 @@
 /* =====================================================================
    LANDING
-   Reads semantic tokens only. Both the colour shift and the widening key
+   Reads semantic tokens only. Both the colour shift and the swelling key
    off html[data-preview], set by js/landing.js, so they can never disagree.
    ===================================================================== */
 
@@ -36,34 +36,43 @@
   color: var(--text-muted);
 }
 
+/* The boxes sit in the middle of the remaining space with room around
+   them, rather than filling it edge to edge. */
 .choices {
   display: flex;
-  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  gap: clamp(var(--space-4), 4vw, var(--space-6));
   min-height: 0;
+  padding: clamp(var(--space-3), 5vw, var(--space-6));
 }
 
 .choice {
-  /* flex-basis 0 means grow factors alone set the widths: at 1 : 1 the
-     boxes are equal, at 1.25 : 1 the hovered one takes 1.25/2.25 ≈ 56%. */
-  flex: 1 1 0;
+  flex: 0 1 30rem;
   min-width: 0;
+  height: min(100%, 34rem);
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  padding: clamp(var(--space-4), 3vw, var(--space-5));
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* Optical centre: extra padding at the bottom lifts the label a little
+     above the geometric middle, where text looks centred to the eye.
+     The percentage is of the box's width, so the lift scales with it. */
+  padding: var(--space-5) var(--space-5) calc(var(--space-5) + 4%);
+
   border-radius: var(--radius);
   text-decoration: none;
   color: var(--text);
 
   /* Gradient border: the inner layer paints the padding box, the outer layer
      shows through the transparent border. Equal stops give a plain line. */
-  border: var(--hairline) solid transparent;
+  border: var(--rule) solid transparent;
   background:
     linear-gradient(var(--surface-box), var(--surface-box)) padding-box,
     linear-gradient(135deg, var(--edge-a), var(--edge-b) 55%, var(--edge-a)) border-box;
 
-  transition: flex-grow var(--spring-duration) var(--spring);
+  transition: transform var(--bubble-duration) var(--bubble);
 }
 
 .choice__label {
@@ -81,14 +90,16 @@
   color: transparent;
 }
 
-/* Previews: the box being considered widens. */
+/* Previews: the box being considered swells from its centre like a bubble.
+   transform does not move the neighbours, so only the hovered box changes. */
 [data-preview="recruiter"] .choice--recruiter,
 [data-preview="amazed"] .choice--amazed {
-  flex-grow: 1.25;
+  transform: scale(1.06);
 }
 
 /* Narrow screens: stack the two blocks. */
 @media (max-width: 640px) {
   .choices { flex-direction: column; }
+  .choice { flex: 1 1 0; width: 100%; height: auto; }
   .choice__label { max-width: none; }
 }

@@ -71,6 +71,7 @@
 
   --radius: 2px;
   --hairline: 1px;
+  --rule: 2px;
 
   /* Motion. --spring is a sampled underdamped oscillator,
      zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
@@ -80,6 +81,16 @@
     0.9866, 0.989, 0.9916, 0.9941, 0.9964, 0.9983, 0.9998, 1.0009, 1.0016,
     1.0019, 1.002, 1.0019, 1.0017, 1.0014, 1);
   --spring-duration: 700ms;
+
+  /* --bubble: the same oscillator with less damping, zeta = 0.4
+     (25.4% overshoot), for the landing boxes swelling on hover.
+     Regenerate with: python3 tools/spring.py 0.4 40 */
+  --bubble: linear(0, 0.0821, 0.2826, 0.5359, 0.7873, 0.9982, 1.1478, 1.2308,
+    1.2537, 1.2306, 1.1784, 1.1138, 1.0504, 0.9977, 0.9607, 0.9407, 0.9357,
+    0.9421, 0.9557, 0.9721, 0.9881, 1.0013, 1.0104, 1.0152, 1.0163, 1.0145,
+    1.011, 1.0068, 1.0028, 0.9995, 0.9973, 0.9961, 0.9959, 0.9964, 0.9973,
+    0.9983, 0.9993, 1.0002, 1.0007, 1.001, 1);
+  --bubble-duration: 900ms;
 
   /* Hover previews are quick so they feel like a response to the pointer. */
   --theme-duration: 450ms;

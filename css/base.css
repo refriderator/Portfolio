@@ -145,6 +145,8 @@ body {
   :root {
     --spring: ease-out;
     --spring-duration: 150ms;
+    --bubble: ease-out;
+    --bubble-duration: 150ms;
     --theme-duration: 150ms;
     --switch-duration: 300ms;
     --fade-out: 120ms;
