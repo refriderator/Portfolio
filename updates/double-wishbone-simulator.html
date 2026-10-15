@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Copied from the WordPress post of the same name. -->
+<!-- Edited with tools/editor. -->
 <html lang="en" data-theme="amazed">
 <head>
   <meta charset="utf-8">
@@ -27,12 +27,15 @@
     </header>
 
     <main class="prose">
+      <div class="text-box">
       <p>Git.io: <a href="https://refriderator.github.io/Double-Wishbone-Simulator/">https://refriderator.github.io/Double-Wishbone-Simulator/</a></p>
       <p>Repository: <a href="https://github.com/refriderator/Double-Wishbone-Simulator">https://github.com/refriderator/Double-Wishbone-Simulator</a></p>
       <p>The goal was to build a tool that allowed me to visually inspect setup decisions and make suspension geometry decisions before any wrenches were turned.</p>
       <p>Users provide arm lengths, pivot points, spring rates and damper settings, then lean on the car with cornering g, braking, a bump or the steering wheel, and watch what each corner does. It&#8217;s set up as an NB Miata by default but every number can be changed.</p>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/double-wishbone-simulator/1.png" alt="" loading="lazy" decoding="async"></figure>
       <h3>Mathematics</h3>
+      <div class="text-box">
       <p>Nothing in here is exotic, it&#8217;s mostly geometry and F = ma.</p>
       <ul>
       <li>Each corner seen from the front is a four-bar linkage. The two arms swing on circles, so finding the ball joints is a circle intersection problem.</li>
@@ -41,19 +44,22 @@
       <li>The car itself has 7 degrees of freedom: heave, pitch, roll, and each wheel moving up and down. I step it 4000 times a second with semi-implicit Euler, which is simple and stays stable.</li>
       <li>Roll inertia uses the parallel axis theorem because the body rolls about the roll axis, not its CG.</li>
       </ul>
+      </div><!--/box-->
       <h4>What went wrong</h4>
+      <div class="text-box">
       <p>Solving the linkage every time step was too slow. I solve it once into a lookup table over wheel travel and rack position, then interpolate.</p>
       <p>Ride height wouldn&#8217;t land exactly where I set it. A tilted body carries its CG off center, so the corner loads change. Working out the loads at the tilted attitude fixed it.</p>
       <p>All of this along with geometric limitations and trying to match stock values with Mazda&#8217;s published numbers was also very frustrating. For example, the rear upper arm pivot was 68 mm too far outboard, and to make up for it the sim had the arm at 188 mm when it&#8217;s really 213 mm. The roll center still came out at 120 mm, so nothing looked off until I lowered the car and it moved the wrong way.</p>
       <p>My setup sheet and the simulation disagreed on roll gradient by about 1%. The motion ratio changes as the wheel moves, so the wheel rate isn&#8217;t just spring rate times motion ratio squared. Using the slope at the actual ride height made them match.</p>
       <p>I mixed up left and right more than once. Now positive means right for everything.</p>
-      <figure>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/double-wishbone-simulator/2.png" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/double-wishbone-simulator/3.png" alt="" loading="lazy" decoding="async"></figure>
-      </figure>
+      <div class="text-box">
       <p><strong>What it doesn&#8217;t do</strong></p>
       <p>No tire grip model, so camber and toe don&#8217;t change how much the car sticks. No anti-dive or anti-squat. And the fitted numbers are my best match, not Mazda&#8217;s drawings. The page marks which is which.</p>
       <p>The body in the 3D view comes from an Assetto Corsa NB mod, converted down to a low-poly shell.</p>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/double-wishbone-simulator/4.jpg" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/double-wishbone-simulator/5.jpg" alt="" loading="lazy" decoding="async"></figure>
     </main>

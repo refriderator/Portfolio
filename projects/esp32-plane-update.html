@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Copied from the WordPress post of the same name. -->
+<!-- Edited with tools/editor. -->
 <html lang="en" data-theme="amazed">
 <head>
   <meta charset="utf-8">
@@ -27,6 +27,7 @@
     </header>
 
     <main class="prose">
+      <div class="text-box">
       <p>&#8220;Stage 8&#8221;, as my Arduino file name suggests, is the 8th rebuild of a plane that has not flew yet. Delays mostly include 3d printing tolerance testing, weight : strength, and dimensional testing for physical parts like batteries, screws, and servos. Tx and Rx of the receiver are wire to GPIO 16 and 17 of the ESP respectively. Servos are on 4, 18, 19, and 21. The nice thing about using your own code over a pre-built flight controller is knowing where all the inner function are. Diagnosis becomes a lot easier for servo function and fail safes.</p>
       <p>The plane itself has:</p>
       <ul>
@@ -45,8 +46,14 @@
       <li>What is actually happening to the serial and peripherals I definitely need more time toying with. I understand how the buffering and parsing works but all the syntax is still being understood.</li>
       <li>Plane aerodynamic balance and behaviors: This plane uses NACA4412 as the main airfoils with 2 degrees of dihedral and NACA0110&#8217;s for the elevator and rudder. The COG is 3 cm in front of the simulated COL, but will probably need to be adjusted after test. There are a lot more ratios to list, but they weren&#8217;t chosen very intentionally so these values will be left for another plane&#8217;s analysis.</li>
       </ul>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/esp32-plane-update/1.png" alt="" loading="lazy" decoding="async"></figure>
-      <figure><img alt="" src="../assets/workshop/esp32-plane-update/2.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/3.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/4.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/5.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/6.jpg" loading="lazy" decoding="async"></figure><figure><img alt="" src="../assets/workshop/esp32-plane-update/7.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/2.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/3.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/4.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/5.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/6.jpg" loading="lazy" decoding="async"></figure>
+      <figure><img alt="" src="../assets/workshop/esp32-plane-update/7.jpg" loading="lazy" decoding="async"></figure>
     </main>
   </div>
 </body>

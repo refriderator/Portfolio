@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Copied from the WordPress post of the same name. -->
+<!-- Edited with tools/editor. -->
 <html lang="en" data-theme="amazed">
 <head>
   <meta charset="utf-8">
@@ -27,33 +27,62 @@
     </header>
 
     <main class="prose">
+      <div class="text-box">
       <p>I will be using a tool I built to explore design choices on my NB Mazda Miata.</p>
       <p>Link to tool: <a href="https://refriderator.github.io/Double-Wishbone-Simulator/">https://refriderator.github.io/Double-Wishbone-Simulator/</a></p>
+      </div><!--/box-->
       <h3>Where stock starts</h3>
+      <div class="text-box">
       <p>The stock car at stock ride height sits at 1.24 Hz up front and 1.06 Hz in the rear. It rolls 5.74° per g, pitches 4.42° per g, and the front carries 61.8% of the roll stiffness (partially calculated partially published by Mazda).</p>
       <p>Those first two numbers are why the rear is softer from the factory. A lower rear frequency lets the back of the car catch up with the front after a bump, so the car rides flat. The cost is a lot of body roll and pitch.</p>
+      </div><!--/box-->
       <h3>Springs and dampers</h3>
+      <div class="text-box">
       <p>I tried two spring sets: 6/5 kgf/mm (front/rear) and 8/6 kgf/mm. I scaled the stock damper rates by the square root of the spring ratio so the damping ratio stays about the same: ×1.44 front and ×1.54 rear for 6/5, ×1.66 and ×1.69 for 8/6. My real dampers came with a graph but slopes by an amount I don&#8217;t know, so that scaling is a guess.</p>
       <p>To measure response I applied a sudden 0.5 g lateral step. Overshoot is how far roll peaks past where it ends up. Settle is how long it takes to stay within 5% of its final value.</p>
-      <figure><table><thead><tr><th>Setup<br>(kgf/mm) (Front / Rear)</th><th>Ride frequency (Front / Rear)</th><th>Roll</th><th>Pitch</th><th>Front roll share</th><th>Overshoot</th><th>Settle</th></tr></thead><tbody><tr><td>Stock 2.9 / 2.1</td><td>1.24 / 1.07 Hz</td><td>5.71 °/g</td><td>4.37 °/g</td><td>61.6 %</td><td>18 %</td><td>0.53 s</td></tr><tr><td>Setup 1, 6 / 5</td><td>1.66 / 1.61 Hz</td><td>3.59 °/g</td><td>2.07 °/g</td><td>54.9 %</td><td>14 %</td><td>0.39 s</td></tr><tr><td>Setup 2, 8 / 6</td><td>1.86 / 1.75 Hz</td><td>3.11 °/g</td><td>1.70 °/g</td><td>55.0 %</td><td>14 %</td><td>0.35 s</td></tr></tbody></table></figure>
+      </div><!--/box-->
+      <div class="table-box">
+      <table><thead><tr><th>Setup<br>(kgf/mm) (Front / Rear)</th><th>Ride frequency (Front / Rear)</th><th>Roll</th><th>Pitch</th><th>Front roll share</th><th>Overshoot</th><th>Settle</th></tr></thead><tbody><tr><td>Stock 2.9 / 2.1</td><td>1.24 / 1.07 Hz</td><td>5.71 °/g</td><td>4.37 °/g</td><td>61.6 %</td><td>18 %</td><td>0.53 s</td></tr><tr><td>Setup 1, 6 / 5</td><td>1.66 / 1.61 Hz</td><td>3.59 °/g</td><td>2.07 °/g</td><td>54.9 %</td><td>14 %</td><td>0.39 s</td></tr><tr><td>Setup 2, 8 / 6</td><td>1.86 / 1.75 Hz</td><td>3.11 °/g</td><td>1.70 °/g</td><td>55.0 %</td><td>14 %</td><td>0.35 s</td></tr></tbody></table>
+      </div><!--/box-->
+      <div class="text-box">
       <p>Going from stock to 6/5 cuts roll by about a third, and 8/6 takes it to almost half. Both coilover setups shift roll stiffness toward the rear (front share drops from 62 % to 55 %), so the car should rotate easier. Overshoot and settle time come from a 0.5 g step with dampers I scaled up with the springs, so only compare them to each other.</p>
+      </div><!--/box-->
       <h3>Front roll bar</h3>
+      <div class="text-box">
       <p>I added an anti-roll bar on top of the 8k/6k springs. The bar rate is an overestimate of my aftermarket front sway-bar. This experiment was mostly to see the comparative effects of anti-roll bars vs coil-overs.</p>
-      <figure><table><thead><tr><th>Setup</th><th>Roll</th><th>Front roll share</th><th>Overshoot</th><th>Settle</th></tr></thead><tbody><tr><td>Stock front bar (8 N/mm)</td><td>3.11 °/g</td><td>55.0 %</td><td>14 %</td><td>0.35 s</td></tr><tr><td>Stiffer front bar (16 N/mm)</td><td>2.76 °/g</td><td>58.5 %</td><td>20 %</td><td>0.33 s</td></tr></tbody></table></figure>
+      </div><!--/box-->
+      <div class="table-box">
+      <table><thead><tr><th>Setup</th><th>Roll</th><th>Front roll share</th><th>Overshoot</th><th>Settle</th></tr></thead><tbody><tr><td>Stock front bar (8 N/mm)</td><td>3.11 °/g</td><td>55.0 %</td><td>14 %</td><td>0.35 s</td></tr><tr><td>Stiffer front bar (16 N/mm)</td><td>2.76 °/g</td><td>58.5 %</td><td>20 %</td><td>0.33 s</td></tr></tbody></table>
+      </div><!--/box-->
+      <div class="text-box">
       <p>Doubling the front bar takes another 11 % off the roll and puts 3.5 % more of the roll stiffness back on the front, so it adds a bit of understeer back from the suspension changes. Overshoot goes up because the bar adds stiffness with no damping. Even with an overly stiff bar the differences are very little compared to coil-overs. Hence the common attribution of adjusting coil-overs for ride and sway bars for balance.</p>
+      </div><!--/box-->
       <h3>Roll center</h3>
+      <div class="text-box">
       <p>Next I lowered the car 26 mm in front and 38 mm in the rear. Camber is set to −2° front and −1.5° rear. The roll lever is the CG height minus the roll axis height at the CG. A shorter lever means less roll for the same cornering force. Double wishbone tends to react poorly to only ride height changes without supporting adjustments. Let&#8217;s investigate.</p>
-      <figure><table><thead><tr><th>Case</th><th>Sprung CG</th><th>Roll center<br>(F / R)</th><th>Roll axis at CG</th><th>Roll lever</th><th>Roll</th></tr></thead><tbody><tr><td>Stock wheels, stock height</td><td>474 mm</td><td>41 / 120 mm</td><td>79 mm</td><td><strong><strong>395 mm</strong></strong></td><td>2.76 °/g</td></tr><tr><td>Stock wheels, lowered</td><td>442 mm</td><td>3 / 86 mm</td><td>42 mm</td><td><strong><strong>400 mm</strong></strong></td><td>2.69 °/g</td></tr><tr><td>15&#8243; wheels, stock height</td><td>474 mm</td><td>69 / 133 mm</td><td>100 mm</td><td><strong>374</strong> mm</td><td>2.31 °/g</td></tr><tr><td>Coen&#8217;s wheels, lowered</td><td>442 mm</td><td>28 / 93 mm</td><td>59 mm</td><td><strong><strong>383 mm</strong></strong></td><td>2.32 °/g</td></tr><tr><td>Coen&#8217;s wheels, lowered + shorter arm</td><td>442 mm</td><td>31 / 93 mm</td><td>61 mm</td><td><strong><strong>381 mm</strong></strong></td><td>2.30 °/g</td></tr></tbody></table></figure>
+      </div><!--/box-->
+      <div class="table-box">
+      <table><thead><tr><th>Case</th><th>Sprung CG</th><th>Roll center<br>(F / R)</th><th>Roll axis at CG</th><th>Roll lever</th><th>Roll</th></tr></thead><tbody><tr><td>Stock wheels, stock height</td><td>474 mm</td><td>41 / 120 mm</td><td>79 mm</td><td><strong><strong>395 mm</strong></strong></td><td>2.76 °/g</td></tr><tr><td>Stock wheels, lowered</td><td>442 mm</td><td>3 / 86 mm</td><td>42 mm</td><td><strong><strong>400 mm</strong></strong></td><td>2.69 °/g</td></tr><tr><td>15&#8243; wheels, stock height</td><td>474 mm</td><td>69 / 133 mm</td><td>100 mm</td><td><strong>374</strong> mm</td><td>2.31 °/g</td></tr><tr><td>Coen&#8217;s wheels, lowered</td><td>442 mm</td><td>28 / 93 mm</td><td>59 mm</td><td><strong><strong>383 mm</strong></strong></td><td>2.32 °/g</td></tr><tr><td>Coen&#8217;s wheels, lowered + shorter arm</td><td>442 mm</td><td>31 / 93 mm</td><td>61 mm</td><td><strong><strong>381 mm</strong></strong></td><td>2.30 °/g</td></tr></tbody></table>
+      </div><!--/box-->
+      <div class="text-box">
       <p>Lowering drops the roll center a bit faster than the CG, so the roll lever grows, but only by 5 mm on stock wheels and 9 mm on mine. Shortening the front upper arm 9.8 mm for −4.5° camber gives back about 2 mm. The CG drop is assumed to equal the ride height drop.</p>
       <p>In the graphs below show the physical lowering of the lever arm as well as the lengthening of the roll center and CG difference. Then the shortened lever produced by shortening the upper control arm.</p>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/fixing-problems-you-created/1.png" alt="" loading="lazy" decoding="async"></figure>
+      <div class="text-box">
       <p>The front roll center falls fastest (1.46 mm per mm) and goes below ground past about 28 mm of drop. </p>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/fixing-problems-you-created/2.png" alt="" loading="lazy" decoding="async"></figure>
       <h3>Shortening the front upper arm (my wheels, lowered)</h3>
-      <figure><table><thead><tr><th>Arm shortened</th><th>Front camber</th><th>Kingpin angle</th><th>Bump steer</th><th>Camber at 1 g, outer / inner</th></tr></thead><tbody><tr><td>0 mm</td><td>−2.00°</td><td>11.2°</td><td>0.17 °/10 mm</td><td>−2.70° / −1.39°</td></tr><tr><td>5 mm</td><td>−3.27°</td><td>12.4°</td><td>0.20</td><td>−3.95° / −2.67°</td></tr><tr><td>9.8 mm</td><td>−4.50°</td><td>13.7°</td><td>0.23</td><td>−5.17° / −3.93°</td></tr><tr><td>15 mm</td><td>−5.82°</td><td>15.1°</td><td>0.26</td><td>−6.46° / −5.28°</td></tr></tbody></table></figure>
+      <div class="table-box">
+      <table><thead><tr><th>Arm shortened</th><th>Front camber</th><th>Kingpin angle</th><th>Bump steer</th><th>Camber at 1 g, outer / inner</th></tr></thead><tbody><tr><td>0 mm</td><td>−2.00°</td><td>11.2°</td><td>0.17 °/10 mm</td><td>−2.70° / −1.39°</td></tr><tr><td>5 mm</td><td>−3.27°</td><td>12.4°</td><td>0.20</td><td>−3.95° / −2.67°</td></tr><tr><td>9.8 mm</td><td>−4.50°</td><td>13.7°</td><td>0.23</td><td>−5.17° / −3.93°</td></tr><tr><td>15 mm</td><td>−5.82°</td><td>15.1°</td><td>0.26</td><td>−6.46° / −5.28°</td></tr></tbody></table>
+      </div><!--/box-->
+      <div class="text-box">
       <p>Each mm off the upper arm adds about 0.25° of negative camber. It also leans the kingpin over more and adds a little bump steer. At 1 g the outer front tire sits at −5.2° with the 9.8 mm arm.</p>
       <p>At 1 g my front wheels also both steer about 0.4° into the corner from bump steer: the outer goes from −0.5° toe to −0.1° and the inner to −0.9°. These characteristics will be more important when adjusting for cut knuckles.</p>
+      </div><!--/box-->
       <h3>Limits of the sim</h3>
+      <div class="text-box">
       <ul>
       <li>No side-view geometry, so no anti-dive or anti-squat.</li>
       <li>No tire force model, so no slip angles.</li>
@@ -62,13 +91,12 @@
       <li>CG heights are assumed (474 mm stock, 442 mm lowered).</li>
       </ul>
       <p>Some </p>
-      <figure>
+      </div><!--/box-->
       <figure><img src="../assets/workshop/fixing-problems-you-created/3.jpg" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/fixing-problems-you-created/4.jpg" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/fixing-problems-you-created/5.png" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/fixing-problems-you-created/6.jpg" alt="" loading="lazy" decoding="async"></figure>
       <figure><img src="../assets/workshop/fixing-problems-you-created/7.jpg" alt="" loading="lazy" decoding="async"></figure>
-      </figure>
     </main>
   </div>
 </body>

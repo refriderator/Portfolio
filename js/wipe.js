@@ -1,6 +1,7 @@
 // The landing's darkening for the amazed preview: navy rises from the
 // bottom of the page as an ordered-dither front, in the landing's big
-// pixels, and sinks back the same way when the preview ends.
+// pixels. When the preview ends the light comes back the same way, rising
+// from the bottom, so the dark lifts off the top of the page.
 //
 // It is drawn on its own canvas behind the page's text (z-index -1), so
 // the masthead stays on top. The theme's own colours wait for it
@@ -29,7 +30,7 @@ canvas.className = "dither-wipe";
 canvas.setAttribute("aria-hidden", "true");
 const g = canvas.getContext("2d");
 
-let p = 0, target = 0, last = 0, running = false, cell = 16, colour = "#000";
+let p = 0, target = 0, rising = true, last = 0, running = false, cell = 16, colour = "#000";
 
 const wanted = () =>
   !landing.hidden && (root.dataset.preview === "amazed" || root.dataset.launching !== undefined);
@@ -48,13 +49,25 @@ function draw(t) {
   g.clearRect(0, 0, cols, rows);
   if (p <= 0) return;
   g.fillStyle = colour;
-  const reach = p * (rows + 2 * BAND + 3) - BAND;     // at p = 1 the whole ramp is past the top
+  const span = rows + 2 * BAND + 3;                   // at the ends the whole ramp is off screen
   for (let c = 0; c < cols; c++) {
-    const h = reach + 1.6 * Math.sin(c * 0.31 + t / 260) + 0.9 * Math.sin(c * 0.11 - t / 410);
-    const solid = Math.max(0, Math.min(rows, Math.floor(h - BAND)));
-    if (solid) g.fillRect(c, rows - solid, 1, solid);                  // below the ramp: one rect
-    for (let r = solid; r < Math.min(rows, Math.ceil(h)); r++) {
-      if ((16 * (h - r)) / BAND > bayer(c, r) + 0.5) g.fillRect(c, rows - 1 - r, 1, 1);
+    const wave = 1.6 * Math.sin(c * 0.31 + t / 260) + 0.9 * Math.sin(c * 0.11 - t / 410);
+    if (rising) {
+      // Dark below the front, which climbs as p grows.
+      const h = p * span - BAND + wave;
+      const solid = Math.max(0, Math.min(rows, Math.floor(h - BAND)));
+      if (solid) g.fillRect(c, rows - solid, 1, solid);                // below the ramp: one rect
+      for (let r = solid; r < Math.min(rows, Math.ceil(h)); r++) {
+        if ((16 * (h - r)) / BAND > bayer(c, r) + 0.5) g.fillRect(c, rows - 1 - r, 1, 1);
+      }
+    } else {
+      // Light below the front, which climbs as p falls; the dark is what is left above it.
+      const h = (1 - p) * span - BAND + wave;
+      const clear = Math.max(0, Math.ceil(h + BAND));
+      if (clear < rows) g.fillRect(c, 0, 1, rows - clear);             // above the ramp: one rect
+      for (let r = Math.max(0, Math.floor(h)); r < Math.min(rows, clear); r++) {
+        if ((16 * (r - h)) / BAND > bayer(c, r) + 0.5) g.fillRect(c, rows - 1 - r, 1, 1);
+      }
     }
   }
 }
@@ -82,6 +95,7 @@ function sync() {
   if (next === 0 && p > 0) root.dataset.wipe = "out";
   else delete root.dataset.wipe;
   target = next;
+  rising = next === 1;
   if (next === 1 && p === 0) size();
   canvas.hidden = false;
   if (!running) {

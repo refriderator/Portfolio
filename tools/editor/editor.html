@@ -1,0 +1,451 @@
+<!doctype html>
+<!-- The website editor's page, served by server.py at /_editor/. Edits the repo's files through its
+     /api/ routes; nothing goes online until Publish. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website Editor</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --panel: #ffffff; --line: #d9d9de; --text: #1d1d1f; --muted: #6e6e73;
+    --accent: #0a66d8; --danger: #c62828; --ok: #1e8e3e; --hover: #ececf0;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1c1e; --panel: #232326; --line: #3a3a3e; --text: #f2f2f7; --muted: #98989f;
+            --accent: #4c9bff; --danger: #ff6b6b; --ok: #4cd07d; --hover: #2c2c30; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; grid-template-columns: 260px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+    background: var(--bg); color: var(--text);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button {
+    padding: 5px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer;
+  }
+  button:hover { background: var(--hover); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger { color: var(--danger); }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  /* Top bar: what is unpublished, and the buttons that act on the whole site. */
+  header {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  header h1 { margin: 0 auto 0 0; font-size: 15px; }
+  #status { color: var(--muted); }
+  #status.dirty { color: var(--accent); }
+
+  /* Sidebar: every post, grouped where it appears on the site. */
+  nav { overflow-y: auto; padding: 12px 8px; border-right: 1px solid var(--line); background: var(--panel); }
+  nav h2 { margin: 16px 8px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  nav h2:first-child { margin-top: 0; }
+  nav a {
+    display: block; padding: 5px 8px; border-radius: 6px; color: inherit; text-decoration: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  nav a:hover { background: var(--hover); }
+  nav a[aria-current] { background: var(--accent); color: #fff; }
+  nav .new { display: flex; gap: 6px; margin: 4px 8px 0; }
+  nav .new button { flex: 1; padding: 3px 6px; font-size: 12px; }
+
+  main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 0; }
+  main.no-preview { grid-template-columns: minmax(0, 1fr); }
+  main.no-preview #preview { display: none; }
+  #form { overflow-y: auto; padding: 20px 24px 80px; }
+  #empty { color: var(--muted); padding: 40px; }
+
+  .fields { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px 12px; align-items: center; margin-bottom: 16px; }
+  .fields label { color: var(--muted); text-align: right; }
+  .fields input, .fields select {
+    width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+  }
+  .fields .hint { grid-column: 2; margin-top: -6px; font-size: 12px; color: var(--muted); }
+
+  /* Body editor: a toolbar over a box you type into, styled roughly like the site's posts. */
+  .toolbar {
+    position: sticky; top: -20px; z-index: 2; display: flex; flex-wrap: wrap; gap: 4px;
+    padding: 6px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--panel);
+  }
+  .toolbar button { padding: 3px 9px; }
+  .toolbar .sep { width: 1px; margin: 2px 4px; background: var(--line); }
+  #body {
+    min-height: 420px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 0 0 8px 8px;
+    background: var(--panel); outline: none; font-size: 16px; line-height: 1.6;
+  }
+  #body:focus { border-color: var(--accent); }
+  #body.drop { outline: 2px dashed var(--accent); outline-offset: -6px; }
+  #body img, #body video { display: block; max-width: 100%; height: auto; margin: 6px 0; }
+  #body iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  #body figure { margin: 12px 0; }
+  #body table { border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  #body th, #body td { border: 1px solid var(--line); padding: 5px 8px; min-width: 50px; }
+  #body h2, #body h3, #body h4 { font-size: 15px; letter-spacing: 0.02em; margin: 1.4em 0 0.5em; }
+  #body .gallery { display: flex; flex-wrap: wrap; gap: 6px; }
+  #body .gallery img { max-width: 160px; }
+
+  .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .actions .grow { flex: 1; }
+
+  #preview { display: flex; flex-direction: column; min-height: 0; border-left: 1px solid var(--line); }
+  #preview .bar { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--line); background: var(--panel); color: var(--muted); }
+  #preview iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+
+  #toast {
+    position: fixed; right: 16px; bottom: 16px; max-width: 420px; padding: 10px 14px; border-radius: 8px;
+    background: var(--text); color: var(--bg); opacity: 0; transform: translateY(8px); transition: 200ms; pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: none; }
+  #toast.error { background: var(--danger); color: #fff; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Website Editor</h1>
+    <span id="status">…</span>
+    <button id="discard" class="danger" title="Throw away every change since the last publish">Discard changes</button>
+    <button id="publish" class="primary" title="Commit and push to GitHub; the live site updates in a minute or two">Publish</button>
+    <button id="togglePreview" title="Show or hide the preview">Preview</button>
+    <button id="quit" title="Stop the editor">Quit</button>
+  </header>
+
+  <nav id="nav"></nav>
+
+  <main id="main">
+    <section id="form"><p id="empty">Pick a post on the left, or start a new one.</p></section>
+    <section id="preview">
+      <div class="bar"><span id="previewTitle">Preview</span><span style="flex:1"></span>
+        <button id="reload">Reload</button><button id="openTab">Open in browser</button></div>
+      <iframe id="frame" src="/index.html#amazed"></iframe>
+    </section>
+  </main>
+
+  <div id="toast" role="status"></div>
+  <input type="file" id="file" accept="image/*,video/mp4,video/webm,video/quicktime" multiple hidden>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const today = () => new Date().toLocaleDateString("en-CA");          // YYYY-MM-DD
+
+let list = null;          // { cards, projects, articles }
+let current = null;       // { kind: "post" | "article", data }
+let dirty = false;
+
+async function api(path, options = {}) {
+  const res = await fetch("/api/" + path, options);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function toast(text, error = false) {
+  const t = $("#toast");
+  t.textContent = text;
+  t.className = "show" + (error ? " error" : "");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => (t.className = ""), error ? 6000 : 2500);
+}
+
+// ---------- sidebar ----------
+
+async function refresh() {
+  list = await api("list");
+  const nav = $("#nav");
+  const link = (href, text, key) => `<a href="${href}" data-key="${key}">${esc(text)}</a>`;
+  const shelf = (folder) => list.cards.filter((c) => c.folder === folder)
+    .map((c) => link("#", c.title, `post/${c.folder}/${c.slug}`)).join("");
+  const bySection = {};
+  for (const a of list.articles) (bySection[a.section] ??= []).push(a);
+  nav.innerHTML =
+    `<h2>Workshop · Recent updates</h2>${shelf("updates")}
+     <h2>Workshop · Past projects</h2>${shelf("projects")}
+     <div class="new"><button data-new="updates">+ Update</button><button data-new="projects">+ Project post</button></div>` +
+    Object.entries(bySection).map(([section, items]) =>
+      `<h2>Recruiter · ${esc(section)}</h2>` + items.map((a) => link("#", a.title, `article/${a.id}`)).join("")).join("");
+  markCurrent();
+  status();
+}
+
+function markCurrent() {
+  const key = current ? (current.kind === "post" ? `post/${current.data.folder}/${current.data.slug}` : `article/${current.data.id}`) : "";
+  for (const a of $("#nav").querySelectorAll("a")) a.toggleAttribute("aria-current", a.dataset.key === key);
+}
+
+$("#nav").addEventListener("click", async (e) => {
+  const a = e.target.closest("a"), b = e.target.closest("button[data-new]");
+  if (!a && !b) return;
+  e.preventDefault();
+  if (dirty && !confirm("You have unsaved edits to this post. Leave without saving?")) return;
+  if (b) return open({ kind: "post", data: { folder: b.dataset.new, slug: "", title: "", date: today(), line: "", project: "", body: "<p></p>" } });
+  const [kind, ...rest] = a.dataset.key.split("/");
+  try {
+    open({ kind, data: await api(`${kind}/${rest.join("/")}`) });
+  } catch (err) { toast(err.message, true); }
+});
+
+// ---------- form ----------
+
+function open(item) {
+  current = item;
+  const d = item.data, post = item.kind === "post";
+  const projectOptions = ['<option value="">None</option>']
+    .concat(Object.entries(list.projects).map(([slug, name]) => `<option value="${slug}"${d.project === slug ? " selected" : ""}>${esc(name)}</option>`));
+  $("#form").innerHTML = `
+    <div class="fields">
+      <label for="f-title">Title</label><input id="f-title" value="${esc(d.title)}">
+      ${post ? `
+        <label for="f-date">Date</label><input id="f-date" type="date" value="${esc(d.date)}">
+        <label for="f-line">Card text</label><input id="f-line" value="${esc(d.line)}" placeholder="One line for the Workshop card">
+        <span class="hint">Shown under the title on the Workshop card${d.slug ? "" : "; leave empty to use the title"}.</span>
+        <label for="f-project">Project</label><select id="f-project">${projectOptions.join("")}</select>
+        <span class="hint">Linked under the title, and listed on that project's page.</span>
+        <label>Shelf</label><span>${d.folder === "updates" ? "Recent updates" : "Past projects"}${d.slug ? ` · ${d.folder}/${d.slug}.html` : " · new"}</span>`
+      : `
+        <label for="f-subtitle">Subtitle</label><input id="f-subtitle" value="${esc(d.subtitle)}" placeholder="Where and when, e.g. the team or the dates">
+        <label>Where</label><span>Recruiter page · #${esc(d.id)}</span>`}
+    </div>
+    <div class="toolbar" id="toolbar">
+      <button data-cmd="formatBlock:p" title="Normal paragraph">¶</button>
+      <button data-cmd="formatBlock:h3" title="Heading">H</button>
+      <button data-cmd="bold" title="Bold (⌘B)"><b>B</b></button>
+      <button data-cmd="italic" title="Italic (⌘I)"><i>I</i></button>
+      <span class="sep"></span>
+      <button data-cmd="insertUnorderedList" title="Bulleted list">• List</button>
+      <button data-cmd="insertOrderedList" title="Numbered list">1. List</button>
+      <button data-act="link" title="Link the selected text">Link</button>
+      <span class="sep"></span>
+      <button data-act="image" title="Insert pictures, GIFs or video clips (or drag them in)">Picture / video</button>
+      <button data-act="youtube" title="Embed a YouTube video">YouTube</button>
+      <button data-act="table" title="Insert a table">Table</button>
+      <span class="sep"></span>
+      <button data-cmd="removeFormat" title="Clear formatting">Clear</button>
+      <button data-act="html" title="Edit the raw HTML">HTML</button>
+    </div>
+    <div id="body" contenteditable="true" spellcheck="true">${d.body}</div>
+    <div class="actions">
+      <button id="save" class="primary">Save</button>
+      <span class="grow"></span>
+      ${post && d.slug ? '<button id="delete" class="danger">Delete post</button>' : ""}
+    </div>`;
+  dirty = false;
+  $("#form").oninput = () => (dirty = true);
+  $("#form").onchange = () => (dirty = true);
+  $("#save").onclick = save;
+  $("#delete")?.addEventListener("click", remove);
+  $("#toolbar").addEventListener("mousedown", (e) => e.preventDefault());   // keep the text selection
+  $("#toolbar").addEventListener("click", tool);
+  dropAndPaste($("#body"));
+  markCurrent();
+  showPreview();
+}
+
+function collect() {
+  const box = $("#body");
+  const d = { ...current.data, title: $("#f-title").value, body: box.dataset.raw ? box.textContent : box.innerHTML };
+  if (current.kind === "post") Object.assign(d, { date: $("#f-date").value, line: $("#f-line").value, project: $("#f-project").value });
+  else d.subtitle = $("#f-subtitle").value;
+  return d;
+}
+
+async function save() {
+  const d = collect();
+  try {
+    if (current.kind === "post") {
+      const { slug } = await api(`post/${d.folder}/${d.slug || "new"}`, { method: "POST", body: JSON.stringify(d) });
+      current.data = await api(`post/${d.folder}/${slug}`);
+    } else {
+      await api(`article/${d.id}`, { method: "POST", body: JSON.stringify(d) });
+      current.data = await api(`article/${d.id}`);
+    }
+    open(current);
+    await refresh();
+    toast("Saved. Not online yet: Publish when you're ready.");
+  } catch (err) { toast(err.message, true); }
+}
+
+async function remove() {
+  const d = current.data;
+  if (!confirm(`Delete "${d.title}"? Its page and its cards go. (Discard changes brings it back until you publish.)`)) return;
+  try {
+    await api(`delete/${d.folder}/${d.slug}`, { method: "POST" });
+    current = null;
+    dirty = false;
+    $("#form").innerHTML = '<p id="empty">Deleted.</p>';
+    await refresh();
+  } catch (err) { toast(err.message, true); }
+}
+
+// ---------- toolbar ----------
+
+function tool(e) {
+  const b = e.target.closest("button");
+  if (!b) return;
+  $("#body").focus();
+  if (b.dataset.cmd) {
+    const [cmd, arg] = b.dataset.cmd.split(":");
+    document.execCommand(cmd, false, arg ?? null);
+  } else if (b.dataset.act === "link") {
+    const url = prompt("Link to (https://…):");
+    if (url) document.execCommand("createLink", false, url);
+  } else if (b.dataset.act === "image") {
+    $("#file").click();
+  } else if (b.dataset.act === "youtube") {
+    const url = prompt("YouTube link:");
+    const id = url && (url.match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{6,})/) || [])[1];
+    if (id) document.execCommand("insertHTML", false,
+      `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube video" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><p></p>`);
+    else if (url) toast("That doesn't look like a YouTube link.", true);
+  } else if (b.dataset.act === "table") {
+    const size = prompt("Columns × rows (not counting the header):", "3 x 3");
+    const [cols, rows] = (size || "").split(/\s*[x×,]\s*/).map(Number);
+    if (cols > 0 && rows > 0) {
+      const row = (cell) => "<tr>" + Array.from({ length: cols }, () => cell).join("") + "</tr>";
+      document.execCommand("insertHTML", false,
+        `<table><thead>${row("<th>Heading</th>")}</thead><tbody>${Array.from({ length: rows }, () => row("<td>–</td>")).join("")}</tbody></table><p></p>`);
+    }
+  } else if (b.dataset.act === "html") {
+    const box = $("#body");
+    if (box.dataset.raw) {
+      box.innerHTML = box.textContent;
+      delete box.dataset.raw;
+      box.style.whiteSpace = "";
+      box.style.fontFamily = "";
+    } else {
+      box.textContent = box.innerHTML;
+      box.dataset.raw = "1";
+      box.style.whiteSpace = "pre-wrap";
+      box.style.fontFamily = "ui-monospace, monospace";
+    }
+  }
+  dirty = true;
+}
+
+// ---------- pictures and clips: button, drag-and-drop, paste ----------
+
+function folderFor() {
+  const d = current.data;
+  return current.kind === "post" ? (d.slug || slugish(collect().title) || "new-post") : "recruiter";
+}
+const slugish = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+
+async function upload(files) {
+  for (const file of files) {
+    if (!/^(image|video)\//.test(file.type)) continue;
+    toast(`Uploading ${file.name}…`);
+    try {
+      const { src, video } = await api(`upload?folder=${encodeURIComponent(folderFor())}&name=${encodeURIComponent(file.name)}`,
+        { method: "POST", body: file });
+      $("#body").focus();
+      document.execCommand("insertHTML", false, video
+        ? `<figure><video src="${src}" controls muted loop playsinline></video></figure><p></p>`
+        : `<figure><img src="${src}" alt=""></figure><p></p>`);
+      dirty = true;
+      toast(`Added ${file.name}.`);
+    } catch (err) { toast(err.message, true); }
+  }
+}
+
+$("#file").addEventListener("change", (e) => { upload([...e.target.files]); e.target.value = ""; });
+
+function dropAndPaste(box) {
+  box.addEventListener("dragover", (e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); box.classList.add("drop"); } });
+  box.addEventListener("dragleave", () => box.classList.remove("drop"));
+  box.addEventListener("drop", (e) => {
+    box.classList.remove("drop");
+    if (!e.dataTransfer.files.length) return;
+    e.preventDefault();
+    const at = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+    if (at) { const s = getSelection(); s.removeAllRanges(); s.addRange(at); }
+    upload([...e.dataTransfer.files]);
+  });
+  box.addEventListener("paste", (e) => {
+    const files = [...e.clipboardData.files];
+    if (files.length) { e.preventDefault(); upload(files); return; }
+    // Pasted text keeps its paragraphs but not another page's fonts and colours.
+    const text = e.clipboardData.getData("text/plain");
+    if (text && !e.clipboardData.types.includes("text/html")) return;
+    e.preventDefault();
+    const htmlText = e.clipboardData.getData("text/html")
+      .replace(/<(\/?)(?:span|font|div)[^>]*>/g, (m, close) => (m.startsWith("<div") || m.startsWith("</div") ? (close ? "</p>" : "<p>") : ""))
+      .replace(/\s(style|class|id)="[^"]*"/g, "");
+    document.execCommand("insertHTML", false, htmlText);
+  });
+}
+
+// ---------- preview, status, publish ----------
+
+function pageUrl() {
+  if (!current) return "/index.html#amazed";
+  const d = current.data;
+  return current.kind === "post" ? (d.slug ? `/${d.folder}/${d.slug}.html` : "/index.html#amazed") : `/index.html#${d.id}`;
+}
+
+function showPreview() {
+  const frame = $("#frame");
+  const url = pageUrl() + (pageUrl().includes("#") ? "" : "?t=" + Date.now());
+  $("#previewTitle").textContent = "Preview (saved version)";
+  if (frame.getAttribute("src") === url) frame.contentWindow.location.reload();
+  else frame.src = url;
+}
+
+$("#reload").onclick = showPreview;
+$("#openTab").onclick = () => window.open(pageUrl(), "_blank");
+$("#togglePreview").onclick = () => $("#main").classList.toggle("no-preview");
+
+async function status() {
+  try {
+    const s = await api("status");
+    const n = s.changed.length;
+    $("#status").textContent = n ? `${n} file${n === 1 ? "" : "s"} changed since the last publish` : `Up to date · ${s.last}`;
+    $("#status").classList.toggle("dirty", n > 0);
+    $("#publish").disabled = $("#discard").disabled = n === 0;
+  } catch (err) { $("#status").textContent = err.message; }
+}
+
+$("#publish").onclick = async () => {
+  if (dirty && !confirm("This post has unsaved edits, which won't be published. Publish the rest anyway?")) return;
+  const message = prompt("Describe the change (it becomes the commit message):", current ? `Edit "${collect().title}"` : "Edit the site");
+  if (message === null) return;
+  $("#publish").disabled = true;
+  toast("Publishing…");
+  try {
+    const { last } = await api("publish", { method: "POST", body: JSON.stringify({ message }) });
+    toast(`Published (${last}). GitHub Pages updates the live site in a minute or two.`);
+  } catch (err) { toast(err.message, true); }
+  status();
+};
+
+$("#discard").onclick = async () => {
+  if (!confirm("Throw away every change since the last publish, including uploads? This can't be undone.")) return;
+  try {
+    await api("discard", { method: "POST" });
+    current = null;
+    dirty = false;
+    $("#form").innerHTML = '<p id="empty">Changes discarded.</p>';
+    await refresh();
+    showPreview();
+  } catch (err) { toast(err.message, true); }
+};
+
+$("#quit").onclick = async () => {
+  if (dirty && !confirm("You have unsaved edits. Quit anyway?")) return;
+  await api("quit", { method: "POST" }).catch(() => {});
+  document.body.innerHTML = '<p style="padding:40px">The editor has stopped. Open "Website Editor" again to keep editing.</p>';
+};
+
+addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "s" && current) { e.preventDefault(); save(); }
+});
+addEventListener("beforeunload", (e) => { if (dirty) e.preventDefault(); });
+addEventListener("focus", status);
+
+refresh().catch((err) => toast(err.message, true));
+</script>
+</body>
+</html>

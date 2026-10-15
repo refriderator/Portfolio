@@ -357,70 +357,139 @@ a.tile:focus-visible::before {
 .prose p { margin: 0 0 var(--space-3); }
 .prose a { color: inherit; text-underline-offset: 0.18em; }
 
-/* Posts copied from WordPress (js-free HTML: headings, lists, tables,
-   figures, a YouTube player). Pictures sit flush with the text column. */
+/* Posts: headings stay pixel type; the reading is done in thin-bordered
+   boxes in the system's own text face, which is far easier on long
+   paragraphs than VT323. Boxes, pictures, tables and videos sit above the
+   CRT scanlines (z-index 1), so photos stay crisp and text stays clean.
+   tools/editor puts each run of paragraphs and lists in a .text-box and
+   each table in a .table-box. */
+.prose { max-width: 48rem; }
+
 .prose h2, .prose h3, .prose h4 {
-  margin: var(--space-5) 0 var(--space-2);
+  margin: var(--space-5) 0 var(--space-3);
   font-family: var(--font-pixel);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.6;
 }
 
-.prose ul, .prose ol { margin: 0 0 var(--space-3); padding-left: 1.2em; }
-.prose li + li { margin-top: var(--space-1); }
+.text-box,
+.table-box,
+.prose figure,
+.prose .video {
+  position: relative;
+  z-index: 1;
+}
 
-.prose figure { margin: var(--space-4) 0; }
+.text-box {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--surface-box);
+  font-family: var(--font-read);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.text-box p { margin: 0 0 0.9em; }
+.text-box ul, .text-box ol { margin: 0 0 0.9em; padding-left: 1.3em; }
+.text-box li + li { margin-top: 0.3em; }
+.text-box > :last-child { margin-bottom: 0; }
+.text-box a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.text-box strong { font-weight: 600; }
+
+.prose figure { margin: 0 0 var(--space-4); }
 .prose figcaption { margin-top: var(--space-1); font-size: 20px; color: var(--text-muted); }
 
 .prose img {
   display: block;
   max-width: 100%;
   height: auto;
-  border: var(--px, 2px) solid var(--line);
+  border: 1px solid var(--line);
+  image-rendering: auto;
+}
+
+/* Tables: the same text face, figures in fixed-width digits so columns of
+   numbers line up, a tinted header and banded rows. Wide ones scroll
+   sideways inside their box instead of widening the page. */
+.table-box {
+  margin: 0 0 var(--space-4);
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: var(--surface-box);
 }
 
 .prose table {
   width: 100%;
-  margin: var(--space-4) 0;
   border-collapse: collapse;
-  font-size: 20px;
+  font-family: var(--font-read);
+  font-size: 15px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
 }
 
 .prose th, .prose td {
-  padding: var(--space-1) var(--space-2);
+  padding: 0.6rem 0.85rem;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
 
-/* Wide tables scroll sideways on a phone instead of widening the page. */
-@media (max-width: 640px) {
-  .prose table { display: block; overflow-x: auto; }
+.prose th {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  white-space: nowrap;
 }
 
-.prose .video { margin: var(--space-4) 0; }
+.prose tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--text) 3%, transparent); }
+.prose tr:last-child td { border-bottom: 0; }
+
+.prose .video { margin: 0 0 var(--space-4); }
 
 .prose .video iframe,
 .prose video {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: var(--px, 2px) solid var(--line);
+  border: 1px solid var(--line);
   background: #000;
 }
+
 
 /* In-progress project page: goals on the left, its updates and posts
    down the right, photos in a row along the bottom. One column on a phone. */
 .project {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
   grid-template-areas: "goals log" "photos photos";
-  gap: var(--space-6) clamp(var(--space-5), 5vw, var(--space-7, 6rem));
+  gap: var(--space-6) var(--space-5);
+  align-items: start;
   margin-top: var(--space-5);
 }
 
-.project__goals { grid-area: goals; margin-top: 0; }
+/* Goals in a text box that stays in view while the log scrolls past. */
+.project__goals {
+  grid-area: goals;
+  position: sticky;
+  top: var(--space-4);
+  margin-top: 0;
+}
+
+.project__goals ul {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 1.2em);
+  border: 1px solid var(--line);
+  background: var(--surface-box);
+  font-family: var(--font-read);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.project__goals li + li { margin-top: 0.4em; }
 .project__goals h2:first-child { margin-top: 0; }
 .project__log { grid-area: log; display: grid; gap: var(--space-6); align-content: start; }
 .project__log .shelf__title { margin-top: 0; }
@@ -434,16 +503,19 @@ a.tile:focus-visible::before {
 
 .project__photos figure { margin: 0; }
 
+.project__photos figure { position: relative; z-index: 1; }
+
 .project__photos img {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border: var(--px, 2px) solid var(--line);
+  border: 1px solid var(--line);
 }
 
 @media (max-width: 800px) {
   .project { grid-template-columns: 1fr; grid-template-areas: "goals" "log" "photos"; }
+  .project__goals { position: static; }
 }
 
 /* Pinned items get more room than the rest. */
