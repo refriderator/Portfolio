@@ -138,8 +138,10 @@
 
 /* The amazed preview's darkening is a dither rising from below (js/wipe.js),
    drawn behind the page's text. The theme colours wait for it: going dark,
-   they change only once the wipe has reached the top; going back, they flip
-   at once underneath it and the sinking wipe reveals them. */
+   they change only once the wipe has reached the top ([data-covered]); going
+   back from there, they flip at once underneath it and the light rising from
+   the bottom reveals them. A wipe that never reached the top never changed
+   them, and just drains back down. */
 .dither-wipe {
   position: fixed;
   left: 0;
@@ -149,9 +151,8 @@
   image-rendering: pixelated;
 }
 
-html[data-preview="amazed"]:not([data-theme]):not([data-switching]) {
+html[data-covered]:not([data-theme]):not([data-switching]) {
   transition-duration: 0s;
-  transition-delay: 470ms;
 }
 
 html[data-wipe="out"] { transition: none; }

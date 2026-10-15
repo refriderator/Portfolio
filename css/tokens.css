@@ -194,9 +194,11 @@
   --edge-b:       var(--charcoal-600);
 }
 
-/* Amazed: navy grounds, chrome highlights. [data-launching] holds it during
-   the paper-plane transition, whatever the pointer does meanwhile. */
-[data-preview="amazed"],
+/* Amazed: navy grounds, chrome highlights. The hover preview switches to it
+   only once the dither wipe covers the screen ([data-covered], js/wipe.js);
+   [data-launching] holds it during the paper-plane transition, whatever the
+   pointer does meanwhile. */
+[data-preview="amazed"][data-covered],
 [data-launching],
 [data-theme="amazed"] {
   --surface-page: var(--navy-950);

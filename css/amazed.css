@@ -142,7 +142,10 @@
   position: relative;
   isolation: isolate;
   display: flex;
-  align-items: flex-end;
+  /* Text hangs right under the photo; the room kept for the description
+     is below it, so unfolding fills downward instead of the title sitting
+     at the bottom with a gap above it. */
+  align-items: flex-start;
   z-index: 0;            /* a number, so the hold on leaving can time it; "auto" flips at once */
   /* Tall enough for the photo, the gap and the unfolded description, so
      hovering never changes the card's height and the grid stays put. */
@@ -207,7 +210,7 @@
 }
 
 .feature__text {
-  padding: clamp(var(--space-4), 3vw, var(--space-5));
+  padding: var(--space-3) clamp(var(--space-3), 2vw, var(--space-4));
 }
 
 .feature__status {

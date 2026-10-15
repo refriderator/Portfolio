@@ -37,10 +37,14 @@
 // ---------------------------------------------------------------------------
 
 import { scene } from "./scene.js";
+import { reveal } from "./wipe.js";
 import { K, SHEET, makeCanvas, sheetSprite, ripple } from "./pixel.js";
 
 const root = document.documentElement;
 const LAYER_GAP = 0.2;                 // fine px between stacked layers of paper
+// Touch screens have no hover preview, so the page stays light while the plane folds; it goes dark only as
+// the plane flies off, rising from the bottom with the Workshop (js/wipe.js reveal()).
+const touch = () => matchMedia("(hover: none)").matches;
 
 // Timeline, in ms from the click.
 const T = {
@@ -449,7 +453,8 @@ export default function play({ to, swap, isCurrent }) {
   if (!scene) { swap(); return Promise.resolve(); }
 
   return new Promise((resolve) => {
-    root.dataset.launching = "";
+    const light = touch();
+    if (!light) root.dataset.launching = "";
     root.dataset.landed = "";
     scene.launch();
 
@@ -469,7 +474,9 @@ export default function play({ to, swap, isCurrent }) {
       if (fold && t < T.fly[1]) fold.draw(g, t);
       if (t >= T.fly[0] && !swapped) {
         swapped = true;
+        const page = getComputedStyle(root).getPropertyValue("--surface-page").trim();
         swap();                                 // the Workshop replaces the landing…
+        if (light) reveal(page);                // …under the landing's light colour, eaten away from below
         rising = rise(to);                      // …its blocks start below the screen
         if (skipped) for (const a of rising) a.finish();
       }

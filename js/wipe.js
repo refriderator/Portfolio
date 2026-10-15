@@ -1,14 +1,23 @@
 // The landing's darkening for the amazed preview: navy rises from the
 // bottom of the page as an ordered-dither front, in the landing's big
-// pixels. When the preview ends the light comes back the same way, rising
-// from the bottom, so the dark lifts off the top of the page.
+// pixels. If the preview ends before the navy reaches the top, the front
+// just turns round and drains back down, like paint running off a wall.
+// If it had covered everything, the light comes back from the bottom
+// instead, so the dark lifts off the top of the page. The front only
+// changes which way it is drawn at the ends, never mid-way, so it can't
+// jump.
+//
+// On touch screens (no hover, no preview) the same front plays once more,
+// the other way round, for the paper plane: as the plane flies off, a sheet
+// of the landing's light colour over the already-dark Workshop is eaten
+// away from the bottom up, and the Workshop's blocks rise in with it
+// (reveal(), called by js/airplane.js).
 //
 // It is drawn on its own canvas behind the page's text (z-index -1), so
-// the masthead stays on top. The theme's own colours wait for it
-// (css/landing.css): going dark, the page colour changes only once the
-// wipe covers everything, and the text once the front has passed it;
-// going back, everything changes at once underneath, and the wipe sinking
-// away reveals it.
+// the masthead stays on top. The theme's own colours wait for it: they
+// switch (html[data-covered], css/tokens.css) only once the wipe covers
+// everything; going back from there, they switch back at once underneath
+// and the light rising from the bottom reveals them.
 //
 // Front, in big pixels up from the bottom of the screen, for column c:
 //   h(c) = p · (rows + 2·BAND + 3) − BAND + wave(c, t)
@@ -31,6 +40,7 @@ canvas.setAttribute("aria-hidden", "true");
 const g = canvas.getContext("2d");
 
 let p = 0, target = 0, rising = true, last = 0, running = false, cell = 16, colour = "#000";
+let revealing = false;          // the touch screens' plane reveal is playing
 
 const wanted = () =>
   !landing.hidden && (root.dataset.preview === "amazed" || root.dataset.launching !== undefined);
@@ -41,7 +51,7 @@ function size() {
   canvas.height = Math.ceil(innerHeight / cell);
   canvas.style.width = `${canvas.width * cell}px`;
   canvas.style.height = `${canvas.height * cell}px`;
-  colour = getComputedStyle(root).getPropertyValue("--navy-950").trim() || "#050a1a";
+  if (!revealing) colour = getComputedStyle(root).getPropertyValue("--navy-950").trim() || "#050a1a";
 }
 
 function draw(t) {
@@ -79,9 +89,10 @@ function frame(t) {
   p = target > p ? Math.min(target, p + step) : Math.max(target, p - step);
   if (reduced()) p = target;
   draw(t);
+  if (p === 1 && target === 1) root.dataset.covered = "";   // the theme switches now, unseen under the wipe
   if (p === target && (p === 0 || p === 1)) {
     running = false;
-    if (p === 0) canvas.hidden = true;
+    if (p === 0) { canvas.hidden = true; revealing = false; }
     if (root.dataset.wipe === "out") delete root.dataset.wipe;
     return;
   }
@@ -90,13 +101,23 @@ function frame(t) {
 
 function sync() {
   const next = wanted() ? 1 : 0;
-  if (next === target) return;
-  // Going back: every colour flips at once, hidden under the wipe, which then sinks to reveal it.
-  if (next === 0 && p > 0) root.dataset.wipe = "out";
-  else delete root.dataset.wipe;
+  if (next === target || revealing) return;
+  // Mid-way, the front keeps its shape and just turns round; only at the ends does the drawing switch.
+  if (p === 0) rising = true;
+  else if (p === 1) rising = false;
+  if (next === 0) {
+    // Fully covered: the colours flip back at once, under the wipe, and the light rising reveals them.
+    if (root.dataset.covered !== undefined) root.dataset.wipe = "out";
+    delete root.dataset.covered;
+  } else {
+    delete root.dataset.wipe;
+  }
   target = next;
-  rising = next === 1;
   if (next === 1 && p === 0) size();
+  start();
+}
+
+function start() {
   canvas.hidden = false;
   if (!running) {
     running = true;
@@ -105,12 +126,27 @@ function sync() {
   }
 }
 
+// Touch screens' plane: `light` (the landing's page colour, read before the Workshop's theme went on) covers
+// the screen and is eaten away from the bottom up.
+export function reveal(light) {
+  if (reduced()) return;
+  revealing = true;
+  colour = light;
+  size();
+  p = 1;
+  target = 0;
+  rising = false;
+  draw(performance.now());
+  start();
+}
+
 if (landing) {
   canvas.hidden = true;
   document.body.prepend(canvas);
   addEventListener("resize", () => { if (!canvas.hidden) { size(); draw(performance.now()); } });
   new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-preview", "data-launching"] });
   new MutationObserver(() => {
-    if (landing.hidden) { p = target = 0; canvas.hidden = true; delete root.dataset.wipe; }   // the Workshop is dark already
+    // The Workshop is dark already (unless this is the touch screens' reveal, which runs over it).
+    if (landing.hidden && !revealing) { p = target = 0; canvas.hidden = true; delete root.dataset.wipe; delete root.dataset.covered; }
   }).observe(landing, { attributes: true, attributeFilter: ["hidden"] });
 }
