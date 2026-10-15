@@ -9,6 +9,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="assets/landing/recruiter.png" as="image">
+  <link rel="preload" href="assets/landing/amazed.png" as="image">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Press+Start+2P&family=VT323&display=swap">
 
   <link rel="stylesheet" href="css/tokens.css">
@@ -31,40 +33,6 @@
 </head>
 <body>
 
-  <!-- The landing sheet as pixel art, on a 28 × 40 grid (≈ A4: 0.700 vs
-       0.707). Each 1 × 1 cell is one "pixel"; crispEdges keeps them square
-       at any size. Colours come from CSS variables (--sheet-*), which reach
-       inside <use>, so themes can repaint it. --marks hides the text bars
-       and photo area (for the back of the sheet and for its shadow). Its
-       fallback is "inherit", not "visible": a child set to visible would
-       show even when an ancestor is hidden. -->
-  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
-    <defs>
-      <pattern id="sheet-dither" width="2" height="2" patternUnits="userSpaceOnUse">
-        <rect width="1" height="1" style="fill: var(--sheet-shade)"/>
-        <rect x="1" y="1" width="1" height="1" style="fill: var(--sheet-shade)"/>
-      </pattern>
-    </defs>
-    <symbol id="sheet" viewBox="0 0 28 40" shape-rendering="crispEdges">
-      <!-- paper -->
-      <path style="fill: var(--sheet-fill)" d="M7 1h20v6H7z M1 7h26v32H1z"/>
-      <!-- shaded foot, curling up the left edge -->
-      <path style="fill: var(--sheet-shade)" d="M1 37h26v2H1z M1 34h1v3H1z"/>
-      <!-- the folded-down corner -->
-      <path style="fill: var(--sheet-flap)" d="M5 2h1v1H5z M4 3h2v1H4z M3 4h3v1H3z M2 5h4v1H2z"/>
-      <!-- marks: where the picture develops, and two lines of "text" -->
-      <g style="visibility: var(--marks, inherit)">
-        <path style="fill: url(#sheet-dither)" d="M3 7h22v16H3z"/>
-        <path style="fill: var(--sheet-ink)" d="M4 34h20v1H4z M4 36h13v1H4z"/>
-      </g>
-      <!-- outline: edges, notched corners, the dog-ear's staircase diagonal
-           and the folded flap's two edges -->
-      <path style="fill: var(--sheet-ink)" d="M6 0h21v1H6z M27 1h1v38h-1z M1 39h26v1H1z M0 6h1v33H0z
-        M1 5h1v1H1z M2 4h1v1H2z M3 3h1v1H3z M4 2h1v1H4z M5 1h1v1H5z
-        M1 6h6v1H1z M6 1h1v5H6z"/>
-    </symbol>
-  </svg>
-
   <!-- ============================ LANDING ============================ -->
   <div class="view landing" id="start" data-view="landing">
     <header class="masthead">
@@ -72,48 +40,19 @@
       <p class="masthead__line">Physics, mathematics &amp; statistics, University of Toronto</p>
     </header>
 
-    <!-- Each choice is a stack of layers, one job each, because two
-         animations cannot share one transform:
-           shadow  stays on the ground, slides as the paper rises
-           drop    intro: flips and falls onto the page
-           lift    hover: grows, or rises towards you
-           float   hover: bobs and jiggles
-           paper   the front: picture (on hover) and label
-           back    the blank back, seen while the sheet flips
-           dust    pixel dust on landing and lift-off
-         The <a> itself never moves, so the hover target stays put. -->
+    <!-- The sheets are drawn by js/scene.js on a pixel canvas over these
+         links. The links lay them out, take hover, focus and clicks, and
+         carry the text for screen readers; without JavaScript they show
+         as plain boxes. data-label is the lettering on the sheet (| breaks
+         the line), data-photo the picture that develops on hover. -->
     <main class="choices">
-      <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter">
-        <span class="choice__shadow" aria-hidden="true"><svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg></span>
-        <span class="choice__drop">
-          <span class="choice__lift">
-            <span class="choice__float">
-              <span class="choice__paper">
-                <svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg>
-                <img class="choice__img" src="assets/landing/recruiter.png" alt="" width="96" height="112" decoding="async" fetchpriority="low">
-                <span class="choice__label"><span class="choice__text">I am a recruiter</span></span>
-              </span>
-              <span class="choice__back"><svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg></span>
-            </span>
-          </span>
-        </span>
-        <span class="choice__dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter"
+         data-label="I AM A|RECRUITER" data-photo="assets/landing/recruiter.png">
+        <span class="choice__label">I am a recruiter</span>
       </a>
-      <a class="choice choice--amazed" data-choice="amazed" href="#amazed">
-        <span class="choice__shadow" aria-hidden="true"><svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg></span>
-        <span class="choice__drop">
-          <span class="choice__lift">
-            <span class="choice__float">
-              <span class="choice__paper">
-                <svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg>
-                <img class="choice__img" src="assets/landing/amazed.png" alt="" width="80" height="113" decoding="async" fetchpriority="low">
-                <span class="choice__label"><span class="choice__text">I want to be amazed</span></span>
-              </span>
-              <span class="choice__back"><svg class="choice__sprite" viewBox="0 0 28 40" preserveAspectRatio="none" aria-hidden="true"><use href="#sheet"/></svg></span>
-            </span>
-          </span>
-        </span>
-        <span class="choice__dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <a class="choice choice--amazed" data-choice="amazed" href="#amazed"
+         data-label="I WANT TO|BE AMAZED" data-photo="assets/landing/amazed.png">
+        <span class="choice__label">I want to be amazed</span>
       </a>
     </main>
   </div>

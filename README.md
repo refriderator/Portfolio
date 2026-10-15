@@ -15,16 +15,21 @@ Static site, no build step. Open `index.html` through any local server
 | `css/landing.css`, `css/recruiter.css`, `css/amazed.css` | One file per view. |
 | `js/views.js` | Picks the view from the URL hash and runs the transition. |
 | `js/landing.js` | Hover/focus preview on the landing sheets; warms what the next step needs. |
+| `js/scene.js` | Draws the landing on a pixel canvas: sheets, shadows, particles, flag wave. |
+| `js/pixel.js` | Pixel-art helpers: the sheet sprite, a 3 × 5 bitmap font, dithering, particles. |
 | `js/airplane.js` | The landing → Workshop paper-plane transition (loaded on demand). |
 | `js/recruiter.js` | Builds the sidebar post list and the scroll marker. |
-| `tools/spring.py` | Generates the `--spring`, `--bubble` and `--bubble-held` easing curves in `tokens.css` (`hold` for the 12 fps staircase). |
+| `tools/spring.py` | Generates the `--spring` and `--bubble` easing curves in `tokens.css` (`hold` gives a frame-held staircase). |
 | `tools/pixelate.py` | Turns a photo into an 8-bit sprite (crop, downsample, dither). |
 | `assets/landing/` | The two landing sprites (recruiter 96 × 112, amazed 80 × 113). |
 | `design-system.html` | Reference sheet for the recruiter theme. |
 
-The landing sheets are a 28 × 40 pixel-art sprite, the `#sheet` symbol at
-the top of `index.html`, coloured by the `--sheet-*` tokens. One sheet pixel
-(`--pp`) is the sheet's width / 28.
+The landing is drawn on one canvas by `js/scene.js`, at a fine pixel of a few
+CSS px scaled up without smoothing. Sheets are 22 × 31 big pixels (4 × 4 fine
+pixels each), built cell by cell in `js/pixel.js` and coloured by the
+`--sheet-*` tokens. The links in `index.html` lay the sheets out and carry
+their text (`data-label`, `data-photo`); without JavaScript they show as
+plain boxes.
 
 ## Adding content
 
@@ -48,7 +53,7 @@ fonts. Everything else waits for a sign of interest:
 - Project and update pages are prefetched after about 200 ms of hovering their
   card (speculation rules; browsers without them just load on click).
 - Hidden views are `display: none`, so they cost no layout or painting.
-- The folding plane is removed from the page as soon as it leaves the screen.
+- The canvas only runs while something moves, and hides when the landing does.
 
 Give pictures inside the Workshop `loading="lazy"` so they load only when
 scrolled near.

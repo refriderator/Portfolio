@@ -1,10 +1,13 @@
-// Sets html[data-preview] while a choice is hovered (mouse/pen) or focused (keyboard).
-// All visual consequences live in CSS; this file only manages state.
+// Sets html[data-preview] while a choice is hovered (mouse/pen) or focused
+// (keyboard). The page colours follow it in CSS (tokens.css); the sheets
+// follow it on the pixel canvas, which js/scene.js runs.
 // Touch is deliberately ignored: a tap goes straight to the view.
 //
 // Hover and focus are tracked separately and the preview is derived from
 // both. Clearing it on any single event is wrong: following a #link blurs
 // the link while the pointer is still over it.
+
+import "./scene.js";
 
 const root = document.documentElement;
 let hovered = null;
@@ -49,22 +52,4 @@ for (const choice of document.querySelectorAll("[data-choice]")) {
   choice.addEventListener("blur", () => {
     if (focused === name) { focused = null; sync(); }
   });
-}
-
-// Intro: the papers fall once per page load. When the last one lands, mark
-// it so the intro does not replay on returning from another view. If the
-// landing is hidden mid-fall (someone clicks through fast), the animation is
-// cancelled rather than ended; that counts too. Under reduced motion the
-// intro never runs, so mark it straight away.
-const lastDrop = document.querySelector(".choice--amazed .choice__drop");
-const landed = () => (root.dataset.landed = "");
-
-if (!lastDrop || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  landed();
-} else {
-  for (const type of ["animationend", "animationcancel"]) {
-    lastDrop.addEventListener(type, (e) => {
-      if (e.target === lastDrop && e.animationName === "drop") landed();
-    });
-  }
 }

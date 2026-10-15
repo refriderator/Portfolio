@@ -26,13 +26,16 @@
   --ink:       #15171c;
 
   /* The landing sheets, a pixel-art document: periwinkle paper, a lighter
-     dog-ear, a darker shaded foot, ink outline. Not registered with
-     @property, so a theme change swaps them in one step, like changing an
-     8-bit palette entry. */
+     dog-ear and lit edge, a darker shaded foot, ink outline; sparkle and
+     dust particles. Not registered with @property, so a theme change swaps
+     them in one step, like changing an 8-bit palette entry. The canvas
+     (js/scene.js) reads them whenever the theme changes. */
   --sheet-fill:  #d1d8ee;
   --sheet-shade: #b3bedf;
   --sheet-flap:  #eef1f9;
   --sheet-ink:   #15171c;
+  --sheet-spark: #3b4a7a;
+  --sheet-dust:  #9aa1ae;
 
   /* Amazed navy: backgrounds. Deep enough that it reads as blue only
      next to the night greys, never as a bright royal blue. */
@@ -92,7 +95,7 @@
 
   /* One "pixel" of the 8-bit style: outlines, corner notches and shadow
      offsets are all whole multiples of it. */
-  --px: 6px;
+  --px: 8px;
 
   /* Motion. --spring is a sampled underdamped oscillator,
      zeta = 0.55 (12.6% overshoot). Regenerate with tools/spring.py. */
@@ -113,16 +116,6 @@
     0.9983, 0.9993, 1.0002, 1.0007, 1.001, 1);
   --bubble-duration: 900ms;
 
-  /* --bubble-held: the same spring sampled at 12 frames per second, each
-     value held until the next (a zero-order hold), so it moves like an old
-     game sprite: 11 poses in 900ms instead of a smooth curve.
-     Regenerate with: python3 tools/spring.py 0.4 11 hold */
-  --bubble-held: linear(0 0%, 0 9.0909%, 0.6989 9.0909%, 0.6989 18.1818%, 1.2425 18.1818%,
-    1.2425 27.2727%, 1.1198 27.2727%, 1.1198 36.3636%, 0.9477 36.3636%,
-    0.9477 45.4545%, 0.9585 45.4545%, 0.9585 54.5455%, 1.0091 54.5455%,
-    1.0091 63.6364%, 1.0131 63.6364%, 1.0131 72.7273%, 0.9993 72.7273%,
-    0.9993 81.8182%, 0.9962 81.8182%, 0.9962 90.9091%, 0.9997 90.9091%,
-    0.9997 100%, 1 100%);
 
 
   /* Hover previews are quick so they feel like a response to the pointer. */
@@ -212,6 +205,7 @@
   --sheet-shade: #9ea6b2;
   --sheet-flap:  #f6f7f9;
   --sheet-ink:   #02050d;
+  --sheet-spark: #f6f7f9;
 }
 
 /* Recruiter: paper grounds, charcoal for text and lines,

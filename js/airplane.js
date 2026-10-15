@@ -2,8 +2,8 @@
 //
 // The sheet climbs, its thrust blows the other sheet away, it folds itself
 // into a dart (crease, corners in twice, fold in half, wings out) and flies
-// off the top of the screen, while the Workshop's blocks rise up from below
-// and spring into place.
+// off the top of the screen trailing sparkles, while the Workshop's blocks
+// rise up from below and spring into place.
 //
 // Loaded only when needed: js/landing.js imports it the first time someone
 // hovers or focuses the amazed sheet, and js/views.js calls it on the click.
@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------
 // Folding model
 //   The sheet is a list of flat pieces. Each piece has
-//     poly    its outline in sheet coordinates (CSS px, origin top-left)
+//     poly    its outline in sheet coordinates (fine pixels, origin top-left)
 //     base    a 4×4 matrix placing it in the world while nothing moves
 //     layer   stacking order while the paper lies flat
 //     joints  the creases it is currently turning about, outermost first
@@ -25,26 +25,26 @@
 //   is placed by  R_half · R_wing · base.  Child joint first, then parent:
 //   the same forward kinematics as a robot arm.
 //
-// Rendering
-//   Every piece is a copy of the sheet's DOM, clipped to its polygon
-//   (clip-path) and placed by matrix3d() under one perspective. The pieces
-//   are not put in a shared 3D scene (preserve-3d): browsers depth-sort
-//   those by each element's whole box, and a piece's box is the whole sheet,
-//   mostly clipped away, which sorts wrongly. Instead each piece is drawn
-//   flat in an order computed here, back to front by the depth of its
-//   centre (the painter's algorithm), which is exact for paper this simple.
-//   Frames are quantised to 12 per second, like a sprite, and every frame is
-//   a pure function of time, so skipping to the end is just drawing the last.
+// Rendering (8-bit)
+//   Every frame the pieces are projected straight onto the screen
+//   (orthographic, so each piece is an affine image of the sheet and the
+//   canvas can map the sheet sprite onto it exactly), sorted back to front
+//   by depth (the painter's algorithm), and drawn into a small buffer at
+//   big-pixel resolution. Its edges are then made hard (alpha 0 or 255) and
+//   given a one-pixel ink outline, like a sprite, and it is copied onto the
+//   landing's canvas four times larger, column by column with a small wave
+//   so the paper flutters.
 // ---------------------------------------------------------------------------
 
+import { scene } from "./scene.js";
+import { K, SHEET, makeCanvas, sheetSprite } from "./pixel.js";
+
 const root = document.documentElement;
-const FPS = 12;
-const LAYER_GAP = 0.6;                 // px between stacked layers of paper
+const LAYER_GAP = 0.2;                 // fine px between stacked layers of paper
 
 // Timeline, in ms from the click.
 const T = {
-  blow: 150,                           // the other sheet is blown away
-  fold: 450,                           // the flat copy replaces the sheet
+  fold: 450,                           // the folding copy replaces the sheet
   crease: [450, 900],                  // fold in half and open again
   corners: [900, 1250],                // top corners to the centre line
   corners2: [1250, 1600],              // the new edges to the centre again
@@ -203,19 +203,27 @@ function placement(p, inPlane) {
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const progress = ([a, b], t) => clamp01((t - a) / (b - a));
 const ease = (u) => u * u * (3 - 2 * u);            // smoothstep: zero slope at both ends
-const snap = (x, px) => Math.round(x / px) * px;
 
 
 // ---------- The folding sheet ----------
 
-function folder(sheetEl, rect, px) {
-  const w = rect.width, h = rect.height, c = w / 2, k = 0.34 * c;
-  const tan22 = Math.SQRT2 - 1;                    // tan 22.5°, half of a corner's 45°
+const rand = (a, b) => a + Math.random() * (b - a);
 
-  // The sheet's take-off lift, in sheet pixels (1/28 of its width), to
-  // match .is-launching in landing.css.
-  const cx = w / 2, cy = h / 2, pp = w / 28;
-  const lift = { x: -pp, y: -3 * pp, s: 1.14 };
+function hexToRgb(colour) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(colour.trim());
+  const n = m ? parseInt(m[1], 16) : 0;
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function folder(start) {
+  const w = start.w, h = start.h, c = w / 2, k = 0.34 * c;
+  const tan22 = Math.SQRT2 - 1;                    // tan 22.5°, half of a corner's 45°
+  const cx = w / 2, cy = h / 2;
+  const pal = start.pal;
+  const front = sheetSprite({ pal, side: "front", photo: start.photo });
+  const back = sheetSprite({ pal, side: "back" });
+  const ink = hexToRgb(pal.ink);
+  const [buf, bg] = makeCanvas(1, 1);
 
   // Folds, in sheet coordinates with the nose (top edge) at y = 0.
   const folds = {
@@ -240,34 +248,7 @@ function folder(sheetEl, rect, px) {
     ],
   };
 
-  // DOM: a fixed stage over the sheet's spot, with the perspective; one
-  // clipped copy of the sheet per piece.
-  const stage = document.createElement("div");
-  stage.className = "fold-stage";
-  Object.assign(stage.style, {
-    left: `${rect.left}px`, top: `${rect.top}px`, width: `${w}px`, height: `${h}px`,
-  });
-  document.body.append(stage);
-
   let pieces = [{ poly: [[0, 0], [w, 0], [w, h], [0, h]], base: identity(), layer: 0, joints: [] }];
-  let els = [];
-
-  function rebuild() {
-    for (const el of els) el.remove();
-    els = pieces.map((p) => {
-      const el = sheetEl.cloneNode(true);
-      el.classList.add("fold-face");
-      el.style.clipPath = `polygon(${p.poly.map(([u, v]) => `${u}px ${v}px`).join(", ")})`;
-      stage.append(el);
-      return el;
-    });
-  }
-
-  // A piece's centre, for depth sorting.
-  const centre = (p) => [
-    p.poly.reduce((s, q) => s + q[0], 0) / p.poly.length,
-    p.poly.reduce((s, q) => s + q[1], 0) / p.poly.length,
-  ];
 
   // Stages run in order; entering one cuts along its creases, leaving one
   // bakes it (only full 180° folds are baked).
@@ -290,61 +271,141 @@ function folder(sheetEl, rect, px) {
   ];
   let current = -1;
 
-  function enter(i) {
-    for (const j of stages[i].folds) pieces = cut(pieces, j);
-    if (stages[i].inPlane) restack(pieces);
-    rebuild();
-  }
-
-  function leave(i) {
-    const s = stages[i];
-    s.pose(1);
-    if (s.bake) bake(pieces);
-    else if (s.inPlane) for (const p of pieces) p.joints = [];   // opened again: the crease stays as a cut
-  }
-
-  // The whole model's placement: lift, then the tilt as it becomes a plane,
-  // then the flight away and up off the screen.
+  // The whole model's placement on the screen: as handed over, then tilting
+  // as it becomes a plane, then climbing away, shrinking into the distance.
   function view(t) {
     const tilt = (40 * Math.PI / 180) * ease(progress(T.plane, t));
     const f = progress(T.fly, t);
-    const up = f * f * (rect.top + h * 1.2 + 200);   // accelerating climb
-    const away = -700 * f;                           // and into the distance
-    const bank = 0.12 * Math.sin(f * Math.PI * 2);
+    const up = f * f * (start.y + h * 1.8 + 40);     // accelerating climb
+    const bank = 0.14 * Math.sin(f * Math.PI * 2);
     return chain(
-      translate(cx + lift.x, cy + lift.y - up, away),
+      translate(start.x + cx, start.y + cy - up),
       rotateAbout([0, 0, 0], [1, 0, 0], tilt),
       rotateAbout([0, 0, 0], [0, 0, 1], bank),
-      scale(lift.s),
+      scale(1 - 0.55 * f),
       translate(-cx, -cy),
     );
   }
 
-  function draw(t) {
-    // Advance through the stages this frame has reached.
+  const project = (m, [u, v]) => [m[0] * u + m[4] * v + m[12], m[1] * u + m[5] * v + m[13]];
+
+  // A shower of sparkles along each crease as it is pressed flat.
+  function sparkle(foldList, t) {
+    const m = view(t);
+    for (const j of foldList) {
+      const [ax, ay] = project(m, j.a), [bx, by] = project(m, j.b);
+      for (let i = 0; i < 9; i++) {
+        const s = Math.random();
+        scene.particles.add({ kind: "spark", x: ax + (bx - ax) * s, y: ay + (by - ay) * s,
+          vx: rand(-25, 25), vy: rand(-35, -5), life: rand(350, 600), size: 2, colour: pal.spark });
+      }
+    }
+  }
+
+  function enter(i) {
+    for (const j of stages[i].folds) pieces = cut(pieces, j);
+    if (stages[i].inPlane) restack(pieces);
+  }
+
+  function leave(i, t) {
+    const s = stages[i];
+    s.pose(1);
+    if (s.bake) bake(pieces);
+    else if (s.inPlane) for (const p of pieces) p.joints = [];   // opened again: the crease stays as a cut
+    sparkle(s.folds, t);
+  }
+
+  const centre = (p) => [
+    p.poly.reduce((s, q) => s + q[0], 0) / p.poly.length,
+    p.poly.reduce((s, q) => s + q[1], 0) / p.poly.length,
+  ];
+
+  function draw(g, t) {
     while (current + 1 < stages.length && t >= stages[current + 1].span[0]) {
-      if (current >= 0) leave(current);
+      if (current >= 0) leave(current, t);
       enter(++current);
     }
     const s = stages[current];
     s.pose(progress(s.span, t));
 
-    const g = view(t);
-    const placed = pieces.map((p, i) => {
-      const m = mul(g, placement(p, s.inPlane));
+    const G = view(t);
+    const scaleNow = Math.hypot(G[0], G[1], G[2]);
+    const items = pieces.map((p) => {
+      const m = mul(G, placement(p, s.inPlane));
       const [u, v] = centre(p);
-      return { el: els[i], m, depth: m[2] * u + m[6] * v + m[14] };
-    });
-    placed.sort((a, b) => a.depth - b.depth);         // farthest first
-    placed.forEach(({ el, m }, order) => {
-      el.style.transform = `matrix3d(${m.map((n) => +n.toFixed(4)).join(",")})`;
-      el.style.zIndex = order;
-      // Which side faces us: the z part of the sheet's normal after placing.
-      el.classList.toggle("is-back", m[10] < 0);
-    });
+      return { p, m, depth: m[2] * u + m[6] * v + m[14] };
+    }).sort((a, b) => a.depth - b.depth);           // farthest first
+
+    // The buffer: the plane's bounding box at big-pixel resolution, with a
+    // pixel of margin for the outline.
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const { p, m } of items)
+      for (const q of p.poly) {
+        const [x, y] = project(m, q);
+        x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+      }
+    const ox = x0 - K, oy = y0 - K;
+    const bw = Math.ceil((x1 - ox) / K) + 2, bh = Math.ceil((y1 - oy) / K) + 2;
+    if (buf.width !== bw || buf.height !== bh) { buf.width = bw; buf.height = bh; }
+    bg.setTransform(1, 0, 0, 1, 0, 0);
+    bg.clearRect(0, 0, bw, bh);
+    bg.imageSmoothingEnabled = false;
+
+    // Each piece: the sheet sprite (one pixel per big pixel) mapped by the
+    // piece's affine placement, clipped to the piece, then darkened in three
+    // steps as it turns away from us, like a small palette of shades.
+    for (const { p, m } of items) {
+      const nz = m[10] / scaleNow;
+      bg.save();
+      bg.setTransform(m[0], m[1], m[4], m[5], (m[12] - ox) / K, (m[13] - oy) / K);
+      bg.beginPath();
+      p.poly.forEach(([u, v], i) => (i ? bg.lineTo(u / K, v / K) : bg.moveTo(u / K, v / K)));
+      bg.closePath();
+      bg.clip();
+      bg.drawImage(nz >= 0 ? front : back, 0, 0);
+      const a = Math.abs(nz), dark = a > 0.8 ? 0 : a > 0.45 ? 0.18 : 0.34;
+      if (dark) { bg.fillStyle = `rgba(0,0,0,${dark})`; bg.fillRect(0, 0, SHEET.w, SHEET.h); }
+      bg.restore();
+    }
+
+    // Hard edges and an ink outline: every pixel is either paper or not, and
+    // every empty pixel touching paper becomes ink.
+    const img = bg.getImageData(0, 0, bw, bh), d = img.data;
+    const solid = new Uint8Array(bw * bh);
+    for (let i = 0; i < bw * bh; i++) {
+      solid[i] = d[i * 4 + 3] >= 110 ? 1 : 0;
+      d[i * 4 + 3] = solid[i] ? 255 : 0;
+    }
+    for (let y = 0; y < bh; y++)
+      for (let x = 0; x < bw; x++) {
+        const i = y * bw + x;
+        if (solid[i]) continue;
+        if ((x > 0 && solid[i - 1]) || (x < bw - 1 && solid[i + 1]) || (y > 0 && solid[i - bw]) || (y < bh - 1 && solid[i + bw])) {
+          d[i * 4] = ink[0]; d[i * 4 + 1] = ink[1]; d[i * 4 + 2] = ink[2]; d[i * 4 + 3] = 255;
+        }
+      }
+    bg.putImageData(img, 0, 0);
+
+    // Onto the scene, four times larger, each column nudged by a travelling
+    // wave: the paper flutters, more once it is flying.
+    const flying = progress(T.fly, t);
+    const amp = 0.8 + 2.4 * flying;
+    for (let col = 0; col < bw; col++) {
+      const off = Math.round(amp * Math.sin(col * 0.9 - t * 0.022));
+      g.drawImage(buf, col, 0, 1, bh, Math.round(ox) + col * K, Math.round(oy) + off, K, bh * K);
+    }
+
+    // A trail of sparkles and paper scraps from the tail once it flies.
+    if (flying > 0) {
+      const tx = ox + (bw * K) / 2, ty = oy + bh * K - K;
+      for (let i = 0; i < 3; i++)
+        scene.particles.add({ kind: i ? "spark" : "scrap", x: tx + rand(-8, 8), y: ty + rand(-4, 4),
+          vx: rand(-40, 40), vy: rand(20, 90), drag: 1.5, life: rand(350, 650), size: 2,
+          colour: i === 1 ? pal.spark : pal.flap });
+    }
   }
 
-  return { draw, remove: () => stage.remove() };
+  return { draw };
 }
 
 
@@ -354,9 +415,8 @@ function folder(sheetEl, rect, px) {
 // same oscillator as tools/spring.py:  x(t) = 1 − e^(−ζωt)(cos ω_d t + (ζω/ω_d) sin ω_d t).
 // Bigger blocks are "heavier": ω = √(k/m), so they ring more slowly. They
 // start one after another and overshoot by different amounts, so they jostle
-// past each other on the way in. Frames are 12 per second, positions snap
-// to the pixel grid.
-function rise(view, px) {
+// past each other on the way in. Sampled at 60 frames per second.
+function rise(view) {
   const vh = innerHeight;
   const parts = [...view.querySelectorAll(
     ".back, .amazed__title, .amazed__lede, .shelf__title, .feature, .tile")]
@@ -364,109 +424,74 @@ function rise(view, px) {
 
   return parts.map((el, i) => {
     const r = el.getBoundingClientRect();
-    const from = vh - r.top + 4 * px;
-    const zeta = 0.5 + 0.08 * (i % 3);
+    const from = vh - r.top + 24;
+    const zeta = 0.45 + 0.08 * (i % 3);
     const omega = Math.min(13, Math.max(7, 11 * Math.sqrt(20000 / (r.width * r.height))));
     const wd = omega * Math.sqrt(1 - zeta * zeta);
-    const tip = (i % 2 ? 1 : -1) * 3;               // neighbours lean opposite ways
-    const n = Math.ceil((4.6 / (zeta * omega)) * FPS); // until the envelope is 1%
+    const tip = (i % 2 ? 1 : -1) * 4;               // neighbours lean opposite ways
+    const n = Math.ceil((4.6 / (zeta * omega)) * 60); // until the envelope is 1%
 
     const frames = [];
     for (let f = 0; f <= n; f++) {
-      const t = f / FPS, env = Math.exp(-zeta * omega * t);
+      const t = f / 60, env = Math.exp(-zeta * omega * t);
       const x = 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
-      const y = snap(from * (1 - x), px);
-      const lean = +(tip * env * Math.sin(wd * t)).toFixed(2);
-      frames.push({ transform: `translate(0, ${y}px) rotate(${lean}deg)`, easing: "steps(1, end)" });
+      const lean = tip * env * Math.sin(wd * t);
+      frames.push({ transform: `translate(0, ${(from * (1 - x)).toFixed(1)}px) rotate(${lean.toFixed(2)}deg)` });
     }
     frames.push({ transform: "none" });
 
-    return el.animate(frames, { duration: (n + 1) * 1000 / FPS, delay: i * 70, fill: "backwards" });
+    return el.animate(frames, { duration: (n + 1) * 1000 / 60, delay: i * 70, fill: "backwards" });
   });
 }
 
 
 // ---------- The whole sequence ----------
 
-function clock(total, onFrame, signal) {
+export default function play({ to, swap, isCurrent }) {
+  if (!scene) { swap(); return Promise.resolve(); }
+
   return new Promise((resolve) => {
-    const start = performance.now();
-    let last = -1;
-    function tick(now) {
-      const t = signal.skip ? total : Math.min(total, now - start);
-      const frame = Math.floor((t * FPS) / 1000);
-      if (frame !== last || t >= total) {
-        last = frame;
-        if (onFrame(t >= total ? total : (frame * 1000) / FPS) === false) return resolve(false);
+    root.dataset.launching = "";
+    root.dataset.landed = "";
+    scene.launch();
+
+    let start = null, fold = null, swapped = false, skipped = false, done = false;
+    let rising = [];
+    const skip = () => { skipped = true; for (const a of rising) a.finish(); };
+    addEventListener("pointerdown", skip);
+    addEventListener("keydown", skip);
+
+    const overlay = (g, now) => {
+      if (done) return;
+      if (start === null) start = now;
+      if (!isCurrent()) return finish();
+      const t = skipped ? T.fly[1] : now - start;
+
+      if (t >= T.fold && !fold) fold = folder(scene.handOff("amazed"));
+      if (fold && t < T.fly[1]) fold.draw(g, t);
+      if (t >= T.fly[0] && !swapped) {
+        swapped = true;
+        swap();                                 // the Workshop replaces the landing…
+        rising = rise(to);                      // …its blocks start below the screen
+        if (skipped) for (const a of rising) a.finish();
       }
-      if (t >= total) resolve(true);
-      else requestAnimationFrame(tick);
+      if (t >= T.fly[1]) finish();
+    };
+
+    // Unload everything the transition made, once the plane is off the
+    // screen; the blocks may still be settling, and a click still skips them.
+    async function finish() {
+      done = true;
+      scene.removeOverlay(overlay);
+      scene.reset();
+      delete root.dataset.launching;
+      if (!swapped) for (const a of rising) a.cancel();
+      await Promise.all(rising.map((a) => a.finished.catch(() => {})));
+      removeEventListener("pointerdown", skip);
+      removeEventListener("keydown", skip);
+      resolve();
     }
-    requestAnimationFrame(tick);
+
+    scene.addOverlay(overlay);
   });
-}
-
-export default async function play({ from, to, swap, isCurrent }) {
-  const sheet = from.querySelector(".choice--amazed");
-  const other = from.querySelector(".choice--recruiter");
-  const px = parseFloat(getComputedStyle(root).getPropertyValue("--px")) || 6;
-  const rect = sheet.getBoundingClientRect();
-
-  // Hold the navy palette whatever the pointer does, stop the intro if it
-  // is still playing, and take off.
-  root.dataset.launching = "";
-  root.dataset.landed = "";
-  sheet.classList.add("is-launching");
-
-  // Any click or key skips to the end.
-  const signal = { skip: false };
-  const skip = () => { signal.skip = true; };
-  addEventListener("pointerdown", skip, { once: true });
-  addEventListener("keydown", skip, { once: true });
-
-  let fold = null;
-  let rising = [];
-  let swapped = false;
-
-  const ok = await clock(T.fly[1], (t) => {
-    if (!isCurrent()) return false;
-    if (t >= T.blow) other.classList.add("is-blown");
-    if (t >= T.fold) {
-      if (!fold) {
-        fold = folder(sheet.querySelector(".choice__paper"), rect, px);
-        sheet.classList.add("is-folding");
-      }
-      fold.draw(t);
-    }
-    if (t >= T.fly[0] && !swapped) {
-      swapped = true;
-      swap();                                   // the Workshop replaces the landing…
-      rising = rise(to, px);                    // …its blocks start below the screen
-      if (signal.skip) for (const a of rising) a.finish();
-    }
-  }, signal);
-
-  // The plane is off the screen (or we were interrupted): unload it and put
-  // the landing back as it was, hidden, for next time.
-  fold?.remove();
-  sheet.classList.remove("is-launching", "is-folding");
-  other.classList.remove("is-blown");
-  delete root.dataset.launching;
-
-  // Let the blocks finish settling; a click or key still skips.
-  if (ok) {
-    const settle = () => { for (const a of rising) a.finish(); };
-    if (signal.skip) settle();
-    else {
-      addEventListener("pointerdown", settle, { once: true });
-      addEventListener("keydown", settle, { once: true });
-    }
-    await Promise.all(rising.map((a) => a.finished.catch(() => {})));
-    removeEventListener("pointerdown", settle);
-    removeEventListener("keydown", settle);
-  } else {
-    for (const a of rising) a.cancel();
-  }
-  removeEventListener("pointerdown", skip);
-  removeEventListener("keydown", skip);
 }
