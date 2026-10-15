@@ -143,12 +143,27 @@
   isolation: isolate;
   display: flex;
   align-items: flex-end;
-  min-height: 24rem;
+  z-index: 0;            /* a number, so the hold on leaving can time it; "auto" flips at once */
+  /* Tall enough for the photo, the gap and the unfolded description, so
+     hovering never changes the card's height and the grid stays put. */
+  min-height: calc(var(--photo-h) + 17rem);
   overflow: hidden;
+  /* The photo has a fixed height and the text never rises into it, so
+     there is always clear space between the dither band and the title,
+     however long the description is (on a phone it is always showing). */
+  --photo-h: 13rem;
+  padding-top: calc(var(--photo-h) + var(--space-4));
 
-  /* The growth uses the bouncy spring from the landing, so the two
-     "amazed" places move the same way. */
-  transition: scale var(--bubble-duration) var(--bubble);
+  /* Leaving: the rule that applies after the change sets the transition,
+     so these are the leave transitions and the :hover rule below has the
+     enter ones. Shrinking back has no overshoot (critically damped, like a
+     door closer): the bouncy spring run backwards undershoots to 0.994,
+     which reads as a wobble while the text is still folding away.
+     z-index is held until the card has settled, so it never slips under
+     its neighbour mid-shrink. */
+  transition:
+    scale 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    z-index 0s linear 260ms;
 }
 
 /* Picture layer: hidden at rest, appears on hover in a few hard steps.
@@ -161,7 +176,8 @@
   background: linear-gradient(180deg,
     var(--navy-975) 0 20%, var(--navy-950) 20% 40%, var(--navy-900) 40% 60%,
     var(--navy-800) 60% 80%, var(--chrome-lo) 80%);
-  transition: opacity 300ms steps(3);
+  /* Leaving, the picture waits for the text to fold away first. */
+  transition: opacity 180ms steps(3) 120ms;
 }
 
 .feature__media img {
@@ -171,24 +187,21 @@
   object-position: 50% 62%;
 }
 
-/* The text and its scrim cover the card's lower half, so the photo fills
-   only the top 58%: its subject sits in the clear part, and the dithered
-   edge of the scrim fades its bottom into the navy. */
+/* The photo fills the reserved band at the top; the text sits below it. */
 .feature__media img {
-  height: 58%;
+  height: var(--photo-h);
   image-rendering: pixelated;
 }
 
-/* Scrim behind the text so it stays readable over any picture: a short
-   dithered band (a checkerboard of navy pixels is the 8-bit version of
-   half-transparency) fading the picture into solid navy, so the text
-   itself never sits on the checkerboard. */
+/* Below the photo, solid navy; its bottom edge is a short dithered band
+   (a checkerboard of navy pixels is the 8-bit version of
+   half-transparency) two pixels tall, fading it into the navy. */
 .feature__media::after {
   content: "";
   position: absolute;
-  inset: 40% 0 0;
+  inset: calc(var(--photo-h) - 2 * var(--px)) 0 0;
   background:
-    linear-gradient(transparent 0 25%, var(--navy-975) 25%),
+    linear-gradient(transparent 0 calc(2 * var(--px)), var(--navy-975) 0),
     repeating-conic-gradient(var(--navy-975) 0 25%, transparent 0 50%)
       0 0 / calc(2 * var(--px)) calc(2 * var(--px));
 }
@@ -217,7 +230,7 @@
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: grid-template-rows 300ms steps(4), opacity 300ms steps(4);
+  transition: grid-template-rows 160ms steps(4), opacity 160ms steps(4);
 }
 
 .feature__desc {
@@ -229,29 +242,41 @@
   color: var(--text-muted);
 }
 
+/* The gap above the description lives inside the collapsing row (as a
+   spacer block), so it folds away with it instead of snapping. */
+.feature__desc::before {
+  content: "";
+  display: block;
+  height: var(--space-2);
+}
+
+/* Entering: the bouncy spring from the landing, so the two "amazed"
+   places move the same way; picture and text unroll together. */
 .feature:hover,
 .feature:focus-visible {
   scale: 1.025;
   z-index: 1;
+  transition: scale var(--bubble-duration) var(--bubble), z-index 0s;
 }
 
 .feature:hover .feature__media,
-.feature:focus-visible .feature__media { opacity: 1; }
+.feature:focus-visible .feature__media {
+  opacity: 1;
+  transition: opacity 300ms steps(3);
+}
 
 .feature:hover .feature__more,
 .feature:focus-visible .feature__more {
   grid-template-rows: 1fr;
   opacity: 1;
+  transition: grid-template-rows 300ms steps(4), opacity 300ms steps(4);
 }
-
-.feature:hover .feature__desc,
-.feature:focus-visible .feature__desc { padding-top: var(--space-2); }
 
 /* Touch screens have no hover: show everything from the start. */
 @media (hover: none) {
+  .feature { min-height: 0; }   /* nothing unfolds, so no room to keep for it */
   .feature__media { opacity: 1; }
   .feature__more { grid-template-rows: 1fr; opacity: 1; }
-  .feature__desc { padding-top: var(--space-2); }
 }
 
 
@@ -357,9 +382,9 @@ a.tile:focus-visible::before {
 .prose p { margin: 0 0 var(--space-3); }
 .prose a { color: inherit; text-underline-offset: 0.18em; }
 
-/* Posts: headings stay pixel type; the reading is done in thin-bordered
-   boxes in the system's own text face, which is far easier on long
-   paragraphs than VT323. Boxes, pictures, tables and videos sit above the
+/* Posts: headings stay pixel type; the reading is done in IBM Plex Sans,
+   which is far easier on long paragraphs than VT323, set straight on the
+   page with no frame. Boxes, pictures, tables and videos sit above the
    CRT scanlines (z-index 1), so photos stay crisp and text stays clean.
    tools/editor puts each run of paragraphs and lists in a .text-box and
    each table in a .table-box. */
@@ -383,10 +408,8 @@ a.tile:focus-visible::before {
 
 .text-box {
   margin: 0 0 var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  background: var(--surface-box);
   font-family: var(--font-read);
+  font-weight: var(--read-weight);
   font-size: 17px;
   line-height: 1.65;
   color: var(--text);
@@ -424,6 +447,7 @@ a.tile:focus-visible::before {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-read);
+  font-weight: var(--read-weight);
   font-size: 15px;
   line-height: 1.45;
   font-variant-numeric: tabular-nums;
@@ -458,22 +482,21 @@ a.tile:focus-visible::before {
 }
 
 
-/* In-progress project page: goals on the left, its updates and posts
-   down the right, photos in a row along the bottom. One column on a phone. */
+/* In-progress project page: the wide left column is the project itself,
+   goals then photos; the narrower right column lists its updates and
+   posts. On a phone: goals, photos, then the list. */
 .project {
   display: grid;
-  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
-  grid-template-areas: "goals log" "photos photos";
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "goals log" "photos log";
   gap: var(--space-6) var(--space-5);
   align-items: start;
   margin-top: var(--space-5);
 }
 
-/* Goals in a text box that stays in view while the log scrolls past. */
 .project__goals {
   grid-area: goals;
-  position: sticky;
-  top: var(--space-4);
   margin-top: 0;
 }
 
@@ -481,10 +504,9 @@ a.tile:focus-visible::before {
   position: relative;
   z-index: 1;
   margin: 0;
-  padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 1.2em);
-  border: 1px solid var(--line);
-  background: var(--surface-box);
+  padding-left: 1.2em;
   font-family: var(--font-read);
+  font-weight: var(--read-weight);
   font-size: 16px;
   line-height: 1.5;
 }
@@ -496,8 +518,9 @@ a.tile:focus-visible::before {
 
 .project__photos {
   grid-area: photos;
+  align-self: start;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
   gap: var(--space-4);
 }
 
@@ -514,8 +537,7 @@ a.tile:focus-visible::before {
 }
 
 @media (max-width: 800px) {
-  .project { grid-template-columns: 1fr; grid-template-areas: "goals" "log" "photos"; }
-  .project__goals { position: static; }
+  .project { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "goals" "photos" "log"; }
 }
 
 /* Pinned items get more room than the rest. */

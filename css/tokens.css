@@ -69,8 +69,12 @@
      at multiples of 8px; VT323 (a DEC terminal face) carries longer text. */
   --font-pixel: "Press Start 2P", ui-monospace, monospace;
   --font-terminal: "VT323", ui-monospace, monospace;
-  /* Long reading in Workshop posts: the system's own text face. */
-  --font-read: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  /* Long reading in Workshop posts. IBM Plex Sans was drawn for IBM's
+     engineering documentation: squared-off curves that suit the 8-bit
+     pages, but proportional and open enough for long paragraphs. It is a
+     variable font, so the weight can sit between Regular and Medium. */
+  --font-read: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --read-weight: 450;
 
   /* Scale follows Bringhurst's classic sizes
      (14 16 18 21 24 36 48 72 px), plus 20 for serif body text, which
