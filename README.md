@@ -24,10 +24,10 @@ Static site, no build step. Open `index.html` through any local server
 | `assets/landing/` | The two landing sprites (recruiter 96 × 112, amazed 80 × 113). |
 | `design-system.html` | Reference sheet for the recruiter theme. |
 
-The landing is drawn on one canvas by `js/scene.js`, at a fine pixel of a few
-CSS px scaled up without smoothing. Sheets are 22 × 31 big pixels (4 × 4 fine
-pixels each), built cell by cell in `js/pixel.js` and coloured by the
-`--sheet-*` tokens. The links in `index.html` lay the sheets out and carry
+The landing is drawn on one canvas by `js/scene.js`, at a fine pixel of 2 CSS
+px scaled up without smoothing. Sheets are 22 × 31 big pixels (K × K fine
+pixels each, about 20 CSS px on a laptop), built cell by cell in `js/pixel.js`
+and coloured by the `--sheet-*` tokens; photos keep the fine pixel. The links in `index.html` lay the sheets out and carry
 their text (`data-label`, `data-photo`); without JavaScript they show as
 plain boxes.
 

@@ -1,9 +1,10 @@
 // The landing as a little 8-bit scene, drawn on one canvas.
 //
-// The canvas works in fine pixels (about 5 CSS px each on a laptop) and is
-// scaled up with image-rendering: pixelated, so everything on it is chunky
-// by construction: the sheets (22 × 31 big pixels, 4 fine pixels each),
-// their shadows, the particles, and the folding plane (js/airplane.js).
+// The canvas works in fine pixels (2 CSS px) and is scaled up with
+// image-rendering: pixelated, so everything on it is a hard-edged square.
+// Sheets are 22 × 31 big pixels of K × K fine pixels each (about 20 CSS px
+// on a laptop); photos keep the fine pixel, so they stay sharp. The plane
+// (js/airplane.js) and the particles are drawn here too.
 //
 // The real links (.choice) stay in the page, invisible, on top: they lay
 // the sheets out, take the hover, focus and click, and carry the text for
@@ -12,13 +13,12 @@
 // Motion runs at the display's full frame rate. Positions come from damped
 // springs,  x'' = k (target − x) − c x',  stepped with semi-implicit Euler;
 // the damping ratio ζ = c / (2√k) decides between a bounce (ζ < 1) and a
-// smooth settle (ζ = 1). The loop sleeps whenever nothing is moving.
+// smooth settle (ζ ≈ 1). The loop sleeps whenever nothing is moving.
 
-import { K, SHEET, PHOTO, makeCanvas, readPalette, sheetTexture, silhouette, Particles } from "./pixel.js";
+import { K, setK, SHEET, makeCanvas, readPalette, sheetTexture, silhouette, ripple, Particles } from "./pixel.js";
 
 const root = document.documentElement;
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const W = SHEET.w * K, H = SHEET.h * K;          // a sheet in fine pixels
 
 class Spring {
   constructor(x = 0, k = 170, c = 26) { this.x = x; this.v = 0; this.target = x; this.k = k; this.c = c; }
@@ -42,35 +42,38 @@ class Scene {
 
     this.particles = new Particles();
     this.overlays = new Set();        // extra drawing each frame (the plane)
-    this.f = 4;                       // CSS px per fine pixel
+    this.f = 2;                       // CSS px per fine pixel
+    this.q = 1;                       // a quarter of a big pixel, in fine pixels: the unit for small things
+    this.W = SHEET.w * K;
+    this.H = SHEET.h * K;
     this.pal = readPalette();
     this.palKey = "";
-    this.preview = null;
     this.launching = false;
     this.running = false;
     this.last = 0;
     this.now = 0;
     this.introStart = null;
+    this.textures = new Map();
 
-    this.sheets = [...landing.querySelectorAll(".choice")].map((el) => {
+    this.sheets = [...landing.querySelectorAll(".choice")].map((el, i) => {
       const photo = new Image();
       photo.decoding = "async";
       photo.src = el.dataset.photo;
       photo.addEventListener("load", () => { this.textures.clear(); this.wake(); });
       return {
-        el, name: el.dataset.choice, photo,
-        dogEar: el.dataset.choice === "recruiter",
+        el, name: el.dataset.choice, photo, seed: i * 2.3,
+        hasEar: el.dataset.choice === "recruiter",
         label: (el.dataset.label ?? "").split("|"),
         home: { x: 0, y: 0 },
         lift: new Spring(0, 120, 22),     // big pixels up; ζ = 1, a smooth rise
-        hop: new Spring(0, 260, 9),       // fine pixels; ζ ≈ 0.28, a bouncy hop
+        hop: new Spring(0, 260, 9),       // in q; ζ ≈ 0.28, a bouncy hop
         squash: new Spring(1, 420, 16),   // vertical scale after landing
-        wave: new Spring(0, 60, 15),      // flag-wave amplitude, fine pixels
+        wave: new Spring(0, 40, 13),      // ripple amplitude, in q
         reveal: new Spring(0, 90, 19),    // photo, 0–16 dither levels
+        ear: new Spring(0, 140, 17),      // dog-ear: 0 folded … 1 open
         fall: null, blown: null, hidden: false, hovered: false, nextSpark: 0,
       };
     });
-    this.textures = new Map();
 
     root.dataset.scene = "";
     addEventListener("resize", () => { this.layout(); this.wake(); });
@@ -85,14 +88,21 @@ class Scene {
 
   sheet(name) { return this.sheets.find((s) => s.name === name); }
 
-  // Where the sheets go, from the links' boxes. The fine pixel is chosen so a
-  // sheet (22 big pixels = 88 fine) fits the narrowest box.
+  // Where the sheets go, from the links' boxes. A big pixel is the largest
+  // even number of CSS px for which a 22-pixel-wide sheet fits the
+  // narrowest box; the canvas pixel is 2 CSS px, so K = big / 2.
   layout() {
     if (this.landing.hidden || this.launching) return;
     const rects = this.sheets.map((s) => s.el.getBoundingClientRect());
     const narrowest = Math.min(...rects.map((r) => r.width));
     if (!narrowest) return;
-    this.f = Math.max(2, Math.floor(narrowest / W));
+    const big = Math.max(2, 2 * Math.floor(narrowest / (2 * SHEET.w)));
+    this.f = big >= 4 ? 2 : 1;
+    if (big / this.f !== K) { setK(big / this.f); this.textures.clear(); }
+    this.q = K / 4;
+    this.W = SHEET.w * K;
+    this.H = SHEET.h * K;
+
     const f = this.f;
     this.canvas.width = Math.ceil(innerWidth / f);
     this.canvas.height = Math.ceil(innerHeight / f);
@@ -101,26 +111,30 @@ class Scene {
     this.g.imageSmoothingEnabled = false;
     this.sheets.forEach((s, i) => {
       const r = rects[i];
-      s.home.x = Math.round((r.left + (r.width - W * f) / 2) / f);
-      s.home.y = Math.round((r.top + (r.height - H * f) / 2) / f);
+      s.home.x = Math.round((r.left + (r.width - this.W * f) / 2) / f);
+      s.home.y = Math.round((r.top + (r.height - this.H * f) / 2) / f);
     });
   }
 
+  earPose(s) { return s.hasEar ? Math.round(Math.min(1, Math.max(0, s.ear.x)) * 8) / 8 : null; }
+
   texture(s, side) {
     const reveal = side === "front" ? Math.round(Math.min(16, Math.max(0, s.reveal.x))) : 0;
-    const key = `${this.palKey}|${s.name}|${side}|${reveal}`;
+    const ear = this.earPose(s);
+    const key = `${this.palKey}|${K}|${s.name}|${side}|${reveal}|${ear}`;
     if (!this.textures.has(key)) {
-      if (this.textures.size > 80) this.textures.clear();
+      if (this.textures.size > 120) this.textures.clear();
       this.textures.set(key, sheetTexture({
-        pal: this.pal, dogEar: s.dogEar, side, photo: s.photo, reveal, label: s.label,
+        pal: this.pal, ear, side, photo: s.photo, reveal, label: s.label,
       }));
     }
     return this.textures.get(key);
   }
 
   shadowTexture(s, dither) {
-    const key = `shadow|${s.dogEar}|${dither}`;
-    if (!this.textures.has(key)) this.textures.set(key, silhouette(s.dogEar, "#000", dither));
+    const ear = this.earPose(s);
+    const key = `shadow|${K}|${ear}|${dither}`;
+    if (!this.textures.has(key)) this.textures.set(key, silhouette(ear, "#000", dither));
     return this.textures.get(key);
   }
 
@@ -160,15 +174,33 @@ class Scene {
   busy() {
     return this.overlays.size > 0 || this.particles.busy ||
       this.sheets.some((s) => s.fall || s.blown || s.hovered ||
-        !s.lift.resting || !s.hop.resting || !s.squash.resting || !s.wave.resting || !s.reveal.resting);
+        [s.lift, s.hop, s.squash, s.wave, s.reveal, s.ear].some((sp) => !sp.resting));
   }
 
-  // ---------- intro: the sheets tumble down, one after the other ----------
+  // ---------- intro: the sheets drift down, one after the other ----------
 
   startIntro(t) {
     this.introStart = t;
     if (root.dataset.landed !== undefined || reduced()) { root.dataset.landed = ""; return; }
-    this.sheets.forEach((s, i) => { s.fall = { start: t + 300 + i * 800, dur: 1300 }; });
+    this.sheets.forEach((s, i) => { s.fall = { start: t + 250 + i * 950, dur: 2300 }; });
+  }
+
+  // A falling sheet of paper: it rocks from side to side like a pendulum,
+  // tilted into its direction of travel, slowing and nearly hanging at the
+  // end of each swing and dropping fastest through the middle, the swings
+  // dying away as it settles. With φ = 2π · 1.25 u (u: 0 → 1 over the fall):
+  //   swing     x = A (1 − u)^0.8 sin φ
+  //   descent   g(u) = u + 0.6 sin(2φ) / (4π · 1.25), so dg/du = 1 + 0.6 cos 2φ:
+  //             slowest (0.4) at the ends of a swing, fastest (1.6) mid-swing
+  //   tilt      θ = 0.22 cos φ (1 − u), leaning into the direction of travel
+  leaf(sh, u) {
+    const swings = 1.25, phi = 2 * Math.PI * swings * u;
+    const dir = sh.name === "amazed" ? -1 : 1;
+    return {
+      dx: dir * 0.45 * this.W * Math.pow(1 - u, 0.8) * Math.sin(phi),
+      g: u + (0.6 * Math.sin(2 * phi)) / (4 * Math.PI * swings),
+      tilt: dir * 0.22 * Math.cos(phi) * (1 - u),
+    };
   }
 
   // ---------- state ----------
@@ -187,17 +219,19 @@ class Scene {
       if (calm) sh.reveal.x = sh.reveal.target;
 
       if (sh.name === "recruiter") {
-        // A bubbly hop: kicked upwards, a bouncy spring brings it home.
+        // A bubbly hop with sparkles, and the dog-ear unfolds. No ripple.
+        sh.ear.target = sh.hovered ? 1 : 0;
+        if (calm) sh.ear.x = sh.ear.target;
         if (entered && !calm) {
           sh.hop.v = -150;
           this.burst(sh, 10, "spark");
         }
-        sh.wave.target = sh.hovered && !calm ? 1.5 : 0;
+        sh.wave.target = 0;
         if (sh.hovered && !calm && t > sh.nextSpark) { this.twinkle(sh); sh.nextSpark = t + 110; }
       } else {
-        // Lift, float and flutter; the launch takes it higher still.
+        // Lift, float and ripple; the launch takes it higher still.
         sh.lift.target = this.launching ? 6 : sh.hovered ? 2 : 0;
-        sh.wave.target = this.launching ? 4 : sh.hovered && !calm ? 2.5 : 0;
+        sh.wave.target = this.launching ? 2 : sh.hovered && !calm ? 1.2 : 0;
         if (calm) sh.lift.x = sh.lift.target;
         if (entered && !calm) this.burst(sh, 14, "dust");
         if ((sh.hovered || this.launching) && !sh.hidden && !calm && t > sh.nextSpark) {
@@ -206,19 +240,19 @@ class Scene {
         }
       }
 
-      for (const sp of [sh.lift, sh.hop, sh.squash, sh.wave, sh.reveal]) sp.step(s);
+      for (const sp of [sh.lift, sh.hop, sh.squash, sh.wave, sh.reveal, sh.ear]) sp.step(s);
 
       if (sh.fall && t >= sh.fall.start + sh.fall.dur) {
         sh.fall = null;
-        sh.squash.v = -3.2;                         // land with a squash…
-        this.burst(sh, 16, "dust");                 // …and a puff of dust
-        this.burst(sh, 6, "scrap");
+        sh.squash.v = -1.2;                         // settle with a little give…
+        this.burst(sh, 10, "dust");                 // …and a puff of dust
+        this.burst(sh, 4, "scrap");
         if (this.sheets.every((x) => !x.fall)) root.dataset.landed = "";
       }
 
       if (sh.blown) {
         const b = sh.blown;
-        b.vx -= 2600 * s;                           // the gust accelerates it
+        b.vx -= 2600 * this.q * s;                  // the gust accelerates it
         b.x += b.vx * s;
         b.y += b.vy * s;
         b.spin += 9 * s;
@@ -228,77 +262,79 @@ class Scene {
     this.particles.update(dt);
   }
 
-  // ---------- particles ----------
-
-  centre(sh) { const p = this.pose(sh); return { x: p.x + W / 2, y: p.y + H / 2 }; }
+  // ---------- particles (sizes and speeds in q, a quarter big pixel) ----------
 
   burst(sh, n, kind) {
-    const p = this.pose(sh);
+    const p = this.pose(sh), q = this.q, W = this.W, H = this.H;
     for (let i = 0; i < n; i++) {
       const left = i % 2 === 0;
-      const x = left ? p.x + rand(-2, W * 0.3) : p.x + rand(W * 0.7, W + 2);
+      const x = left ? p.x + rand(-2 * q, W * 0.3) : p.x + rand(W * 0.7, W + 2 * q);
       if (kind === "spark") {
-        this.particles.add({ kind, x: p.x + rand(-8, W + 8), y: p.y + rand(-8, H + 8),
-          vx: rand(-20, 20), vy: rand(-40, -10), life: rand(450, 750), size: 2, colour: this.pal.spark });
+        this.particles.add({ kind, x: p.x + rand(-8 * q, W + 8 * q), y: p.y + rand(-8 * q, H + 8 * q),
+          vx: rand(-20, 20) * q, vy: rand(-40, -10) * q, life: rand(450, 750), size: 2 * q, colour: this.pal.spark });
       } else if (kind === "scrap") {
-        this.particles.add({ kind, x, y: p.y + H - 2, vx: (left ? -1 : 1) * rand(15, 45), vy: rand(-70, -30),
-          gravity: 90, drag: 1.2, life: rand(700, 1100), size: 2, colour: i % 3 ? this.pal.fill : this.pal.flap });
+        this.particles.add({ kind, x, y: p.y + H - 2 * q, vx: (left ? -1 : 1) * rand(15, 45) * q, vy: rand(-70, -30) * q,
+          gravity: 90 * q, drag: 1.2, life: rand(700, 1100), size: 2 * q, colour: i % 3 ? this.pal.fill : this.pal.flap });
       } else {
-        this.particles.add({ kind: "dot", x, y: p.y + H - rand(0, 3), vx: (left ? -1 : 1) * rand(25, 70), vy: rand(-45, -10),
-          gravity: 40, drag: 2.5, life: rand(350, 650), size: Math.random() < 0.4 ? 3 : 2, colour: this.pal.dust });
+        this.particles.add({ kind: "dot", x, y: p.y + H - rand(0, 3 * q), vx: (left ? -1 : 1) * rand(25, 70) * q, vy: rand(-45, -10) * q,
+          gravity: 40 * q, drag: 2.5, life: rand(350, 650), size: (Math.random() < 0.4 ? 3 : 2) * q, colour: this.pal.dust });
       }
     }
   }
 
   twinkle(sh) {
-    const p = this.pose(sh);
+    const p = this.pose(sh), q = this.q, W = this.W, H = this.H;
     const edge = Math.floor(rand(0, 4));
-    const x = edge === 0 ? p.x - 3 : edge === 1 ? p.x + W + 2 : p.x + rand(0, W);
-    const y = edge === 2 ? p.y - 3 : edge === 3 ? p.y + H + 2 : p.y + rand(0, H);
-    this.particles.add({ kind: "spark", x, y, vx: 0, vy: -12, life: rand(380, 620), size: 2, colour: this.pal.spark });
+    const x = edge === 0 ? p.x - 3 * q : edge === 1 ? p.x + W + 2 * q : p.x + rand(0, W);
+    const y = edge === 2 ? p.y - 3 * q : edge === 3 ? p.y + H + 2 * q : p.y + rand(0, H);
+    this.particles.add({ kind: "spark", x, y, vx: 0, vy: -12 * q, life: rand(380, 620), size: 2 * q, colour: this.pal.spark });
   }
 
   downdraft(sh, n) {
-    const p = this.pose(sh);
+    const p = this.pose(sh), q = this.q;
     for (let i = 0; i < n; i++)
-      this.particles.add({ kind: "dot", x: p.x + rand(0, W), y: p.y + H + rand(2, 8), vx: rand(-60, 60), vy: rand(10, 40),
-        drag: 3, life: rand(250, 450), size: 2, colour: this.pal.dust });
+      this.particles.add({ kind: "dot", x: p.x + rand(0, this.W), y: p.y + this.H + rand(2, 8) * q,
+        vx: rand(-60, 60) * q, vy: rand(10, 40) * q, drag: 3, life: rand(250, 450), size: 2 * q, colour: this.pal.dust });
   }
 
   streak(sh) {
-    const p = this.pose(sh);
-    this.particles.add({ kind: "streak", x: p.x + W + rand(0, 40), y: p.y + rand(0, H), vx: rand(-700, -400),
-      life: rand(150, 300), length: Math.round(rand(6, 16)), size: 2, colour: this.pal.dust });
+    const p = this.pose(sh), q = this.q;
+    this.particles.add({ kind: "streak", x: p.x + this.W + rand(0, 40) * q, y: p.y + rand(0, this.H), vx: rand(-700, -400) * q,
+      life: rand(150, 300), length: rand(6, 16) * q, size: 2 * q, colour: this.pal.dust });
   }
 
   // ---------- where a sheet is this frame ----------
-  //   x, y   top-left, fine pixels
-  //   sx, sy horizontal / vertical scale (negative shows the back)
-  //   lift   big pixels above the ground (moves the shadow)
+  //   x, y    top-left, fine pixels
+  //   sx, sy  horizontal / vertical scale (negative shows the back)
+  //   lift    big pixels above the ground (moves the shadow)
+  //   tilt    lean in radians (drawn as a shear, keeping pixel columns upright)
+  //   wave    ripple amplitude, in q
   pose(sh) {
-    let x = sh.home.x, y = sh.home.y, sx = 1, sy = sh.squash.x, lift = sh.lift.x, wave = sh.wave.x;
-    y += sh.hop.x - sh.lift.x * K;
+    const H = this.H;
+    let x = sh.home.x, y = sh.home.y, sx = 1, sy = sh.squash.x, lift = sh.lift.x, wave = sh.wave.x, tilt = 0;
+    y += sh.hop.x * this.q - sh.lift.x * K;
 
-    if (sh.hovered && sh.name === "amazed") y += Math.sin(this.now / 220) * 1.5;   // bob
+    if (sh.hovered && sh.name === "amazed") y += Math.sin(this.now / 260) * 1.5 * this.q;   // bob
 
     if (sh.fall) {
       const u = Math.min(1, Math.max(0, (this.now - sh.fall.start) / sh.fall.dur));
-      const top = -(H + 12) - sh.home.y;
-      y = sh.home.y + top * (1 - u);                         // terminal velocity: straight line
-      x += Math.sin(u * Math.PI * 3) * 10 * (1 - u);         // sway
-      sy = Math.cos(u * Math.PI * 2);                        // one turn end over end
-      lift = 14 * (1 - u);
-      wave = Math.max(wave, 3 * (1 - u) + 0.5);
-      if (u <= 0) y = -H * 2;                                // not yet dropped
+      const leaf = this.leaf(sh, u);
+      const top = -(H + 6 * K) - sh.home.y;
+      y = sh.home.y + top * (1 - leaf.g);
+      x += leaf.dx;
+      tilt = leaf.tilt;
+      lift = 10 * (1 - u);
+      wave = Math.max(wave, 1.2 * (1 - u));
+      if (u <= 0) y = -H * 3;                                 // not yet dropped
     }
 
     if (sh.blown) {
       x += sh.blown.x; y += sh.blown.y;
       sx = Math.cos(sh.blown.spin);
       lift = 3;
-      wave = 5;
+      wave = 3;
     }
-    return { x, y, sx, sy, lift, wave };
+    return { x, y, sx, sy, lift, wave, tilt };
   }
 
   // ---------- drawing ----------
@@ -316,33 +352,33 @@ class Scene {
   }
 
   drawShadow(g, sh) {
+    const W = this.W, H = this.H;
+    if (sh.fall && this.now < sh.fall.start) return;
     const p = this.pose(sh);
-    if (p.y < -H * 1.5 && !sh.fall) return;
     // Light at 45°: the shadow's offset grows with height. While a sheet
     // falls, its shadow marks the landing spot, small and dithered while the
     // sheet is high, growing and closing in as it comes down.
     const u = sh.fall ? Math.min(1, Math.max(0, (this.now - sh.fall.start) / sh.fall.dur)) : 1;
-    const off = Math.round(K * (sh.fall ? 1 + 3 * (1 - u) : 1 + p.lift * 0.9));
+    const off = Math.round(K * (sh.fall ? 1 + 2 * (1 - u) : 1 + p.lift * 0.9));
     const dither = sh.fall ? u < 0.92 : p.lift > 0.6;
     const tex = this.shadowTexture(sh, dither);
     const grow = sh.fall ? 0.3 + 0.7 * u * u : 1;
     const w = Math.round(W * Math.abs(p.sx) * grow), h = Math.round(H * grow);
-    const gx = sh.home.x + (sh.blown?.x ?? 0) + (W - w) / 2 + off;
+    const gx = (sh.fall ? p.x : sh.home.x + (sh.blown?.x ?? 0)) + (W - w) / 2 + off;
     const gy = sh.home.y + (H - h) / 2 + off;
-    if (sh.fall && this.now < sh.fall.start) return;
-    g.globalAlpha = sh.blown ? Math.max(0, 1 + sh.blown.x / 120) : 1;
+    g.globalAlpha = sh.blown ? Math.max(0, 1 + sh.blown.x / (30 * K)) : 1;
     g.drawImage(tex, Math.round(gx), Math.round(gy), w, h);
     g.globalAlpha = 1;
   }
 
-  // The sheet, flipped or squashed, then drawn column by column with a
-  // travelling sine wave: each big-pixel column is shifted up or down by
-  //   a · sin(2π c / λ − ω t),
-  // and tinted light or dark by the wave's slope, which is what makes flat
-  // pixels read as a rippling sheet (the classic demo-scene flag).
+  // The sheet, flipped or squashed, then drawn column by column: each
+  // big-pixel column is shifted by the ripple (and by the tilt, a shear),
+  // and lit or shaded by the ripple's slope, which is what makes flat
+  // pixels read as bending paper.
   drawSheet(g, sh, t) {
+    const W = this.W, H = this.H;
     const p = this.pose(sh);
-    if (p.y < -H * 1.8) return;
+    if (p.y < -H * 2.5) return;
     const back = p.sx < 0 || p.sy < 0;
     const tex = this.texture(sh, back ? "back" : "front");
 
@@ -356,22 +392,24 @@ class Scene {
     lg.drawImage(tex, -w / 2, -h / 2, w, h);
     lg.restore();
 
-    const cols = SHEET.w, amp = p.wave;
-    const omega = sh.name === "amazed" ? 0.011 : 0.008, lambda = 13;
-    if (amp > 0.3) {
+    const cols = SHEET.w;
+    const amp = p.wave * this.q;
+    const offs = amp > 0.2 ? ripple(cols, t, amp, sh.seed) : null;
+    if (offs && amp > 0.6) {
       lg.globalCompositeOperation = "source-atop";
       for (let c = 0; c < cols; c++) {
-        const slope = Math.cos((2 * Math.PI * c) / lambda - omega * t);
-        const tint = amp > 0.8 && slope > 0.55 ? "rgba(255,255,255,0.22)" : amp > 0.8 && slope < -0.55 ? "rgba(0,0,0,0.16)" : null;
+        const slope = (offs[Math.min(cols - 1, c + 1)] - offs[Math.max(0, c - 1)]) / (2 * amp);
+        const tint = slope > 0.22 ? "rgba(255,255,255,0.22)" : slope < -0.22 ? "rgba(0,0,0,0.15)" : null;
         if (tint) { lg.fillStyle = tint; lg.fillRect(c * K, 0, K, H); }
       }
       lg.globalCompositeOperation = "source-over";
     }
 
     const x0 = Math.round(p.x), y0 = Math.round(p.y);
+    const shear = Math.tan(p.tilt);
     for (let c = 0; c < cols; c++) {
-      const off = amp > 0.3 ? Math.round(amp * Math.sin((2 * Math.PI * c) / lambda - omega * t)) : 0;
-      g.drawImage(layer, c * K, 0, K, H, x0 + c * K, y0 + off, K, H);
+      const off = (offs ? offs[c] : 0) + shear * (c * K + K / 2 - W / 2);
+      g.drawImage(layer, c * K, 0, K, H, x0 + c * K, y0 + Math.round(off), K, H);
     }
   }
 
@@ -389,7 +427,7 @@ class Scene {
     this.burst(sheet, 30, "dust");
     this.burst(sheet, 10, "scrap");
     setTimeout(() => {
-      other.blown = { x: 0, y: 0, vx: -120, vy: -25, spin: 0 };
+      other.blown = { x: 0, y: 0, vx: -120 * this.q, vy: -25 * this.q, spin: 0 };
       for (let i = 0; i < 10; i++) this.streak(other);
     }, 150);
     this.wake();
@@ -400,7 +438,7 @@ class Scene {
     const sh = this.sheet(name);
     const p = this.pose(sh);
     sh.hidden = true;
-    return { x: p.x, y: p.y, w: W, h: H, photo: sh.photo, pal: this.pal };
+    return { x: p.x, y: p.y, w: this.W, h: this.H, photo: sh.photo, pal: this.pal, q: this.q };
   }
 
   addOverlay(draw) { this.overlays.add(draw); this.wake(); }
@@ -411,8 +449,7 @@ class Scene {
     this.launching = false;
     for (const sh of this.sheets) {
       sh.hidden = false; sh.blown = null;
-      sh.lift.x = sh.lift.target = 0; sh.lift.v = 0;
-      sh.wave.x = sh.wave.target = 0; sh.reveal.x = 0;
+      for (const sp of [sh.lift, sh.wave, sh.reveal, sh.ear, sh.hop]) { sp.x = sp.target = 0; sp.v = 0; }
     }
   }
 }

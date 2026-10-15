@@ -37,7 +37,7 @@
 // ---------------------------------------------------------------------------
 
 import { scene } from "./scene.js";
-import { K, SHEET, makeCanvas, sheetSprite } from "./pixel.js";
+import { K, SHEET, makeCanvas, sheetSprite, ripple } from "./pixel.js";
 
 const root = document.documentElement;
 const LAYER_GAP = 0.2;                 // fine px between stacked layers of paper
@@ -219,7 +219,7 @@ function folder(start) {
   const w = start.w, h = start.h, c = w / 2, k = 0.34 * c;
   const tan22 = Math.SQRT2 - 1;                    // tan 22.5°, half of a corner's 45°
   const cx = w / 2, cy = h / 2;
-  const pal = start.pal;
+  const pal = start.pal, q = start.q;              // q: a quarter big pixel, for particles
   const front = sheetSprite({ pal, side: "front", photo: start.photo });
   const back = sheetSprite({ pal, side: "back" });
   const ink = hexToRgb(pal.ink);
@@ -276,7 +276,7 @@ function folder(start) {
   function view(t) {
     const tilt = (40 * Math.PI / 180) * ease(progress(T.plane, t));
     const f = progress(T.fly, t);
-    const up = f * f * (start.y + h * 1.8 + 40);     // accelerating climb
+    const up = f * f * (start.y + h * 1.8 + 40 * q); // accelerating climb
     const bank = 0.14 * Math.sin(f * Math.PI * 2);
     return chain(
       translate(start.x + cx, start.y + cy - up),
@@ -297,7 +297,7 @@ function folder(start) {
       for (let i = 0; i < 9; i++) {
         const s = Math.random();
         scene.particles.add({ kind: "spark", x: ax + (bx - ax) * s, y: ay + (by - ay) * s,
-          vx: rand(-25, 25), vy: rand(-35, -5), life: rand(350, 600), size: 2, colour: pal.spark });
+          vx: rand(-25, 25) * q, vy: rand(-35, -5) * q, life: rand(350, 600), size: 2 * q, colour: pal.spark });
       }
     }
   }
@@ -386,21 +386,19 @@ function folder(start) {
       }
     bg.putImageData(img, 0, 0);
 
-    // Onto the scene, four times larger, each column nudged by a travelling
-    // wave: the paper flutters, more once it is flying.
+    // Onto the scene, K times larger, each column nudged by the same gusty,
+    // whippy ripple as the sheets: the paper flutters, more once it flies.
     const flying = progress(T.fly, t);
-    const amp = 0.8 + 2.4 * flying;
-    for (let col = 0; col < bw; col++) {
-      const off = Math.round(amp * Math.sin(col * 0.9 - t * 0.022));
-      g.drawImage(buf, col, 0, 1, bh, Math.round(ox) + col * K, Math.round(oy) + off, K, bh * K);
-    }
+    const offs = ripple(bw, t, (0.6 + 1.6 * flying) * q, 5);
+    for (let col = 0; col < bw; col++)
+      g.drawImage(buf, col, 0, 1, bh, Math.round(ox) + col * K, Math.round(oy + offs[col]), K, bh * K);
 
     // A trail of sparkles and paper scraps from the tail once it flies.
     if (flying > 0) {
       const tx = ox + (bw * K) / 2, ty = oy + bh * K - K;
       for (let i = 0; i < 3; i++)
-        scene.particles.add({ kind: i ? "spark" : "scrap", x: tx + rand(-8, 8), y: ty + rand(-4, 4),
-          vx: rand(-40, 40), vy: rand(20, 90), drag: 1.5, life: rand(350, 650), size: 2,
+        scene.particles.add({ kind: i ? "spark" : "scrap", x: tx + rand(-8, 8) * q, y: ty + rand(-4, 4) * q,
+          vx: rand(-40, 40) * q, vy: rand(20, 90) * q, drag: 1.5, life: rand(350, 650), size: 2 * q,
           colour: i === 1 ? pal.spark : pal.flap });
     }
   }
