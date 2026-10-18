@@ -56,3 +56,38 @@ if (links.size) {
   );
   for (const id of links.keys()) observer.observe(document.getElementById(id));
 }
+
+// Résumé preview. On screens wide enough for the panel (the same 90rem as
+// recruiter.css), the résumé buttons open their PDF beside the reading column
+// instead of downloading it; the panel has its own Download. The button being
+// previewed is drawn filled, the other quiet, and both go back on close.
+const preview = document.querySelector(".resume-preview");
+const buttons = [...document.querySelectorAll("a[data-preview]")];
+const wide = matchMedia("(min-width: 90rem)");
+
+if (preview && buttons.length) {
+  const quiet = buttons.map((b) => b.classList.contains("action--quiet"));
+  const doc = preview.querySelector(".resume-preview__doc");
+  const restore = () => buttons.forEach((b, i) => b.classList.toggle("action--quiet", quiet[i]));
+  const close = () => {
+    preview.hidden = true;
+    doc.src = "about:blank";
+    restore();
+  };
+
+  for (const button of buttons) {
+    button.addEventListener("click", (e) => {
+      if (!wide.matches) return;   // narrow: a normal download
+      e.preventDefault();
+      preview.querySelector(".resume-preview__title").textContent = button.textContent.replace(/\s*\(PDF\)$/, "");
+      preview.querySelector(".resume-preview__download").href = button.getAttribute("href");
+      doc.src = `${button.getAttribute("href")}#view=FitH`;
+      buttons.forEach((b) => b.classList.toggle("action--quiet", b !== button));
+      preview.hidden = false;
+    });
+  }
+
+  preview.querySelector(".resume-preview__close").addEventListener("click", close);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !preview.hidden) close(); });
+  wide.addEventListener("change", () => { if (!wide.matches && !preview.hidden) close(); });
+}

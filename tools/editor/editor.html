@@ -65,6 +65,9 @@
   .fields input, .fields select {
     width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
   }
+  .fields .checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .fields .checks label { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-align: left; }
+  .fields .checks input { width: auto; padding: 0; }
   .fields .hint { grid-column: 2; margin-top: -6px; font-size: 12px; color: var(--muted); }
 
   /* Body editor: a toolbar over a box you type into, styled roughly like the site's posts. */
@@ -182,7 +185,7 @@ $("#nav").addEventListener("click", async (e) => {
   if (!a && !b) return;
   e.preventDefault();
   if (dirty && !confirm("You have unsaved edits to this post. Leave without saving?")) return;
-  if (b) return open({ kind: "post", data: { folder: b.dataset.new, slug: "", title: "", date: today(), line: "", project: "", body: "<p></p>" } });
+  if (b) return open({ kind: "post", data: { folder: b.dataset.new, slug: "", title: "", date: today(), line: "", projects: [], body: "<p></p>" } });
   const [kind, ...rest] = a.dataset.key.split("/");
   try {
     open({ kind, data: await api(`${kind}/${rest.join("/")}`) });
@@ -194,8 +197,8 @@ $("#nav").addEventListener("click", async (e) => {
 function open(item) {
   current = item;
   const d = item.data, post = item.kind === "post";
-  const projectOptions = ['<option value="">None</option>']
-    .concat(Object.entries(list.projects).map(([slug, name]) => `<option value="${slug}"${d.project === slug ? " selected" : ""}>${esc(name)}</option>`));
+  const projectChecks = Object.entries(list.projects).map(([slug, name]) =>
+    `<label><input type="checkbox" value="${slug}"${(d.projects || []).includes(slug) ? " checked" : ""}>${esc(name)}</label>`);
   $("#form").innerHTML = `
     <div class="fields">
       <label for="f-title">Title</label><input id="f-title" value="${esc(d.title)}">
@@ -203,8 +206,8 @@ function open(item) {
         <label for="f-date">Date</label><input id="f-date" type="date" value="${esc(d.date)}">
         <label for="f-line">Card text</label><input id="f-line" value="${esc(d.line)}" placeholder="One line for the Workshop card">
         <span class="hint">Shown under the title on the Workshop card${d.slug ? "" : "; leave empty to use the title"}.</span>
-        <label for="f-project">Project</label><select id="f-project">${projectOptions.join("")}</select>
-        <span class="hint">Linked under the title, and listed on that project's page.</span>
+        <label>Projects</label><span class="checks" id="f-projects">${projectChecks.join("")}</span>
+        <span class="hint">Linked under the title, and listed on each ticked project's page.</span>
         <label>Shelf</label><span>${d.folder === "updates" ? "Recent updates" : "Past projects"}${d.slug ? ` · ${d.folder}/${d.slug}.html` : " · new"}</span>`
       : `
         <label for="f-subtitle">Subtitle</label><input id="f-subtitle" value="${esc(d.subtitle)}" placeholder="Where and when, e.g. the team or the dates">
@@ -248,7 +251,8 @@ function open(item) {
 function collect() {
   const box = $("#body");
   const d = { ...current.data, title: $("#f-title").value, body: box.dataset.raw ? box.textContent : box.innerHTML };
-  if (current.kind === "post") Object.assign(d, { date: $("#f-date").value, line: $("#f-line").value, project: $("#f-project").value });
+  if (current.kind === "post") Object.assign(d, { date: $("#f-date").value, line: $("#f-line").value,
+    projects: [...document.querySelectorAll("#f-projects input:checked")].map((box) => box.value) });
   else d.subtitle = $("#f-subtitle").value;
   return d;
 }

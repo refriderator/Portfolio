@@ -249,6 +249,75 @@
 }
 
 
+/* ---------- Résumé preview ----------
+   A PDF viewer pinned in the space right of the reading column (sidebar
+   22rem + reading 44rem). Only where that space is wide enough to read a
+   page in; below that, js/recruiter.js leaves the buttons as downloads. */
+.resume-preview { display: none; }
+
+@media (min-width: 90rem) {
+  .resume-preview:not([hidden]) {
+    position: fixed;
+    top: var(--space-4);
+    bottom: var(--space-4);
+    left: calc(66rem + var(--space-4));
+    right: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    border: var(--hairline) solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-box);
+    animation: preview-in 200ms ease;
+  }
+}
+
+@keyframes preview-in { from { opacity: 0; translate: 12px 0; } }
+
+.resume-preview__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--hairline) solid var(--line);
+}
+
+.resume-preview__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.resume-preview__download { padding: var(--space-1) var(--space-3); font-size: inherit; }
+
+.resume-preview__close {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.resume-preview__close:hover { color: var(--text); }
+
+.resume-preview__doc {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: var(--surface-page);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-preview:not([hidden]) { animation: none; }
+}
+
+
 /* ---------- Narrow screens ----------
    The sidebar becomes a header that scrolls away; the section links
    stay, the per-post list goes (the headings themselves do that job). */

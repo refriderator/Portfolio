@@ -159,9 +159,9 @@ PAGE = """<!doctype html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
 
-  <link rel="stylesheet" href="../css/tokens.css?v=2">
-  <link rel="stylesheet" href="../css/base.css?v=2">
-  <link rel="stylesheet" href="../css/amazed.css?v=2">
+  <link rel="stylesheet" href="../css/tokens.css?v=3">
+  <link rel="stylesheet" href="../css/base.css?v=3">
+  <link rel="stylesheet" href="../css/amazed.css?v=3">
 </head>
 <body>
   <div class="subpage">
@@ -204,11 +204,12 @@ def load_post(folder, slug):
     page = read(os.path.join(ROOT, folder, f"{slug}.html"))
     title = html.unescape(re.search(r'<h1 class="amazed__title">(.*?)</h1>', page, flags=re.S).group(1))
     date = re.search(r'<time datetime="([\d-]+)"', page)
-    project = re.search(r'href="\.\./projects/([\w-]+)\.html"', page)
+    meta = re.search(r'<p class="subpage__meta">(.*?)</p>', page, flags=re.S)
+    linked = re.findall(r'href="\.\./projects/([\w-]+)\.html"', meta.group(1) if meta else "")
     body = re.search(r'<main class="prose">\s*(.*?)\s*</main>', page, flags=re.S).group(1)
     card = next((c for c in cards() if c["folder"] == folder and c["slug"] == slug), {})
     return {"folder": folder, "slug": slug, "title": title, "date": date.group(1) if date else "",
-            "project": project.group(1) if project else "", "line": card.get("line", ""),
+            "projects": linked, "line": card.get("line", ""),
             "body": to_editor(unbox(dedent(body)), "../")}
 
 
@@ -269,10 +270,12 @@ def save_post(data):
     slug = data.get("slug") or slugify(title)
     if not data.get("slug") and os.path.exists(os.path.join(ROOT, folder, f"{slug}.html")):
         raise ValueError(f'There is already a post at {folder}/{slug}.html; give this one another title.')
-    project = data.get("project") or ""
+    # A post can belong to several projects: each is linked under the title and lists the post.
+    names = projects()
+    linked = [p for p in data.get("projects") or ([data["project"]] if data.get("project") else []) if p in names]
     meta = f'<time datetime="{data["date"]}">{long_date(data["date"])}</time>'
-    if project:
-        meta += f' &middot;\n        <a href="../projects/{project}.html">{html.escape(projects().get(project, project))}</a>'
+    for project in linked:
+        meta += f' &middot;\n        <a href="../projects/{project}.html">{html.escape(names[project])}</a>'
     body = box(clean(from_editor(data.get("body", ""), "../")))
     body = "      " + body.replace("\n", "\n      ")
     write(os.path.join(ROOT, folder, f"{slug}.html"),
@@ -283,12 +286,12 @@ def save_post(data):
                       tile(folder, slug, data["date"], title, line))
     write(INDEX, _sort_shelves(index))
     # The project pages list their own updates and posts.
-    for other in projects():
+    for other in names:
         path = os.path.join(ROOT, "projects", f"{other}.html")
         if not os.path.exists(path):
             continue
         text = read(path)
-        if other == project:   # replaced where it stands, so same-day posts keep their order
+        if other in linked:   # replaced where it stands, so same-day posts keep their order
             text = _put_tile(text, folder if folder == "updates" else "posts", folder, slug,
                              tile(folder, slug, data["date"], title, line, "../"))
         else:
