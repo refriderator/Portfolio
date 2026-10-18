@@ -159,9 +159,9 @@ PAGE = """<!doctype html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
 
-  <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/amazed.css">
+  <link rel="stylesheet" href="../css/tokens.css?v=2">
+  <link rel="stylesheet" href="../css/base.css?v=2">
+  <link rel="stylesheet" href="../css/amazed.css?v=2">
 </head>
 <body>
   <div class="subpage">
