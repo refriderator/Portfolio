@@ -278,7 +278,7 @@ class Scene {
 
   startIntro(t) {
     this.introStart = t;
-    if (root.dataset.landed !== undefined || reduced()) { root.dataset.landed = ""; return; }
+    if (root.dataset.landed !== undefined) { root.dataset.landed = ""; return; }
     this.sheets.forEach((s, i) => { s.fall = { start: t + 150 + i * 550, dur: 1500 }; });
   }
 
@@ -291,6 +291,8 @@ class Scene {
   //             slowest (0.4) at the ends of a swing, fastest (1.6) mid-swing
   //   tilt      θ = 0.22 cos φ (1 − u), leaning into the direction of travel
   leaf(sh, u) {
+    // Reduced motion: straight down, easing in and out, no sway or tilt.
+    if (reduced()) return { dx: 0, g: u * u * (3 - 2 * u), tilt: 0 };
     const swings = 1.25, phi = 2 * Math.PI * swings * u;
     const dir = sh.name === "amazed" ? -1 : 1;
     return {
@@ -338,9 +340,11 @@ class Scene {
 
       if (sh.fall && t >= sh.fall.start + sh.fall.dur) {
         sh.fall = null;
-        sh.squash.v = -1.2;                         // settle with a little give…
-        this.burst(sh, 10, "dust");                 // …and a puff of dust
-        this.burst(sh, 4, "scrap");
+        if (!calm) {
+          sh.squash.v = -1.2;                       // settle with a little give…
+          this.burst(sh, 10, "dust");               // …and a puff of dust
+          this.burst(sh, 4, "scrap");
+        }
         if (this.sheets.every((x) => !x.fall)) root.dataset.landed = "";
       }
 
@@ -421,7 +425,7 @@ class Scene {
       x += leaf.dx;
       tilt = leaf.tilt;
       lift = 10 * (1 - u);
-      wave = Math.max(wave, 1.2 * (1 - u));
+      if (!reduced()) wave = Math.max(wave, 1.2 * (1 - u));
       if (u <= 0) y = -H * 3;                                 // not yet dropped
     }
 

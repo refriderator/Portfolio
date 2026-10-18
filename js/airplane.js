@@ -45,6 +45,8 @@ const LAYER_GAP = 0.2;                 // fine px between stacked layers of pape
 // Touch screens have no hover preview, so the page stays light while the plane folds; it goes dark only as
 // the plane flies off, rising from the bottom with the Workshop (js/wipe.js reveal()).
 const touch = () => matchMedia("(hover: none)").matches;
+// Reduced motion keeps the plane and the rise but drops the flutter, the bounce and the lean.
+const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Timeline, in ms from the click.
 const T = {
@@ -393,7 +395,7 @@ function folder(start) {
     // Onto the scene, K times larger, each column nudged by the same gusty,
     // whippy ripple as the sheets: the paper flutters, more once it flies.
     const flying = progress(T.fly, t);
-    const offs = ripple(bw, t, (0.6 + 1.6 * flying) * q, 5);
+    const offs = ripple(bw, t, (calm() ? 0 : 0.6 + 1.6 * flying) * q, 5);
     for (let col = 0; col < bw; col++)
       g.drawImage(buf, col, 0, 1, bh, Math.round(ox) + col * K, Math.round(oy + offs[col]), K, bh * K);
 
@@ -427,16 +429,18 @@ function rise(view) {
   return parts.map((el, i) => {
     const r = el.getBoundingClientRect();
     const from = vh - r.top + 24;
-    const zeta = 0.45 + 0.08 * (i % 3);
+    const gentle = calm();
+    const zeta = gentle ? 1 : 0.45 + 0.08 * (i % 3);
     const omega = Math.min(13, Math.max(7, 11 * Math.sqrt(20000 / (r.width * r.height))));
-    const wd = omega * Math.sqrt(1 - zeta * zeta);
-    const tip = (i % 2 ? 1 : -1) * 4;               // neighbours lean opposite ways
+    const wd = gentle ? 1 : omega * Math.sqrt(1 - zeta * zeta);
+    const tip = gentle ? 0 : (i % 2 ? 1 : -1) * 4;               // neighbours lean opposite ways
     const n = Math.ceil((4.6 / (zeta * omega)) * 60); // until the envelope is 1%
 
     const frames = [];
     for (let f = 0; f <= n; f++) {
       const t = f / 60, env = Math.exp(-zeta * omega * t);
-      const x = 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
+      const x = gentle ? 1 - env * (1 + omega * t)       // critically damped: arrives with no overshoot
+        : 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
       const lean = tip * env * Math.sin(wd * t);
       frames.push({ transform: `translate(0, ${(from * (1 - x)).toFixed(1)}px) rotate(${lean.toFixed(2)}deg)` });
     }

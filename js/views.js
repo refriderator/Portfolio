@@ -27,7 +27,6 @@ const special = {
   "landing>amazed": () => import("./airplane.js"),
   "landing>recruiter": () => import("./scatter.js"),
 };
-const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 let current = views.find((v) => !v.hidden) ?? fallback;
 let generation = 0; // bumps on every change, so a superseded change stops
@@ -88,7 +87,7 @@ async function show(animate) {
   const isCurrent = () => gen === generation;
 
   const own = special[`${prev.dataset.view}>${next.dataset.view}`];
-  if (animate && own && !reducedMotion.matches) {
+  if (animate && own) {
     const { default: play } = await own();
     if (!isCurrent()) return;
     await play({ from: prev, to: next, swap: () => swapNow(next, el), isCurrent });

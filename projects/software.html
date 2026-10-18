@@ -1,0 +1,64 @@
+<!doctype html>
+<!-- An in-progress project: its goals, then every update and post about it. -->
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Software · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/amazed.css">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">Software</h1>
+      <p class="amazed__lede">Learning software engineering by building things I actually use.</p>
+      <p class="subpage__meta">In progress</p>
+    </header>
+
+    <!-- Goals on the left, the project's updates and posts down the right,
+         photos along the bottom. -->
+    <main class="project">
+      <div class="prose project__goals">
+        <h2>Goals</h2>
+        <ul>
+          <li><strong>Jarvis:</strong> a Mac assistant that lives in the notch. Talk or type to it, and it can hold your windows, set timers and read your calendar</li>
+          <li>A small local AI model trained to run Jarvis's tools, so most questions never leave the Mac</li>
+          <li><strong>This website:</strong> plain HTML, CSS and JavaScript with no build step. The landing is drawn pixel by pixel on a canvas, and the animations come from a damped spring I wrote out in Python</li>
+          <li>Being able to explain every design choice, not just make it work</li>
+        </ul>
+      </div>
+
+      <div class="project__log">
+        <section aria-labelledby="updates">
+          <h2 class="shelf__title" id="updates">Updates</h2>
+          <div class="tiles tiles--stack">
+            <a class="tile" href="../updates/qwen-training.html">
+              <span class="tile__meta">Oct 18, 2026</span>
+              <h3 class="tile__name">Training a tiny brain for Jarvis</h3>
+              <p class="tile__desc">Fine-tuning Qwen3 on a 24 GB Mac, from 8B down to 4B.</p>
+            </a>
+            <a class="tile" href="../updates/jarvis.html">
+              <span class="tile__meta">Oct 18, 2026</span>
+              <h3 class="tile__name">Jarvis</h3>
+              <p class="tile__desc">An assistant in the Mac's notch, and a dock for your windows.</p>
+            </a>
+          </div>
+        </section>
+      </div>
+
+      <div class="project__photos">
+        <figure><img src="../assets/workshop/software/1.png" alt="Jarvis app icon" loading="lazy" decoding="async"></figure>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

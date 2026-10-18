@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- Edited with tools/editor. -->
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jarvis · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/amazed.css">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">Jarvis</h1>
+      <p class="subpage__meta">
+        <time datetime="2026-10-18">October 18, 2026</time> &middot;
+        <a href="../projects/software.html">Software</a>
+      </p>
+    </header>
+
+    <main class="prose">
+      <div class="text-box">
+      <p><a href="https://github.com/refriderator/Jarvis">https://github.com/refriderator/Jarvis</a></p>
+      <p>Jarvis is a Mac assistant that lives in the notch. You click the notch or press Option-Space, then talk or type. It answers with a caption and a voice, and it can set timers, read my calendar and Notion, open apps and hold windows for me.</p>
+      <p>I wanted something that felt like part of the Mac instead of another chat window. The notch is dead space on every new MacBook, so that is where it lives.</p>
+      </div><!--/box-->
+      <h3>The dock</h3>
+      <div class="text-box">
+      <p>My favourite part. Drag a window by its title bar onto the side of the screen and it slides off, leaving a sliver showing. Point at the edge and cards of the held windows pop out; click one to use it, and it slides away again when you move off. Drop a window on the notch and it goes into the notch instead.</p>
+      <p>Try it below (works with touch too). It is a toy version in the browser, but it behaves like the real thing.</p>
+      </div><!--/box-->
+      <figure><iframe class="demo" src="../assets/workshop/jarvis/dock-demo.html" title="Interactive demo of the Jarvis window dock" width="100%" height="460" frameborder="0" loading="lazy"></iframe></figure>
+      <h3>A bit of physics</h3>
+      <div class="text-box">
+      <p><strong>Springs.</strong> Every animation is a damped spring, the same x&#8243; + 2&zeta;&omega;x&#8242; + &omega;&sup2;x = 0 from first year mechanics. The damping ratio &zeta; sets the feel. Overshoot is e<sup>&minus;&zeta;&pi;/&radic;(1&minus;&zeta;&sup2;)</sup>, so the notch hopping between displays (&zeta; &asymp; 0.5) overshoots about 16% and feels bouncy, while the notch opening (&zeta; &asymp; 0.82) overshoots about 1% and just feels smooth.</p>
+      <p><strong>Hysteresis.</strong> A window is caught when the pointer comes within 12 pt of an edge, but only let go once it is 70 pt away. With one threshold, a shaky hand sitting on the line flickers between caught and not caught. Two thresholds is the same idea as a Schmitt trigger or a magnet's B&ndash;H loop.</p>
+      <p><strong>Sampling rate.</strong> Jarvis has to ask macOS where other apps' windows are, and each ask waits on that app. I first checked 30 times a second with the default 6 s timeout. One busy app could then freeze a frame that only has 16.7 ms (at 60 fps) for hundreds of frames. Checking twice a second with a 0.5 s timeout was plenty and the stutter went away.</p>
+      </div><!--/box-->
+      <h3>How it&#8217;s built</h3>
+      <div class="text-box">
+      <p>It is written in Swift (SwiftUI and AppKit) as a plain Swift package, about 17,000 lines across 176 files, with a rule of one job per file and under about 300 lines each. The logic lives in its own library so it can be tested without opening the app.</p>
+      <p>Answers go through tiers, cheapest first:</p>
+      <ul>
+      <li><strong>Plain code</strong> for fixed commands like timers and reminders. Instant and free.</li>
+      <li><strong>Apple&#8217;s on-device model</strong> for summarizing text already on screen.</li>
+      <li><strong>A small local model</strong> I trained myself for tool jobs (next post).</li>
+      <li><strong>Claude or ChatGPT</strong> for anything that needs real knowledge or writing.</li>
+      </ul>
+      <p>Code decides which tier, never a model, since asking a model to decide would add a whole extra call to every question. Most questions never leave the Mac.</p>
+      </div><!--/box-->
+    </main>
+  </div>
+</body>
+</html>

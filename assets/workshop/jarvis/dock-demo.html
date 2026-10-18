@@ -1,0 +1,325 @@
+<!doctype html>
+<!-- A toy of Jarvis's window dock, embedded in updates/jarvis.html with an <iframe>.
+     Drag a window by its title bar onto a side edge (it slides off, leaving a sliver) or onto the notch (it
+     goes into the notch's strip). Point at an edge for cards of what's held there; the notch lists its own.
+     The stage is the iframe itself, so it fits a phone as well as a laptop. Pointer events: mouse and touch. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dock demo</title>
+<style>
+  :root {
+    --bg-a: #1b2550; --bg-b: #3a1f4d; --bg-c: #0b1a33;
+    --win: #1d2230; --bar: #2a3040; --line: #3b4354; --text: #e9ecf2; --muted: #9aa1ae;
+    --glow: rgba(160, 200, 255, 0.55); --ease: cubic-bezier(.2, .9, .25, 1.15);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #040a19; }
+  body {
+    font: 13px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    color: var(--text); user-select: none; -webkit-user-select: none;
+  }
+  .stage {
+    position: absolute; inset: 0; overflow: hidden; border-radius: 10px; border: 1px solid #5f6774;
+    background: radial-gradient(120% 90% at 20% 110%, var(--bg-b), transparent 60%),
+                radial-gradient(90% 80% at 90% 0%, var(--bg-a), transparent 65%), var(--bg-c);
+  }
+  .menubar {
+    position: absolute; left: 0; right: 0; top: 0; height: 26px; padding: 0 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10, 13, 20, 0.45); backdrop-filter: blur(8px); font-size: 12px; color: #cfd4dd; z-index: 50;
+  }
+  .menubar b { font-weight: 600; }
+
+  /* The notch: the hardware cut-out, drawn black. It grows a dropdown when it holds windows. */
+  .notch {
+    position: absolute; top: 0; left: 50%; width: 150px; height: 26px; transform: translateX(-50%);
+    background: #000; border-radius: 0 0 12px 12px; z-index: 60; cursor: pointer;
+    transition: width .35s var(--ease), height .35s var(--ease), box-shadow .2s;
+    display: flex; flex-direction: column; align-items: center; overflow: hidden;
+  }
+  .notch.hot { box-shadow: 0 0 0 2px var(--glow), 0 0 24px var(--glow); }
+  .notch.open { width: 260px; height: 104px; border-radius: 0 0 18px 18px; }
+  .notch__dots { position: absolute; right: 12px; top: 9px; display: flex; gap: 4px; }
+  .notch__dots i { width: 8px; height: 8px; border-radius: 50%; }
+  .notch.open .notch__dots { opacity: 0; }
+  .notch__strip {
+    margin-top: 34px; display: flex; gap: 10px; opacity: 0; transition: opacity .2s;
+  }
+  .notch.open .notch__strip { opacity: 1; transition-delay: .12s; }
+  .notch__app {
+    width: 54px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--muted); background: none; border: 0; cursor: pointer; padding: 0;
+  }
+  .notch__app span { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 18px; color: #fff; font-weight: 700; }
+  .notch__empty { margin-top: 44px; color: var(--muted); font-size: 11px; }
+
+  /* Windows */
+  .win {
+    position: absolute; left: 0; top: 0; border-radius: 10px; overflow: hidden;
+    background: var(--win); border: 1px solid var(--line);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+    transition: transform .45s var(--ease), opacity .35s;
+    will-change: transform;
+  }
+  .win.dragging { transition: none; box-shadow: 0 26px 60px rgba(0, 0, 0, .6); }
+  .win__bar {
+    height: 28px; display: flex; align-items: center; gap: 6px; padding: 0 10px;
+    background: var(--bar); cursor: grab; touch-action: none; font-size: 12px; color: #cfd4dd;
+  }
+  .win.dragging .win__bar { cursor: grabbing; }
+  .win__bar i { width: 10px; height: 10px; border-radius: 50%; }
+  .win__bar i:nth-child(1) { background: #ff5f57; } .win__bar i:nth-child(2) { background: #febc2e; }
+  .win__bar i:nth-child(3) { background: #28c840; }
+  .win__bar b { margin-left: 8px; font-weight: 600; }
+  .win__body { padding: 12px; display: grid; gap: 7px; }
+  .win__body s { display: block; height: 8px; border-radius: 4px; background: #2e3546; text-decoration: none; }
+  .win__body s.accent { height: 34px; }
+
+  /* Edges: where a dragged window gets caught, and where pointing shows the cards. */
+  .edge {
+    position: absolute; top: 26px; bottom: 0; width: 16px; z-index: 40;
+  }
+  .edge--left { left: 0; } .edge--right { right: 0; }
+  .edge.hot { background: linear-gradient(to var(--to), var(--glow), transparent); }
+  .edge--left { --to: right; } .edge--right { --to: left; }
+  .cards {
+    position: absolute; top: 50%; z-index: 45; display: flex; flex-direction: column; gap: 10px;
+    transform: translateY(-50%); pointer-events: none; opacity: 0;
+    transition: opacity .2s, translate .35s var(--ease);
+  }
+  .cards--left { left: 14px; translate: -20px 0; } .cards--right { right: 14px; translate: 20px 0; }
+  .cards.show { opacity: 1; translate: 0 0; pointer-events: auto; }
+  .card {
+    width: 150px; border-radius: 9px; overflow: hidden; border: 1px solid var(--line); cursor: pointer;
+    background: var(--win); box-shadow: 0 10px 24px rgba(0, 0, 0, .5); padding: 0; color: var(--text); text-align: left;
+    transition: transform .15s;
+  }
+  .card:hover { transform: scale(1.04); }
+  .card__bar { height: 18px; padding: 0 8px; display: flex; align-items: center; background: var(--bar);
+    font-size: 11px; font-weight: 600; }
+  .card__body { height: 48px; padding: 8px; display: grid; gap: 5px; }
+  .card__body s { display: block; height: 6px; border-radius: 3px; background: #2e3546; }
+
+  .hint {
+    position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 70;
+    padding: 6px 12px; border-radius: 999px; background: rgba(4, 10, 25, .75); border: 1px solid #5f6774;
+    color: #d6d9df; font-size: 12px; white-space: nowrap; transition: opacity .3s;
+  }
+  .reset {
+    position: absolute; right: 10px; bottom: 10px; z-index: 70; border: 1px solid #5f6774; border-radius: 999px;
+    background: rgba(4, 10, 25, .75); color: #d6d9df; padding: 5px 11px; font: inherit; font-size: 12px; cursor: pointer;
+  }
+  @media (max-width: 520px) {
+    .hint { left: 10px; transform: none; bottom: 10px; font-size: 11px; white-space: normal; max-width: calc(100% - 90px); }
+    .card { width: 118px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0s !important; } }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="menubar"><span><b>Jarvis</b>&nbsp;&nbsp;File&nbsp;&nbsp;Edit&nbsp;&nbsp;View</span><span id="clock"></span></div>
+  <div class="notch" id="notch" role="button" aria-label="Notch">
+    <div class="notch__dots" id="dots"></div>
+    <div class="notch__strip" id="strip"></div>
+  </div>
+  <div class="edge edge--left" id="edge-left"></div>
+  <div class="edge edge--right" id="edge-right"></div>
+  <div class="cards cards--left" id="cards-left"></div>
+  <div class="cards cards--right" id="cards-right"></div>
+  <div class="hint" id="hint">Drag a window by its title bar onto a side or the notch</div>
+  <button class="reset" id="reset">Reset</button>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const notch = document.getElementById('notch');
+  const hint = document.getElementById('hint');
+  const edges = { left: document.getElementById('edge-left'), right: document.getElementById('edge-right') };
+  const decks = { left: document.getElementById('cards-left'), right: document.getElementById('cards-right') };
+  const SLIVER = 5, CATCH = 24, RELEASE = 80, BAR = 26;
+
+  const APPS = [
+    { title: 'Safari', colour: '#2f7cf6', letter: 'S' },
+    { title: 'Notes', colour: '#e9b82c', letter: 'N' },
+    { title: 'Music', colour: '#f2445b', letter: 'M' },
+  ];
+  let W, H, wins = [], top = 10;
+
+  const size = () => {
+    W = stage.clientWidth; H = stage.clientHeight;
+    const w = Math.max(150, Math.min(280, W * 0.38));
+    return { w, h: Math.min(w * 0.7, H * 0.5) };
+  };
+
+  function build() {
+    stage.querySelectorAll('.win').forEach((el) => el.remove());
+    const { w, h } = size();
+    wins = APPS.map((app, i) => {
+      const el = document.createElement('div');
+      el.className = 'win';
+      el.innerHTML = `<div class="win__bar"><i></i><i></i><i></i><b>${app.title}</b></div>
+        <div class="win__body"><s class="accent" style="background:${app.colour}33"></s><s></s><s style="width:70%"></s><s style="width:85%"></s></div>`;
+      el.style.width = w + 'px'; el.style.height = h + 'px';
+      stage.appendChild(el);
+      const x = W * 0.5 - w / 2 + (i - 1) * Math.min(90, W * 0.18);
+      const y = BAR + 30 + i * Math.min(36, H * 0.07);
+      const win = { ...app, el, w, h, x, y, home: { x, y }, state: 'free', side: null };
+      el.querySelector('.win__bar').addEventListener('pointerdown', (e) => grab(e, win));
+      el.addEventListener('pointerdown', () => raise(win));
+      el.addEventListener('pointerleave', () => { if (win.state === 'peek') park(win, win.side); });
+      raise(win);
+      place(win);
+      return win;
+    });
+    render();
+  }
+
+  const raise = (win) => { win.el.style.zIndex = ++top; };
+  function place(win, opts = {}) {
+    let { x, y } = win, scale = 1, opacity = 1;
+    if (win.state === 'side') x = win.side === 'left' ? -win.w + SLIVER : W - SLIVER;
+    if (win.state === 'peek') x = win.side === 'left' ? 18 : W - win.w - 18;
+    if (win.state === 'notch') { x = W / 2 - win.w / 2; y = -win.h * 0.4; scale = 0.08; opacity = 0; }
+    win.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    win.el.style.transformOrigin = '50% 0';
+    win.el.style.opacity = opacity;
+    win.el.style.pointerEvents = win.state === 'notch' ? 'none' : '';
+  }
+
+  // Dragging by the title bar. Where the pointer is decides the catch, as in Jarvis (not where the window is).
+  function grab(e, win) {
+    e.preventDefault();
+    const bar = e.currentTarget;
+    try { bar.setPointerCapture(e.pointerId); } catch {}
+    const box = stage.getBoundingClientRect();
+    const from = { x: win.state === 'free' ? win.x : win.home.x, y: win.y };
+    const off = { x: e.clientX - box.left - (win.state === 'free' ? win.x : currentX(win)), y: e.clientY - box.top - win.y };
+    if (win.state !== 'free') { win.x = currentX(win); win.state = 'free'; win.side = null; }
+    win.el.classList.add('dragging');
+    let target = null;
+
+    const move = (ev) => {
+      const p = { x: ev.clientX - box.left, y: ev.clientY - box.top };
+      win.x = p.x - off.x;
+      win.y = Math.max(BAR, Math.min(H - 28, p.y - off.y));
+      place(win);
+      const n = notch.getBoundingClientRect();
+      const overNotch = ev.clientX > n.left - 30 && ev.clientX < n.right + 30 && ev.clientY < n.bottom + 24;
+      // Hysteresis: catching needs the pointer near the edge, letting go needs it well away,
+      // so a hand that wobbles on the line doesn't flicker between the two.
+      const held = target === 'left' ? p.x < RELEASE : target === 'right' ? p.x > W - RELEASE : false;
+      target = overNotch ? 'notch' : held ? target : p.x < CATCH ? 'left' : p.x > W - CATCH ? 'right' : null;
+      notch.classList.toggle('hot', target === 'notch');
+      edges.left.classList.toggle('hot', target === 'left');
+      edges.right.classList.toggle('hot', target === 'right');
+    };
+    const up = () => {
+      bar.removeEventListener('pointermove', move);
+      bar.removeEventListener('pointerup', up);
+      bar.removeEventListener('pointercancel', up);
+      win.el.classList.remove('dragging');
+      [notch, edges.left, edges.right].forEach((el) => el.classList.remove('hot'));
+      if (target === 'notch') { win.home = from; win.state = 'notch'; place(win); }
+      else if (target) { win.home = from; win.x = from.x; park(win, target); }
+      else { win.x = Math.max(-win.w + 60, Math.min(W - 60, win.x)); win.home = { x: win.x, y: win.y }; }
+      if (target) hint.style.opacity = 0;
+      render();
+    };
+    bar.addEventListener('pointermove', move);
+    bar.addEventListener('pointerup', up);
+    bar.addEventListener('pointercancel', up);
+  }
+
+  function currentX(win) {
+    const m = /translate\(([-\d.]+)px/.exec(win.el.style.transform);
+    return m ? parseFloat(m[1]) : win.x;
+  }
+
+  function park(win, side) { win.state = 'side'; win.side = side; place(win); render(); }
+
+  // Cards for what's held on each side, and the notch's strip.
+  function render() {
+    for (const side of ['left', 'right']) {
+      const held = wins.filter((w) => (w.state === 'side' || w.state === 'peek') && w.side === side);
+      decks[side].innerHTML = '';
+      for (const win of held) {
+        const card = document.createElement('button');
+        card.className = 'card';
+        card.innerHTML = `<div class="card__bar">${win.title}</div><div class="card__body"><s style="background:${win.colour}55"></s><s></s><s style="width:60%"></s></div>`;
+        card.addEventListener('click', () => {
+          decks[side].classList.remove('show');
+          win.state = 'peek'; raise(win); place(win);
+        });
+        decks[side].appendChild(card);
+      }
+    }
+    const inNotch = wins.filter((w) => w.state === 'notch');
+    document.getElementById('dots').innerHTML = inNotch.map((w) => `<i style="background:${w.colour}"></i>`).join('');
+    const strip = document.getElementById('strip');
+    strip.innerHTML = inNotch.length ? '' : '';
+    for (const win of inNotch) {
+      const b = document.createElement('button');
+      b.className = 'notch__app';
+      b.innerHTML = `<span style="background:${win.colour}">${win.letter}</span>${win.title}`;
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        win.state = 'free'; win.x = win.home.x; win.y = win.home.y; raise(win); place(win);
+        render();
+        if (!wins.some((w) => w.state === 'notch')) notch.classList.remove('open');
+      });
+      strip.appendChild(b);
+    }
+  }
+
+  // Pointing at an edge shows its cards; leaving both the edge and the cards hides them.
+  for (const side of ['left', 'right']) {
+    let timer;
+    const show = () => { clearTimeout(timer); if (decks[side].children.length) decks[side].classList.add('show'); };
+    const hide = () => { timer = setTimeout(() => decks[side].classList.remove('show'), 250); };
+    edges[side].addEventListener('pointerenter', show);
+    edges[side].addEventListener('pointerdown', show);
+    edges[side].addEventListener('pointerleave', hide);
+    decks[side].addEventListener('pointerenter', show);
+    decks[side].addEventListener('pointerleave', hide);
+  }
+
+  notch.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' && wins.some((w) => w.state === 'notch')) notch.classList.add('open'); });
+  notch.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') notch.classList.remove('open'); });
+  notch.addEventListener('click', () => { if (wins.some((w) => w.state === 'notch')) notch.classList.toggle('open'); });
+  stage.addEventListener('pointerdown', (e) => {
+    if (!notch.contains(e.target)) notch.classList.remove('open');
+    for (const side of ['left', 'right']) {
+      if (!decks[side].contains(e.target) && !edges[side].contains(e.target)) decks[side].classList.remove('show');
+    }
+  });
+
+  document.getElementById('reset').addEventListener('click', () => { hint.style.opacity = 1; build(); });
+
+  // Held windows stay on their edge when the frame changes size; free ones are laid out again.
+  let lastW = 0;
+  new ResizeObserver(() => {
+    if (Math.abs(stage.clientWidth - lastW) < 2) return;
+    lastW = stage.clientWidth;
+    if (!wins.length) return build();
+    size();
+    for (const w of wins) {
+      w.x = Math.max(0, Math.min(W - w.w, w.x));
+      w.home.x = Math.max(0, Math.min(W - w.w, w.home.x));
+      place(w);
+    }
+  }).observe(stage);
+
+  const tick = () => {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  };
+  tick(); setInterval(tick, 30000);
+})();
+</script>
+</body>
+</html>

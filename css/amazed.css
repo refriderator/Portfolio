@@ -81,6 +81,109 @@
   transform: none;
 }
 
+/* ---------- Links: a menu window in the top right of the header ---------- */
+.amazed__head { position: relative; }
+
+.links-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+/* Same pixel button as Back. */
+.links-menu__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-box);
+  box-shadow: var(--frame);
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  transition: translate 160ms steps(2), box-shadow 160ms steps(2);
+}
+
+.links-menu__button::-webkit-details-marker { display: none; }
+
+/* A small pixel triangle that flips when the window is open. */
+.links-menu__button::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-inline: calc(2 * var(--px)) solid transparent;
+  border-top: calc(2 * var(--px)) solid currentColor;
+}
+
+.links-menu[open] .links-menu__button::after { rotate: 180deg; }
+
+.links-menu__button:hover,
+.links-menu__button:focus-visible,
+.links-menu[open] .links-menu__button {
+  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
+  box-shadow: var(--frame-raised);
+}
+
+.links-menu__button:active {
+  translate: var(--px) var(--px);
+  box-shadow: none;
+}
+
+.links-menu__list {
+  position: absolute;
+  top: calc(100% + var(--space-3));
+  right: 0;
+  min-width: 13rem;
+  margin: 0;
+  padding: var(--space-2);
+  list-style: none;
+  background: var(--surface-box);
+  box-shadow: var(--frame);
+}
+
+/* Menu rows like an RPG menu: the pointed-at row gets a cursor arrow. */
+.links-menu__list a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  position: relative;
+  font-size: 22px;
+  line-height: 1.3;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.links-menu__list .icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  fill: currentColor;
+}
+
+.links-menu__list a::before {
+  content: "\25B6";
+  position: absolute;
+  left: var(--space-1);
+  font-size: 12px;
+  opacity: 0;
+}
+
+.links-menu__list a:hover,
+.links-menu__list a:focus-visible {
+  color: var(--highlight-a);
+  outline: none;
+}
+
+.links-menu__list a:hover::before,
+.links-menu__list a:focus-visible::before { opacity: 1; }
+
+
 /* Chrome in 8-bit: hard bands instead of a smooth gradient, repeated once
    per line (1lh), so each line of a wrapped title gets its own stripes. */
 .amazed__title {
