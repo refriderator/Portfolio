@@ -29,34 +29,32 @@
     <main class="prose">
       <div class="text-box">
       <p>Model: <a href="https://huggingface.co/refriderator/jarvis-qwen3-4b">https://huggingface.co/refriderator/jarvis-qwen3-4b</a></p>
-      <p>Jarvis tries a small AI model on my Mac before it asks the cloud. Out of the box that model was bad at the job, so I fine-tuned my own. Its job is narrow on purpose: set timers, open apps, arrange windows, do maths with a calculator tool, and say <em>ESCALATE</em> for everything else so Claude can handle it.</p>
+      <p>Before Jarvis goes to the cloud, it tries a small AI model running on my Mac. The off-the-shelf model was honestly pretty bad at this, so I fine-tuned my own. I kept its job narrow on purpose: set timers, open apps, arrange windows, do maths with a calculator tool, and say <em>ESCALATE</em> for anything else so Claude can take it.</p>
       </div><!--/box-->
       <h3>Fitting it on a laptop</h3>
       <div class="text-box">
-      <p>Everything ran on my 24 GB MacBook, so memory was the real limit. A model&#8217;s size is roughly parameters &times; bits per weight. Qwen3 8B at 4 bits is 8 billion &times; 0.5 bytes &asymp; 4 GB (5 GB as a real file, since some layers keep more bits). The 4B is about 2.5 GB. A 9B model ran out of GPU memory on the very first training step.</p>
-      <p>Instead of retraining the whole thing I used <strong>LoRA</strong>. The original weights stay frozen, and each weight matrix W gets a small correction W + BA, where B and A are thin matrices of rank 8. For a 2560 &times; 2560 matrix that is 8 &times; (2560 + 2560) &asymp; 41,000 trainable numbers instead of 6.5 million, about 0.6%. The whole trained part is a 29 MB file.</p>
+      <p>I did all of this on my 24 GB MacBook, so memory was the thing I kept running into. You can estimate a model&#8217;s size as parameters &times; bits per weight. For Qwen3 8B at 4 bits that&#8217;s 8 billion &times; 0.5 bytes &asymp; 4 GB (closer to 5 GB as an actual file, since some layers keep more bits), and the 4B is about 2.5 GB. I also tried a 9B model, and it ran out of GPU memory on the very first training step.</p>
+      <p>Retraining the whole model wasn&#8217;t realistic, so I used <strong>LoRA</strong>. The original weights stay frozen, and each weight matrix W gets a small correction added on top, W + BA, where B and A are skinny rank-8 matrices. For a 2560 &times; 2560 matrix that&#8217;s 8 &times; (2560 + 2560) &asymp; 41,000 numbers to train instead of 6.5 million, or about 0.6%. Everything I actually trained fits in a 29 MB file.</p>
       </div><!--/box-->
       <h3>Teaching it</h3>
       <div class="text-box">
-      <p>I wrote a Python generator that makes thousands of fake conversations (a fake calendar, fake Notion pages, many ways to say &#8220;set a timer&#8221;), each with the right tool call and answer. To score a model I replay Jarvis&#8217;s real tool loop on wordings it never saw in training: 34 kinds of question, 10 of each.</p>
+      <p>For training data I wrote a Python generator that spits out thousands of fake conversations, with a fake calendar, fake Notion pages and lots of different ways of saying &#8220;set a timer&#8221;, each paired with the right tool call and answer. To test a model, I replay Jarvis&#8217;s real tool loop on wordings it never saw during training: 34 kinds of question, 10 of each.</p>
       </div><!--/box-->
       <figure><img src="../assets/workshop/qwen-training/1.png" alt="Best held-out score of each training run, from 67% for the base model to 100% for v15b" loading="lazy" decoding="async"></figure>
       <h3>What I learned</h3>
       <div class="text-box">
-      <ul>
-      <li><strong>Data beats model size.</strong> Same model, same settings, fixed data: four question kinds went from 0/6 to 6/6.</li>
-      <li><strong>Small samples are noisy.</strong> With 10 cases per kind, one miss is 10 points. At an 80% pass rate the binomial spread is &radic;(0.8 &times; 0.2 / 10) &asymp; &plusmn;13%, so picking the best checkpoint on one test flatters it. I score every pick on a second random seed.</li>
-      <li><strong>Overfitting is real.</strong> Training longer made one run worse (one kind fell from 9/10 to 2/10). Validation loss looked fine the whole time; only the held-out test showed it.</li>
-      <li><strong>Wrong but confident is the worst miss.</strong> A model that says &#8220;I don&#8217;t know&#8221; just costs a cloud call. One that invents your exam date is a bug. I started counting those separately.</li>
-      </ul>
+      <p>Fixing the data mattered way more than the model size. Same model, same settings, just cleaned-up data, and four kinds of question went from 0/6 to 6/6.</p>
+      <p>With only 10 cases per kind, the scores are noisy, since one miss is already 10 points. At an 80% pass rate the binomial spread is &radic;(0.8 &times; 0.2 / 10) &asymp; &plusmn;13%, so if you pick the best checkpoint off a single test you end up flattering it. I started re-scoring every pick on a second random seed.</p>
+      <p>Overfitting showed up too. Training one run for longer made it worse (one kind of question dropped from 9/10 to 2/10), and the validation loss looked fine the whole time. Only the held-out test caught it.</p>
+      <p>The miss I care about most is being wrong and confident about it. If the model says &#8220;I don&#8217;t know&#8221;, that just costs a cloud call, but if it makes up your exam date, that&#8217;s a real bug. I count those separately now.</p>
       </div><!--/box-->
       <h3>Smaller job, smaller model</h3>
       <div class="text-box">
-      <p>The big win was not training harder. It was giving the model less to do. Reminders, alarms and summaries moved to plain code and Apple&#8217;s own model, which left four jobs plus knowing when to hand off. On that job a 4B model beat the old 8B on the same test, with half the memory.</p>
+      <p>In the end the biggest improvement didn&#8217;t come from training harder, it came from giving the model less to do. I moved reminders, alarms and summaries over to plain code and Apple&#8217;s own model, which left it with four jobs plus knowing when to hand off. With that narrower job, the 4B model beat the old 8B on the same test while using half the memory.</p>
       </div><!--/box-->
       <figure><img src="../assets/workshop/qwen-training/2.png" alt="On the same 340 questions, v12 8B scored 68% with 95 confidently wrong answers; v15b 4B scored 100% with none" loading="lazy" decoding="async"></figure>
       <div class="text-box">
-      <p>100% on my own test does not mean it is perfect, since the test is made by the same kind of generator as the training data. The next step is logging real questions for a week and testing on those.</p>
+      <p>To be fair, 100% on my own test doesn&#8217;t mean it&#8217;s perfect, since the test questions come from the same kind of generator as the training data. Next I want to log real questions for a week and test on those.</p>
       </div><!--/box-->
     </main>
   </div>

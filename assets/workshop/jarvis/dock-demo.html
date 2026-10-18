@@ -2,7 +2,8 @@
 <!-- A toy of Jarvis's window dock, embedded in updates/jarvis.html with an <iframe>.
      Drag a window by its title bar onto a side edge (it slides off, leaving a sliver) or onto the notch (it
      goes into the notch's strip). Point at an edge for cards of what's held there; the notch lists its own.
-     The stage is the iframe itself, so it fits a phone as well as a laptop. Pointer events: mouse and touch. -->
+     The stage is the iframe itself, so it fits a phone as well as a laptop. Pointer events: mouse and touch.
+     A finger has no hover, so on touch a tap opens things and a tap somewhere else closes them. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,12 +17,14 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #040a19; }
+  button, .win, .edge { -webkit-tap-highlight-color: transparent; }
   body {
     font: 13px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
     color: var(--text); user-select: none; -webkit-user-select: none;
   }
   .stage {
     position: absolute; inset: 0; overflow: hidden; border-radius: 10px; border: 1px solid #5f6774;
+    touch-action: manipulation;
     background: radial-gradient(120% 90% at 20% 110%, var(--bg-b), transparent 60%),
                 radial-gradient(90% 80% at 90% 0%, var(--bg-a), transparent 65%), var(--bg-c);
   }
@@ -56,9 +59,11 @@
     font-size: 18px; color: #fff; font-weight: 700; }
   .notch__empty { margin-top: 44px; color: var(--muted); font-size: 11px; }
 
-  /* Windows */
+  /* Windows. Their own layer is a stacking context, so however high raise() counts,
+     a window stays under the edges, cards, menubar and notch. */
+  .wins { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
   .win {
-    position: absolute; left: 0; top: 0; border-radius: 10px; overflow: hidden;
+    position: absolute; left: 0; top: 0; border-radius: 10px; overflow: hidden; pointer-events: auto;
     background: var(--win); border: 1px solid var(--line);
     box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
     transition: transform .45s var(--ease), opacity .35s;
@@ -97,7 +102,7 @@
     background: var(--win); box-shadow: 0 10px 24px rgba(0, 0, 0, .5); padding: 0; color: var(--text); text-align: left;
     transition: transform .15s;
   }
-  .card:hover { transform: scale(1.04); }
+  @media (hover: hover) { .card:hover { transform: scale(1.04); } }
   .card__bar { height: 18px; padding: 0 8px; display: flex; align-items: center; background: var(--bar);
     font-size: 11px; font-weight: 600; }
   .card__body { height: 48px; padding: 8px; display: grid; gap: 5px; }
@@ -112,6 +117,7 @@
     position: absolute; right: 10px; bottom: 10px; z-index: 70; border: 1px solid #5f6774; border-radius: 999px;
     background: rgba(4, 10, 25, .75); color: #d6d9df; padding: 5px 11px; font: inherit; font-size: 12px; cursor: pointer;
   }
+  @media (pointer: coarse) { .edge { width: 28px; } }
   @media (max-width: 520px) {
     .hint { left: 10px; transform: none; bottom: 10px; font-size: 11px; white-space: normal; max-width: calc(100% - 90px); }
     .card { width: 118px; }
@@ -126,6 +132,7 @@
     <div class="notch__dots" id="dots"></div>
     <div class="notch__strip" id="strip"></div>
   </div>
+  <div class="wins" id="wins"></div>
   <div class="edge edge--left" id="edge-left"></div>
   <div class="edge edge--right" id="edge-right"></div>
   <div class="cards cards--left" id="cards-left"></div>
@@ -137,6 +144,7 @@
 <script>
 (() => {
   const stage = document.getElementById('stage');
+  const layer = document.getElementById('wins');
   const notch = document.getElementById('notch');
   const hint = document.getElementById('hint');
   const edges = { left: document.getElementById('edge-left'), right: document.getElementById('edge-right') };
@@ -157,7 +165,7 @@
   };
 
   function build() {
-    stage.querySelectorAll('.win').forEach((el) => el.remove());
+    layer.replaceChildren();
     const { w, h } = size();
     wins = APPS.map((app, i) => {
       const el = document.createElement('div');
@@ -165,13 +173,15 @@
       el.innerHTML = `<div class="win__bar"><i></i><i></i><i></i><b>${app.title}</b></div>
         <div class="win__body"><s class="accent" style="background:${app.colour}33"></s><s></s><s style="width:70%"></s><s style="width:85%"></s></div>`;
       el.style.width = w + 'px'; el.style.height = h + 'px';
-      stage.appendChild(el);
+      layer.appendChild(el);
       const x = W * 0.5 - w / 2 + (i - 1) * Math.min(90, W * 0.18);
       const y = BAR + 30 + i * Math.min(36, H * 0.07);
       const win = { ...app, el, w, h, x, y, home: { x, y }, state: 'free', side: null };
       el.querySelector('.win__bar').addEventListener('pointerdown', (e) => grab(e, win));
       el.addEventListener('pointerdown', () => raise(win));
-      el.addEventListener('pointerleave', () => { if (win.state === 'peek') park(win, win.side); });
+      el.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'touch' && win.state === 'peek') park(win, win.side);
+      });
       raise(win);
       place(win);
       return win;
@@ -251,7 +261,11 @@
         const card = document.createElement('button');
         card.className = 'card';
         card.innerHTML = `<div class="card__bar">${win.title}</div><div class="card__body"><s style="background:${win.colour}55"></s><s></s><s style="width:60%"></s></div>`;
+        // The deck slides in under the finger that tapped the edge, and that tap's click can land on a card.
+        // Only a press that started on the card counts.
+        card.addEventListener('pointerdown', () => { card.pressed = true; });
         card.addEventListener('click', () => {
+          if (!card.pressed) return;
           decks[side].classList.remove('show');
           win.state = 'peek'; raise(win); place(win);
         });
@@ -261,7 +275,7 @@
     const inNotch = wins.filter((w) => w.state === 'notch');
     document.getElementById('dots').innerHTML = inNotch.map((w) => `<i style="background:${w.colour}"></i>`).join('');
     const strip = document.getElementById('strip');
-    strip.innerHTML = inNotch.length ? '' : '';
+    strip.innerHTML = '';
     for (const win of inNotch) {
       const b = document.createElement('button');
       b.className = 'notch__app';
@@ -280,7 +294,11 @@
   for (const side of ['left', 'right']) {
     let timer;
     const show = () => { clearTimeout(timer); if (decks[side].children.length) decks[side].classList.add('show'); };
-    const hide = () => { timer = setTimeout(() => decks[side].classList.remove('show'), 250); };
+    // A lifted finger also fires pointerleave, which would hide the cards before they could be tapped.
+    const hide = (e) => {
+      if (e.pointerType === 'touch') return;
+      timer = setTimeout(() => decks[side].classList.remove('show'), 250);
+    };
     edges[side].addEventListener('pointerenter', show);
     edges[side].addEventListener('pointerdown', show);
     edges[side].addEventListener('pointerleave', hide);
@@ -293,6 +311,9 @@
   notch.addEventListener('click', () => { if (wins.some((w) => w.state === 'notch')) notch.classList.toggle('open'); });
   stage.addEventListener('pointerdown', (e) => {
     if (!notch.contains(e.target)) notch.classList.remove('open');
+    for (const win of wins) {
+      if (win.state === 'peek' && !win.el.contains(e.target)) park(win, win.side);
+    }
     for (const side of ['left', 'right']) {
       if (!decks[side].contains(e.target) && !edges[side].contains(e.target)) decks[side].classList.remove('show');
     }

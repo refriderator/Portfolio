@@ -29,32 +29,32 @@
     <main class="prose">
       <div class="text-box">
       <p><a href="https://github.com/refriderator/Jarvis">https://github.com/refriderator/Jarvis</a></p>
-      <p>Jarvis is a Mac assistant that lives in the notch. You click the notch or press Option-Space, then talk or type. It answers with a caption and a voice, and it can set timers, read my calendar and Notion, open apps and hold windows for me.</p>
-      <p>I wanted something that felt like part of the Mac instead of another chat window. The notch is dead space on every new MacBook, so that is where it lives.</p>
+      <p>Jarvis is a Mac assistant I built that lives in the notch. You click the notch (or hit Option-Space) and talk or type to it, and it answers out loud with a caption underneath. It can set timers, check my calendar and Notion, open apps, and hold windows out of the way for me.</p>
+      <p>I didn&#8217;t want yet another chat window. Every new MacBook has that black cut-out at the top of the screen doing nothing, so it seemed like the obvious place to put it.</p>
       </div><!--/box-->
       <h3>The dock</h3>
       <div class="text-box">
-      <p>My favourite part. Drag a window by its title bar onto the side of the screen and it slides off, leaving a sliver showing. Point at the edge and cards of the held windows pop out; click one to use it, and it slides away again when you move off. Drop a window on the notch and it goes into the notch instead.</p>
-      <p>Try it below (works with touch too). It is a toy version in the browser, but it behaves like the real thing.</p>
+      <p>This is the part I&#8217;m proudest of. If you drag a window by its title bar to the side of the screen, it slides off and leaves a thin sliver behind. Hover over that edge and cards for everything you&#8217;ve stashed there pop out. Click one and the window comes back, then tucks itself away again once you move off it. You can also drop a window on the notch and it&#8217;ll sit in there instead.</p>
+      <p>There&#8217;s a toy version below you can play with. On a phone, tap the edge instead of hovering. It&#8217;s not the real app, but it behaves pretty much the same way.</p>
       </div><!--/box-->
       <figure><iframe class="demo" src="../assets/workshop/jarvis/dock-demo.html" title="Interactive demo of the Jarvis window dock" width="100%" height="460" frameborder="0" loading="lazy"></iframe></figure>
-      <h3>A bit of physics</h3>
+      <h3>Some physics that snuck in</h3>
       <div class="text-box">
-      <p><strong>Springs.</strong> Every animation is a damped spring, the same x&#8243; + 2&zeta;&omega;x&#8242; + &omega;&sup2;x = 0 from first year mechanics. The damping ratio &zeta; sets the feel. Overshoot is e<sup>&minus;&zeta;&pi;/&radic;(1&minus;&zeta;&sup2;)</sup>, so the notch hopping between displays (&zeta; &asymp; 0.5) overshoots about 16% and feels bouncy, while the notch opening (&zeta; &asymp; 0.82) overshoots about 1% and just feels smooth.</p>
-      <p><strong>Hysteresis.</strong> A window is caught when the pointer comes within 12 pt of an edge, but only let go once it is 70 pt away. With one threshold, a shaky hand sitting on the line flickers between caught and not caught. Two thresholds is the same idea as a Schmitt trigger or a magnet's B&ndash;H loop.</p>
-      <p><strong>Sampling rate.</strong> Jarvis has to ask macOS where other apps' windows are, and each ask waits on that app. I first checked 30 times a second with the default 6 s timeout. One busy app could then freeze a frame that only has 16.7 ms (at 60 fps) for hundreds of frames. Checking twice a second with a 0.5 s timeout was plenty and the stutter went away.</p>
+      <p>All the animations are damped springs, the same x&#8243; + 2&zeta;&omega;x&#8242; + &omega;&sup2;x = 0 from first-year mechanics. Tuning them mostly came down to picking &zeta;, the damping ratio. An underdamped spring overshoots by e<sup>&minus;&zeta;&pi;/&radic;(1&minus;&zeta;&sup2;)</sup>, which meant I could choose the numbers on purpose instead of nudging them until they looked okay. When the notch jumps to another display I used &zeta; &asymp; 0.5, which overshoots by about 16% and gives it a bit of bounce. Opening the notch uses &zeta; &asymp; 0.82, so it only overshoots about 1% and just glides open.</p>
+      <p>Catching windows at the edge needed some hysteresis. A window gets caught once the pointer is within 12 pt of the edge, but it isn&#8217;t let go until you pull it 70 pt away. With a single cutoff, a slightly shaky hand sitting right on the line makes the window flicker between caught and not caught. Two thresholds fix that. It&#8217;s the same trick as a Schmitt trigger, or the B&ndash;H loop of a magnet if you&#8217;ve seen that one.</p>
+      <p>The last one was a stutter that took me a while to track down. To know where other apps&#8217; windows are, Jarvis has to ask macOS, and each of those asks waits on that app to answer. I was checking 30 times a second with the default 6 s timeout, so one busy app could hold things up for hundreds of frames, when each frame only gets 16.7 ms at 60 fps. Checking twice a second with a 0.5 s timeout turned out to be plenty, and the stutter went away.</p>
       </div><!--/box-->
       <h3>How it&#8217;s built</h3>
       <div class="text-box">
-      <p>It is written in Swift (SwiftUI and AppKit) as a plain Swift package, about 17,000 lines across 176 files, with a rule of one job per file and under about 300 lines each. The logic lives in its own library so it can be tested without opening the app.</p>
-      <p>Answers go through tiers, cheapest first:</p>
+      <p>It&#8217;s written in Swift (SwiftUI and AppKit) as a plain Swift package, currently about 17,000 lines across 176 files. I tried to keep each file to one job and under roughly 300 lines, and all the logic sits in its own library so I can test it without launching the app.</p>
+      <p>When you ask it something, it tries the cheapest thing that can handle it first:</p>
       <ul>
-      <li><strong>Plain code</strong> for fixed commands like timers and reminders. Instant and free.</li>
-      <li><strong>Apple&#8217;s on-device model</strong> for summarizing text already on screen.</li>
-      <li><strong>A small local model</strong> I trained myself for tool jobs (next post).</li>
-      <li><strong>Claude or ChatGPT</strong> for anything that needs real knowledge or writing.</li>
+      <li>plain code for fixed commands like timers and reminders, which is instant and free</li>
+      <li>Apple&#8217;s on-device model for summarizing whatever&#8217;s already on screen</li>
+      <li>a small local model I trained myself for tool jobs (more on that in the next post)</li>
+      <li>Claude or ChatGPT for anything that actually needs knowledge or good writing</li>
       </ul>
-      <p>Code decides which tier, never a model, since asking a model to decide would add a whole extra call to every question. Most questions never leave the Mac.</p>
+      <p>The choice between them is made in code, not by a model. Letting a model decide would add a whole extra call before every answer. In practice most questions never leave the Mac.</p>
       </div><!--/box-->
     </main>
   </div>
