@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" data-theme="amazed">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FOLD//DEX: the launcher · Coen Hao</title>
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
+
+  <link rel="stylesheet" href="../css/tokens.css?v=3">
+  <link rel="stylesheet" href="../css/base.css?v=3">
+  <link rel="stylesheet" href="../css/amazed.css?v=3">
+</head>
+<body>
+  <div class="subpage">
+    <header>
+      <a class="back" href="../index.html#amazed" aria-label="Back to workshop"><span class="back__arrow" aria-hidden="true">&larr;</span>Back</a>
+      <h1 class="amazed__title">FOLD//DEX: the launcher</h1>
+      <p class="subpage__meta">
+        <time datetime="2026-10-24">October 24, 2026</time> &middot;
+        <a href="../projects/cyber-deck.html">Cyber Deck</a>
+      </p>
+    </header>
+
+    <main class="prose">
+      <div class="text-box">
+      <p><a href="https://github.com/refriderator/Fold-Dex">https://github.com/refriderator/Fold-Dex</a></p>
+      <p>I had an old Galaxy Fold 1 lying around and wanted to turn it into a little cyberdeck. It's rooted and runs Ubuntu in a chroot, but the first thing I needed was a home screen that wasn't Samsung's. So I made my own, called Fold Deck, and it runs on both the cover screen and the big inner one.</p>
+      <p>The look is a black terminal with the WarGames font and dark blue and purple accents. There's a d-pad that's always on screen, so you can drive the whole thing like a handheld without touching anything else.</p>
+      </div><!--/box-->
+      <h3>Closed</h3>
+      <div class="text-box">
+      <p>Folded, it's a big clock with the date and weather, then a few status lines: wifi, Tailscale, Notion, my PC and whether the Ubuntu side is up. Under that are games, apps and files, then the d-pad.</p>
+      </div><!--/box-->
+      <figure><img src="../assets/workshop/cyber-deck/cover.jpg" alt="Fold Deck on the cover screen" loading="lazy" decoding="async"></figure>
+      <h3>Open</h3>
+      <div class="text-box">
+      <p>Unfolded, the status stuff moves to the left half. The right half has a button to stream my PC over Moonlight, my notes, and today's tasks from Notion that I can tick off.</p>
+      </div><!--/box-->
+      <figure><img src="../assets/workshop/cyber-deck/open.jpg" alt="Fold Deck on the unfolded inner screen" loading="lazy" decoding="async"></figure>
+      <h3>How it works</h3>
+      <div class="text-box">
+      <p>The whole launcher is one HTML page running inside a tiny Android app. The Java side is only a bridge: it hands the page the battery and wifi, opens apps, and runs root commands. That made it way faster to work on, since I can open the page in a browser on my laptop and tweak it without rebuilding anything.</p>
+      <p>When the phone boots, Termux:Boot mounts the Ubuntu chroot and starts an SSH server, so I can get into the phone from my PC over Tailscale wherever it is.</p>
+      <p>Next up is getting the games drawer solid and the built-in assistant (dex) working properly.</p>
+      </div><!--/box-->
+    </main>
+  </div>
+</body>
+</html>
