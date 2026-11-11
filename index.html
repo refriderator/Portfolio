@@ -5,23 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coen Hao</title>
   <meta name="description" content="Portfolio of a physics, mathematics and statistics student at the University of Toronto.">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="light">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="assets/landing/recruiter.png" as="image">
-  <link rel="preload" href="assets/landing/amazed.png" as="image">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400..600&family=Press+Start+2P&family=VT323&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400..600&display=swap">
 
-  <link rel="stylesheet" href="css/tokens.css?v=3">
-  <link rel="stylesheet" href="css/base.css?v=3">
-  <link rel="stylesheet" href="css/landing.css?v=3">
-  <link rel="stylesheet" href="css/recruiter.css?v=3">
-  <link rel="stylesheet" href="css/amazed.css?v=3">
+  <link rel="stylesheet" href="css/tokens.css?v=4">
+  <link rel="stylesheet" href="css/base.css?v=4">
+  <link rel="stylesheet" href="css/landing.css?v=4">
+  <link rel="stylesheet" href="css/recruiter.css?v=4">
+  <link rel="stylesheet" href="css/amazed.css?v=4">
   <!-- Modules: each file gets its own scope, and they run after parsing, in order. -->
-  <script type="module" src="js/landing.js"></script>
-  <script type="module" src="js/recruiter.js?v=3"></script><!-- gives posts their ids… -->
-  <script type="module" src="js/views.js"></script><!-- …which views.js then resolves -->
+  <script type="module" src="js/recruiter.js?v=4"></script><!-- gives posts their ids… -->
+  <script type="module" src="js/views.js?v=4"></script><!-- …which views.js then resolves -->
 
   <!-- Prefetch a project or update page once the pointer rests on its card
        ("moderate" = after about 200ms of hover, or on press), so it opens
@@ -45,25 +42,25 @@
   <!-- ============================ LANDING ============================ -->
   <div class="view landing" id="start" data-view="landing">
     <header class="masthead">
-      <p class="masthead__name">Coen Hao</p>
+      <h1 class="masthead__name">Coen Hao</h1>
       <p class="masthead__line">Physics, mathematics &amp; statistics, University of Toronto</p>
     </header>
 
-    <!-- The sheets are drawn by js/scene.js on a pixel canvas over these
-         links. The links lay them out, take hover, focus and clicks, and
-         carry the text for screen readers; without JavaScript they show
-         as plain boxes. data-label is the lettering on the sheet (| breaks
-         the line), data-photo the picture that develops on hover. -->
-    <main class="choices">
-      <a class="choice choice--recruiter" data-choice="recruiter" href="#recruiter"
-         data-label="I AM A|RECRUITER" data-photo="assets/landing/recruiter.png">
-        <span class="choice__label">I am a recruiter</span>
-      </a>
-      <a class="choice choice--amazed" data-choice="amazed" href="#amazed"
-         data-label="I WANT TO|BE AMAZED" data-photo="assets/landing/amazed.png">
-        <span class="choice__label">I want to be amazed</span>
-      </a>
-    </main>
+    <!-- Hashes stay #recruiter and #amazed so old links keep working. -->
+    <nav class="choices" aria-label="Sections">
+      <a class="choice" href="#recruiter"><span class="choice__name">Portfolio</span><span class="choice__desc">résumé and work</span></a>
+      <a class="choice" href="#amazed"><span class="choice__name">Workshop</span><span class="choice__desc">stuff I'm building</span></a>
+    </nav>
+
+    <footer>
+      <ul class="landing__links">
+        <li><a href="mailto:coen.hao@mail.utoronto.ca">Email</a></li>
+        <li><a href="https://www.linkedin.com/in/coen-hao-04014b209">LinkedIn</a></li>
+        <li><a href="https://github.com/refriderator">GitHub</a></li>
+        <li><a href="https://huggingface.co/refriderator">Hugging Face</a></li>
+        <li><a href="https://www.instagram.com/violet_nb2/">Instagram</a></li>
+      </ul>
+    </footer>
   </div>
 
 
@@ -376,9 +373,8 @@
   </div>
 
 
-  <!-- ============================ AMAZED ============================
-       In progress: large cards that grow and reveal a picture on hover.
-       Below: small cards for recent updates and past projects. Every
+  <!-- ============================ WORKSHOP ============================
+       In progress up top, then recent updates and past projects. Every
        card links to its own page under projects/ or updates/. -->
   <div class="view amazed" id="amazed" data-view="amazed" hidden>
     <header class="amazed__head">

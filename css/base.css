@@ -1,13 +1,4 @@
-/* =====================================================================
-   BASE
-   Shared by every view. The page's state lives in attributes on <html>:
-     data-preview   which landing choice is hovered or focused
-     data-theme     the theme of the current view (absent on the landing)
-     data-switching present while moving between views
-     data-instant   present for one frame when the state is set without
-                    animation (opening a deep link such as #recruiter)
-   Everything visual keys off those; js/views.js only flips them.
-   ===================================================================== */
+/* Shared by every page. */
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -21,22 +12,6 @@ html {
   text-rendering: optimizeLegibility;
   font-kerning: normal;
   font-variant-numeric: oldstyle-nums proportional-nums;
-
-  /* Typed tokens transition here and every descendant inherits the
-     in-between values frame by frame. One declaration animates the theme. */
-  transition-property:
-    --surface-page, --surface-box, --text, --text-muted, --line,
-    --highlight-a, --highlight-b, --highlight-c, --edge-a, --edge-b;
-  transition-duration: var(--theme-duration);
-  /* Hover previews fade in three hard steps, the way old consoles faded
-     by stepping through a few palette entries. */
-  transition-timing-function: steps(3);
-}
-
-/* Moving between views: the same properties, slower and symmetric. */
-html[data-switching] {
-  transition-duration: var(--switch-duration);
-  transition-timing-function: var(--switch-ease);
 }
 
 html[data-instant],
@@ -75,33 +50,20 @@ body {
   line-height: 1.6;
   color: var(--text-muted);
   text-decoration: none;
-  transition:
-    color 200ms ease,
-    border-color 200ms ease,
-    background-color 200ms ease,
-    transform 120ms ease;
+  transition: color 150ms ease, border-color 150ms ease;
 }
 
-/* The arrow leads the way out: it slides left on the same damped spring as
-   the landing boxes, so it overshoots a little and settles. */
 .back__arrow {
-  display: inline-block;
   position: relative;
-  top: -0.1em;                       /* EB Garamond's arrow sits low; centre it on the word */
-  transition: transform var(--spring-duration) var(--spring);
+  top: -0.1em;
 }
 
 .back:hover,
 .back:focus-visible {
   color: var(--text);
   border-color: var(--text-muted);
-  background-color: var(--surface-box);
 }
 
-.back:hover .back__arrow,
-.back:focus-visible .back__arrow { transform: translateX(-4px); }
-
-.back:active { transform: scale(0.96); }
 
 /* Headings are focused by js/views.js only to move the reading position
    for keyboard and screen-reader users; they are not controls, so no ring. */
@@ -121,8 +83,7 @@ body {
 
 /* ---------- Views ----------
    Exactly one view is shown; the others carry [hidden].
-   js/views.js runs the sequence: fade the old view out, swap, change the
-   theme, then fade the new view in partway through the colour change. */
+   js/views.js fades the old one out and the new one in. */
 /* .landing and .recruiter set display, which would beat the browser's own
    [hidden] rule; this puts [hidden] back on top. */
 [hidden] { display: none !important; }
@@ -139,33 +100,4 @@ body {
 .view.is-entering {
   opacity: 0;
   transition: none;
-}
-
-
-/* Respect reduced motion: keep a short crossfade, drop the bounce. */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --spring: ease-out;
-    --spring-duration: 150ms;
-    --bubble: ease-out;
-    --bubble-duration: 150ms;
-    --theme-duration: 150ms;
-    --switch-duration: 300ms;
-    --fade-out: 120ms;
-    --fade-in: 200ms;
-    --fade-in-delay: 100ms;
-  }
-}
-
-
-/* Touch screens have no hover, so links answer the finger instead: a quick
-   press-in while held. */
-@media (hover: none) {
-  .back, .action, .icon-link, .feature, a.tile {
-    transition: transform 150ms ease;
-  }
-
-  .back:active, .action:active, .icon-link:active, .feature:active, a.tile:active {
-    transform: scale(0.96);
-  }
 }

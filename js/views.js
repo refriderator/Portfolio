@@ -11,7 +11,7 @@
 //   3. fade the new view in, starting partway through the colour change
 //                                           (--fade-in after --fade-in-delay)
 //
-// Some pairs of views have their own transition instead (see `special`).
+// Some pairs of views can have their own transition instead (see `special`).
 
 const root = document.documentElement;
 const views = [...document.querySelectorAll("[data-view]")];
@@ -20,13 +20,10 @@ const fallback = views.find((v) => v.dataset.view === "landing");
 // Each view's theme is its name, except the landing, which uses the base tokens.
 const themeOf = (view) => (view === fallback ? null : view.dataset.view);
 
-// Transitions of their own, by "from>to". Each is a module loaded on demand;
-// js/landing.js starts loading it as soon as someone shows interest, so by
-// the click it is normally ready.
-const special = {
-  "landing>amazed": () => import("./airplane.js"),
-  "landing>recruiter": () => import("./scatter.js"),
-};
+// Transitions of their own, by "from>to": a module loaded on demand that
+// exports play({ from, to, swap, isCurrent }). None at present; every change
+// uses the plain crossfade below.
+const special = {};
 
 let current = views.find((v) => !v.hidden) ?? fallback;
 let generation = 0; // bumps on every change, so a superseded change stops

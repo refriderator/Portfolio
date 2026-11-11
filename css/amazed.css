@@ -1,89 +1,39 @@
-/* =====================================================================
-   AMAZED — 8-bit
-   Navy grounds and chrome edges (the "amazed" theme in tokens.css), drawn
-   like an old console RPG menu: blue windows with pixel frames, a pixel
-   display face, a terminal face for reading, and faint CRT scanlines.
-   Shared by the Amazed view in index.html and by the pages under
-   projects/ and updates/.
-   ===================================================================== */
+/* Workshop view in index.html, and the pages under projects/ and updates/. */
 
 .amazed,
 .subpage {
-  /* A pixel window frame drawn entirely with box-shadows, so nothing is
-     clipped and no extra elements are needed:
-       four one-pixel offsets   the light outer frame; the corner squares
-                                stay empty, which notches the corners
-       an inset line            the darker inner bevel
-       a big offset block       the hard drop shadow */
-  --frame:
-    0 calc(-1 * var(--px)) 0 0 var(--edge-a),
-    0 var(--px) 0 0 var(--edge-a),
-    calc(-1 * var(--px)) 0 0 0 var(--edge-a),
-    var(--px) 0 0 0 var(--edge-a),
-    inset 0 0 0 var(--px) var(--edge-b),
-    calc(2 * var(--px)) calc(3 * var(--px)) 0 0 var(--black);
-  --frame-raised:
-    0 calc(-1 * var(--px)) 0 0 var(--edge-a),
-    0 var(--px) 0 0 var(--edge-a),
-    calc(-1 * var(--px)) 0 0 0 var(--edge-a),
-    var(--px) 0 0 0 var(--edge-a),
-    inset 0 0 0 var(--px) var(--edge-b),
-    calc(4 * var(--px)) calc(5 * var(--px)) 0 0 var(--black);
-
-  position: relative;
-  max-width: 76rem;
+  max-width: 64rem;
   margin: 0 auto;
-  padding: var(--space-6) clamp(var(--space-3), 4vw, var(--space-6)) var(--space-6);
-  font-family: var(--font-terminal);
+  padding: var(--space-6) clamp(var(--space-3), 4vw, var(--space-6));
 }
 
-/* CRT scanlines: every other pair of pixel rows slightly darker, like the
-   gaps between a tube's raster lines. On top of everything, but it lets
-   clicks through. */
-.amazed::after,
-.subpage::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom, transparent 0 2px, rgb(0 0 0 / 0.16) 2px 4px);
-}
+.subpage { max-width: 52rem; }
 
-/* Back button, restyled as a pixel menu button. */
-.amazed .back,
-.subpage .back {
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 0;
-  border-radius: 0;
-  background: var(--surface-box);
-  box-shadow: var(--frame);
-  font-family: var(--font-pixel);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--text);
-  transition: translate 160ms steps(2), box-shadow 160ms steps(2);
-}
 
-.amazed .back:hover,
-.amazed .back:focus-visible,
-.subpage .back:hover,
-.subpage .back:focus-visible {
-  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
-  box-shadow: var(--frame-raised);
-}
+/* ---------- Header ---------- */
 
-.amazed .back:active,
-.subpage .back:active {
-  translate: var(--px) var(--px);
-  box-shadow: none;
-  transform: none;
-}
-
-/* ---------- Links: a menu window in the top right of the header ---------- */
 .amazed__head { position: relative; }
 
+.amazed__title {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: clamp(var(--step-4), 5vw, var(--step-5));
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.amazed__lede,
+.subpage__meta {
+  margin: 0;
+  font-size: var(--step-2);
+  color: var(--text-muted);
+}
+
+.subpage__meta { font-size: var(--step-1); font-style: italic; }
+.subpage__meta a { color: inherit; text-underline-offset: 0.18em; }
+.subpage__meta a:hover { color: var(--text); }
+
+
+/* Links dropdown, top right. */
 .links-menu {
   position: absolute;
   top: 0;
@@ -91,72 +41,54 @@
   z-index: 2;
 }
 
-/* Same pixel button as Back. */
 .links-menu__button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-box);
-  box-shadow: var(--frame);
-  font-family: var(--font-pixel);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--text);
+  padding: var(--space-1) var(--space-3);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--step-1);
+  line-height: 1.6;
+  color: var(--text-muted);
   list-style: none;
   cursor: pointer;
   user-select: none;
-  transition: translate 160ms steps(2), box-shadow 160ms steps(2);
 }
 
 .links-menu__button::-webkit-details-marker { display: none; }
 
-/* A small pixel triangle that flips when the window is open. */
-.links-menu__button::after {
-  content: "";
-  width: 0;
-  height: 0;
-  border-inline: calc(2 * var(--px)) solid transparent;
-  border-top: calc(2 * var(--px)) solid currentColor;
-}
-
-.links-menu[open] .links-menu__button::after { rotate: 180deg; }
-
 .links-menu__button:hover,
-.links-menu__button:focus-visible,
 .links-menu[open] .links-menu__button {
-  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
-  box-shadow: var(--frame-raised);
-}
-
-.links-menu__button:active {
-  translate: var(--px) var(--px);
-  box-shadow: none;
+  color: var(--text);
+  border-color: var(--text-muted);
 }
 
 .links-menu__list {
   position: absolute;
-  top: calc(100% + var(--space-3));
+  top: calc(100% + var(--space-2));
   right: 0;
-  min-width: 13rem;
+  min-width: 12rem;
   margin: 0;
-  padding: var(--space-2);
+  padding: var(--space-2) 0;
   list-style: none;
-  background: var(--surface-box);
-  box-shadow: var(--frame);
+  background: var(--surface-page);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius);
 }
 
-/* Menu rows like an RPG menu: the pointed-at row gets a cursor arrow. */
 .links-menu__list a {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
-  position: relative;
-  font-size: 22px;
-  line-height: 1.3;
-  color: var(--text);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--step-1);
+  color: var(--text-muted);
   text-decoration: none;
+}
+
+.links-menu__list a:hover,
+.links-menu__list a:focus-visible {
+  color: var(--text);
+  background: var(--surface-box);
+  outline: none;
 }
 
 .links-menu__list .icon {
@@ -166,387 +98,167 @@
   fill: currentColor;
 }
 
-.links-menu__list a::before {
-  content: "\25B6";
-  position: absolute;
-  left: var(--space-1);
-  font-size: 12px;
-  opacity: 0;
-}
 
-.links-menu__list a:hover,
-.links-menu__list a:focus-visible {
-  color: var(--highlight-a);
-  outline: none;
-}
-
-.links-menu__list a:hover::before,
-.links-menu__list a:focus-visible::before { opacity: 1; }
-
-
-/* Chrome in 8-bit: hard bands instead of a smooth gradient, repeated once
-   per line (1lh), so each line of a wrapped title gets its own stripes. */
-.amazed__title {
-  margin: var(--space-5) 0 var(--space-3);
-  font-family: var(--font-pixel);
-  font-size: clamp(24px, 4vw, 48px);
-  font-weight: 400;
-  line-height: 1.4;
-
-  background: linear-gradient(180deg,
-    var(--highlight-a) 0 45%, var(--highlight-b) 45% 70%, var(--highlight-c) 70%);
-  background-size: 100% 1.4em;
-  background-size: 100% 1lh;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.amazed__lede {
-  margin: 0;
-  max-width: 40ch;
-  font-size: 28px;
-  line-height: 1.2;
-  color: var(--text-muted);
-}
+/* ---------- Sections ---------- */
 
 .amazed__body > section,
 .shelves { margin-top: var(--space-6); }
 
 .shelf__title {
-  margin: 0 0 var(--space-4);
-  font-family: var(--font-pixel);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--highlight-b);
+  margin: 0 0 var(--space-3);
+  font-size: var(--step-1);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 
-/* ---------- Window surface, shared by both card sizes ---------- */
-.feature,
-.tile {
-  background: var(--surface-box);
-  box-shadow: var(--frame);
-  color: var(--text);
-  text-decoration: none;
-}
-
-
-/* ---------- In progress: large feature cards ---------- */
+/* ---------- In progress: photo cards ---------- */
 
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
-  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-5) var(--space-4);
 }
 
 .feature {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  /* Text hangs right under the photo; the room kept for the description
-     is below it, so unfolding fills downward instead of the title sitting
-     at the bottom with a gap above it. */
-  align-items: flex-start;
-  z-index: 0;            /* a number, so the hold on leaving can time it; "auto" flips at once */
-  /* Tall enough for the photo, the gap and the unfolded description, so
-     hovering never changes the card's height and the grid stays put. */
-  min-height: calc(var(--photo-h) + 17rem);
-  overflow: hidden;
-  /* The photo has a fixed height and the text never rises into it, so
-     there is always clear space between the dither band and the title,
-     however long the description is (on a phone it is always showing). */
-  --photo-h: 13rem;
-  padding-top: var(--photo-h);
-
-  /* Leaving: the rule that applies after the change sets the transition,
-     so these are the leave transitions and the :hover rule below has the
-     enter ones. Shrinking back has no overshoot (critically damped, like a
-     door closer): the bouncy spring run backwards undershoots to 0.994,
-     which reads as a wobble while the text is still folding away.
-     z-index is held until the card has settled, so it never slips under
-     its neighbour mid-shrink. */
-  transition:
-    scale 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    z-index 0s linear 260ms;
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
-/* Picture layer: hidden at rest, appears on hover in a few hard steps.
-   Until there is an <img>, a banded 8-bit sky stands in for it. */
 .feature__media {
-  position: absolute;
-  inset: var(--px);
-  z-index: -1;
-  opacity: 0;
-  background: linear-gradient(180deg,
-    var(--navy-975) 0 20%, var(--navy-950) 20% 40%, var(--navy-900) 40% 60%,
-    var(--navy-800) 60% 80%, var(--chrome-lo) 80%);
-  /* Leaving, the picture waits for the text to fold away first. */
-  transition: opacity 180ms steps(3) 120ms;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-box);
 }
 
 .feature__media img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 62%;
-}
-
-/* The photo fills the reserved band at the top; the text sits below it. */
-.feature__media img {
-  height: var(--photo-h);
-  image-rendering: pixelated;
-}
-
-/* Below the photo, solid navy; its bottom edge is a short dithered band
-   (a checkerboard of navy pixels is the 8-bit version of
-   half-transparency) two pixels tall, fading it into the navy. */
-.feature__media::after {
-  content: "";
-  position: absolute;
-  inset: calc(var(--photo-h) - 2 * var(--px)) 0 0;
-  background:
-    linear-gradient(transparent 0 calc(2 * var(--px)), var(--navy-975) 0),
-    repeating-conic-gradient(var(--navy-975) 0 25%, transparent 0 50%)
-      0 0 / calc(2 * var(--px)) calc(2 * var(--px));
-}
-
-.feature__text {
-  padding: var(--space-3) clamp(var(--space-3), 2vw, var(--space-4));
-}
-
-.feature__status {
-  font-size: 22px;
-  color: var(--text-muted);
 }
 
 .feature__name {
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-pixel);
-  font-size: clamp(16px, 2vw, 24px);
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-/* Description: collapsed to zero height at rest. Animating grid rows from
-   0fr to 1fr animates to the content's real height, which "height: auto"
-   cannot do. Stepped, so it unrolls like a game text box. */
-.feature__more {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition: grid-template-rows 160ms steps(4), opacity 160ms steps(4);
+  margin: var(--space-3) 0 0;
+  font-size: var(--step-3);
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .feature__desc {
-  overflow: hidden;
-  margin: 0;
-  max-width: 38ch;
-  font-size: 24px;
-  line-height: 1.2;
+  margin: var(--space-1) 0 0;
+  font-size: var(--step-1);
+  line-height: 1.45;
   color: var(--text-muted);
 }
 
-/* The gap above the description lives inside the collapsing row (as a
-   spacer block), so it folds away with it instead of snapping. */
-.feature__desc::before {
-  content: "";
-  display: block;
-  height: var(--space-2);
-}
-
-/* Entering: the bouncy spring from the landing, so the two "amazed"
-   places move the same way; picture and text unroll together. */
-.feature:hover,
-.feature:focus-visible {
-  scale: 1.025;
-  z-index: 1;
-  transition: scale var(--bubble-duration) var(--bubble), z-index 0s;
-}
-
-.feature:hover .feature__media,
-.feature:focus-visible .feature__media {
-  opacity: 1;
-  transition: opacity 300ms steps(3);
-}
-
-.feature:hover .feature__more,
-.feature:focus-visible .feature__more {
-  grid-template-rows: 1fr;
-  opacity: 1;
-  transition: grid-template-rows 300ms steps(4), opacity 300ms steps(4);
-}
-
-/* Touch screens have no hover: show everything from the start. */
-@media (hover: none) {
-  .feature { min-height: 0; }   /* nothing unfolds, so no room to keep for it */
-  .feature__media { opacity: 1; }
-  .feature__more { grid-template-rows: 1fr; opacity: 1; }
+.feature:hover .feature__name,
+.feature:focus-visible .feature__name {
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: 0.15em;
 }
 
 
-/* ---------- Recent updates / past projects: small tiles ---------- */
+/* ---------- Updates and past projects: plain lists ---------- */
+
+.shelves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-6) var(--space-5);
+}
 
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-5);
+  gap: 0 var(--space-4);
+  border-top: var(--hairline) solid var(--line);
 }
+
+.tiles--stack { grid-template-columns: 1fr; }
+.tiles--pinned { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
 
 .tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
-  transition: translate 160ms steps(2), box-shadow 160ms steps(2);
-}
-
-/* RPG menu cursor: a ▶ appears beside the item you are pointing at. */
-a.tile::before {
-  content: "\25B6";
-  position: absolute;
-  left: var(--space-2);
-  top: var(--space-4);
-  font-size: 14px;
-  color: var(--highlight-a);
-  visibility: hidden;
-}
-
-a.tile:hover,
-a.tile:focus-visible {
-  translate: calc(-1 * var(--px)) calc(-1 * var(--px));
-  box-shadow: var(--frame-raised);
-}
-
-a.tile:hover::before,
-a.tile:focus-visible::before {
-  visibility: visible;
-  animation: blink 800ms steps(1) infinite;
-}
-
-@keyframes blink {
-  50% { visibility: hidden; }
+  display: block;
+  padding: var(--space-3) 0;
+  border-bottom: var(--hairline) solid var(--line);
+  color: inherit;
+  text-decoration: none;
 }
 
 .tile__meta {
-  font-size: 20px;
+  display: block;
+  font-size: var(--step-0);
+  font-style: italic;
   color: var(--text-muted);
 }
 
 .tile__name {
   margin: 0;
-  font-family: var(--font-pixel);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.6;
+  font-size: var(--step-2);
+  font-weight: 500;
+  line-height: 1.25;
 }
 
 .tile__desc {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.15;
+  margin: var(--space-1) 0 0;
+  font-size: var(--step-1);
+  line-height: 1.4;
   color: var(--text-muted);
 }
 
-
-/* Recent updates and past projects side by side. Each column is at least
-   24rem, so below about 50rem of width the second wraps under the first. */
-.shelves {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: var(--space-6) var(--space-5);
+a.tile:hover .tile__name,
+a.tile:focus-visible .tile__name {
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: 0.15em;
 }
 
-/* One card per row inside a column. */
-.tiles--stack { grid-template-columns: 1fr; }
 
-
-/* ---------- Project and update pages ---------- */
-
-.subpage__meta {
-  margin: var(--space-4) 0 0;
-  font-size: 22px;
-  color: var(--text-muted);
-}
-
-.subpage__meta a {
-  color: inherit;
-  text-underline-offset: 0.18em;
-}
-
-.subpage__meta a:hover { color: var(--text); }
+/* ---------- Posts ---------- */
 
 .prose {
   max-width: 40rem;
   margin-top: var(--space-5);
-  font-size: 24px;
-  line-height: 1.3;
-}
-
-.prose p { margin: 0 0 var(--space-3); }
-.prose a { color: inherit; text-underline-offset: 0.18em; }
-
-/* Posts: headings stay pixel type; the reading is done in IBM Plex Sans,
-   which is far easier on long paragraphs than VT323, set straight on the
-   page with no frame. Boxes, pictures, tables and videos sit above the
-   CRT scanlines (z-index 1), so photos stay crisp and text stays clean.
-   tools/editor puts each run of paragraphs and lists in a .text-box and
-   each table in a .table-box. */
-.prose { max-width: 48rem; }
-
-.prose h2, .prose h3, .prose h4 {
-  margin: var(--space-5) 0 var(--space-3);
-  font-family: var(--font-pixel);
-  font-size: 14px;
-  font-weight: 400;
+  font-size: var(--step-body);
   line-height: 1.6;
 }
 
-.text-box,
-.table-box,
-.prose figure,
-.prose .video {
-  position: relative;
-  z-index: 1;
+.prose p { margin: 0 0 var(--space-3); }
+.prose a { color: inherit; text-decoration-thickness: var(--hairline); text-underline-offset: 0.18em; }
+
+.prose h2, .prose h3, .prose h4 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: var(--step-3);
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-.text-box {
-  margin: 0 0 var(--space-4);
-  font-family: var(--font-read);
-  font-weight: var(--read-weight);
-  font-size: 17px;
-  line-height: 1.65;
-  color: var(--text);
-}
-
-.text-box p { margin: 0 0 0.9em; }
-.text-box ul, .text-box ol { margin: 0 0 0.9em; padding-left: 1.3em; }
+.text-box { margin: 0 0 var(--space-4); }
+.text-box p { margin: 0 0 0.8em; }
+.text-box ul, .text-box ol { margin: 0 0 0.8em; padding-left: 1.2em; }
 .text-box li + li { margin-top: 0.3em; }
 .text-box > :last-child { margin-bottom: 0; }
-.text-box a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
-.text-box strong { font-weight: 600; }
+.text-box strong { font-weight: 500; }
 
 .prose figure { margin: 0 0 var(--space-4); }
-.prose figcaption { margin-top: var(--space-1); font-size: 20px; color: var(--text-muted); }
+.prose figcaption { margin-top: var(--space-1); font-size: var(--step-1); font-style: italic; color: var(--text-muted); }
 
 .prose img {
   display: block;
   max-width: 100%;
   height: auto;
-  border: 1px solid var(--line);
-  image-rendering: auto;
+  border-radius: var(--radius);
 }
 
-/* Tables: the same text face, figures in fixed-width digits so columns of
-   numbers line up, a tinted header and banded rows. Wide ones scroll
-   sideways inside their box instead of widening the page. */
 .table-box {
   margin: 0 0 var(--space-4);
   overflow-x: auto;
-  border: 1px solid var(--line);
-  background: var(--surface-box);
+  border: var(--hairline) solid var(--line);
 }
 
 .prose table {
@@ -557,23 +269,16 @@ a.tile:focus-visible::before {
   font-size: 15px;
   line-height: 1.45;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
 }
 
 .prose th, .prose td {
-  padding: 0.6rem 0.85rem;
-  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.8rem;
+  border-bottom: var(--hairline) solid var(--line);
   text-align: left;
   vertical-align: top;
 }
 
-.prose th {
-  font-weight: 600;
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-  white-space: nowrap;
-}
-
-.prose tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--text) 3%, transparent); }
+.prose th { font-weight: 600; background: var(--surface-box); white-space: nowrap; }
 .prose tr:last-child td { border-bottom: 0; }
 
 .prose .video { margin: 0 0 var(--space-4); }
@@ -583,75 +288,49 @@ a.tile:focus-visible::before {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: 1px solid var(--line);
+  border: 0;
   background: #000;
 }
 
 
-/* In-progress project page: the wide left column is the project itself,
-   goals then photos; the narrower right column lists its updates and
-   posts. On a phone: goals, photos, then the list. */
+/* ---------- In-progress project page: goals and photos left, posts right ---------- */
+
+.subpage:has(.project) { max-width: 64rem; }
+
 .project {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
   grid-template-areas: "goals log" "photos log";
-  gap: var(--space-6) var(--space-5);
+  grid-template-rows: auto 1fr;
+  gap: var(--space-5);
   align-items: start;
   margin-top: var(--space-5);
 }
 
-.project__goals {
-  grid-area: goals;
-  margin-top: 0;
-}
-
-.project__goals ul {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  padding-left: 1.2em;
-  font-family: var(--font-read);
-  font-weight: var(--read-weight);
-  font-size: 16px;
-  line-height: 1.5;
-}
-
-.project__goals li + li { margin-top: 0.4em; }
+.project__goals { grid-area: goals; margin-top: 0; }
 .project__goals h2:first-child { margin-top: 0; }
-.project__log { grid-area: log; display: grid; gap: var(--space-6); align-content: start; }
-.project__log .shelf__title { margin-top: 0; }
+.project__goals ul { margin: 0; padding-left: 1.2em; }
+.project__goals li + li { margin-top: 0.3em; }
+
+.project__log { grid-area: log; display: grid; gap: var(--space-5); }
 
 .project__photos {
   grid-area: photos;
-  align-self: start;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-3);
 }
 
 .project__photos figure { margin: 0; }
 
-.project__photos figure { position: relative; z-index: 1; }
-
 .project__photos img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
 @media (max-width: 800px) {
   .project { grid-template-columns: 1fr; grid-template-rows: none; grid-template-areas: "goals" "photos" "log"; }
-}
-
-/* Pinned items get more room than the rest. */
-.tiles--pinned {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  a.tile:hover::before,
-  a.tile:focus-visible::before { animation: none; }
 }

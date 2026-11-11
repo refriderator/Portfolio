@@ -1,164 +1,76 @@
-/* =====================================================================
-   LANDING — 8-bit
-   A white page; two pixel-art sheets tumble down onto it. The sheets, their
-   shadows, the particles and the paper plane are all drawn by js/scene.js
-   on one canvas (.pixel-scene). This file lays out the page and the links
-   the canvas draws over, and is the fallback when there is no canvas.
-
-   State lives on <html>:
-     data-scene      the canvas is running (set by js/scene.js)
-     data-preview    which sheet is hovered or focused (js/landing.js)
-     data-landed     the intro has played, so it never replays
-     data-launching  the paper-plane transition is running (js/airplane.js)
-   ===================================================================== */
+/* Landing: name, one line, two links. */
 
 .landing {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--space-4);
-  height: 100vh;
-  height: 100svh;
-  /* Vertical padding only: horizontal padding would add to the outer gaps
-     around the sheets and break the even spacing. The masthead pads itself. */
-  padding: clamp(var(--space-3), 3vw, var(--space-5)) 0;
-  overflow: clip;
-  font-family: var(--font-pixel);
-}
-
-.masthead {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-  padding: 0 clamp(var(--space-3), 3vw, var(--space-5));
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: 100vh;
+  min-height: 100svh;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
 }
 
 .masthead__name {
   margin: 0;
-  font-size: 16px;                   /* Press Start 2P is crisp at multiples of 8px */
-  line-height: 1.5;
+  font-size: clamp(var(--step-5), 7vw, var(--step-6));
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
 .masthead__line {
-  margin: 0;
-  font-family: var(--font-terminal);
-  font-size: 22px;
+  margin: var(--space-3) 0 0;
+  font-size: var(--step-2);
   color: var(--text-muted);
 }
 
-/* Evenly spread: the gaps at the left edge, between the sheets and at the
-   right edge are all equal. */
-.choices {
+.choices { border-top: var(--hairline) solid var(--line); }
+
+.choice {
   display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  min-height: 0;
-  padding: var(--space-5) 0;
-}
-
-/* Each link is the box a sheet is drawn in: 22 × 31 (about A4), sized by
-   height so the proportions hold, never so tall that two overflow the width. */
-.choice {
-  position: relative;
-  flex: none;
-  height: min(100%, 40vw * 31 / 22);
-  aspect-ratio: 22 / 31;
-  display: grid;
-  place-items: center;
-  padding: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: var(--hairline) solid var(--line);
+  color: inherit;
   text-decoration: none;
-  color: var(--sheet-ink);
-  /* Without the canvas: a plain pixel-bordered sheet. */
-  background: var(--sheet-fill);
-  border: var(--px) solid var(--sheet-ink);
 }
 
-.choice__label {
-  font-size: 16px;
-  line-height: 1.6;
-  text-align: center;
+.choice__name {
+  font-size: var(--step-4);
+  font-weight: 500;
+  line-height: 1.1;
 }
 
-/* With the canvas, the link draws nothing itself; its text stays for
-   screen readers, and keyboard focus still shows. */
-[data-scene] .choice {
-  background: none;
-  border-color: transparent;
+.choice__desc {
+  font-size: var(--step-1);
+  font-style: italic;
+  color: var(--text-muted);
 }
 
-[data-scene] .choice__label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.choice:hover .choice__name,
+.choice:focus-visible .choice__name {
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: 0.15em;
 }
 
-/* A long press on a sheet starts shake mode (js/scene.js): no text
-   selection, iOS link preview or double-tap zoom on the way. */
-.choice {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: manipulation;
+.landing__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step-1);
 }
 
-.choice:focus-visible {
-  outline: var(--px) dashed var(--text);
-  outline-offset: var(--px);
+.landing__links a {
+  color: var(--text-muted);
+  text-decoration: none;
 }
 
-/* The canvas: one fine pixel per canvas pixel, scaled up by a whole number
-   (set by js/scene.js) with no smoothing, so every pixel is a hard square.
-   Above the page so the plane can fly over the Workshop; never in the way
-   of the pointer. */
-.pixel-scene {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 20;
-  pointer-events: none;
-  image-rendering: pixelated;
-}
-
-/* Landing → recruiter (js/scatter.js): the landing stays up as an overlay
-   while its masthead fades out and the recruiter page fades in beneath. */
-.landing.is-dismissing {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  transition: none;
-}
-
-.landing .masthead { transition: opacity 700ms ease; }
-.landing.is-faded .masthead { opacity: 0; }
-
-/* The amazed preview's darkening is a dither rising from below (js/wipe.js),
-   drawn behind the page's text. The theme colours wait for it: going dark,
-   they change only once the wipe has reached the top ([data-covered]); going
-   back from there, they flip at once underneath it and the light rising from
-   the bottom reveals them. A wipe that never reached the top never changed
-   them, and just drains back down. */
-.dither-wipe {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: -1;
-  pointer-events: none;
-  image-rendering: pixelated;
-}
-
-html[data-covered]:not([data-theme]):not([data-switching]) {
-  transition-duration: 0s;
-}
-
-html[data-wipe="out"] { transition: none; }
-
-/* Narrow screens: stack the two sheets, still evenly spaced. */
-@media (max-width: 640px) {
-  .choices { flex-direction: column; padding: 0; }
-  .choice { height: min(42%, 80vw * 31 / 22); }
-}
+.landing__links a:hover { color: var(--text); }
