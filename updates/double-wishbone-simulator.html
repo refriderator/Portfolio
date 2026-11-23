@@ -42,7 +42,7 @@
       <li>Each corner seen from the front is a four-bar linkage. The two arms swing on circles, so finding the ball joints is a circle intersection problem.</li>
       <li>The upright is a rigid body in 3D. It leans with the arms, then rotates about the kingpin axis until the tie rod is the right length. That last part boils down to one equation, A + B cos ψ + C sin ψ = 0, which has an exact answer, so no iterating.</li>
       <li>Roll center is two line intersections. Extend the arms to find the instant center, draw a line from the contact patch through it, and see where it crosses the centerline.</li>
-      <li>The car itself has 7 degrees of freedom: heave, pitch, roll, and each wheel moving up and down. I step it 4000 times a second with semi-implicit Euler, which is simple and stays stable.</li>
+      <li>The car itself has 9 degrees of freedom: heave, pitch, roll, each wheel moving up and down, and sideways slide and yaw while driven. I step it 4000 times a second with semi-implicit Euler, which is simple and stays stable.</li>
       <li>Roll inertia uses the parallel axis theorem because the body rolls about the roll axis, not its CG.</li>
       </ul>
       </div><!--/box-->
