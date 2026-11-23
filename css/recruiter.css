@@ -127,8 +127,8 @@
 .reading {
   max-width: 44rem;
   padding: var(--space-6) clamp(var(--space-4), 5vw, var(--space-6)) 30vh;
-  font-size: var(--step-body);
-  line-height: 1.6;
+  font-size: var(--step-1);
+  line-height: 1.5;
 }
 
 .collection + .collection {
@@ -139,7 +139,7 @@
   margin: 0 0 var(--space-5);
   padding-bottom: var(--space-3);
   border-bottom: var(--hairline) solid var(--text);
-  font-size: var(--step-5);
+  font-size: var(--step-4);
   font-weight: 500;
   line-height: 1.05;
   scroll-margin-top: var(--space-5);
@@ -147,7 +147,7 @@
 
 /* Side projects: same structure, quieter headings. */
 .collection--minor .collection__title {
-  font-size: var(--step-4);
+  font-size: var(--step-3);
   border-bottom-color: var(--line);
 }
 
@@ -218,7 +218,7 @@
 
 .post__title {
   margin: 0;
-  font-size: var(--step-4);
+  font-size: 1.75rem;
   font-weight: 500;
   line-height: 1.1;
 }
